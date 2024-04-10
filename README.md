@@ -1,2 +1,4 @@
 # OSCP-shortsheet
-PT short hand
+- 🚀 Prepared as part of my OSCP journey.
+
+# Table of Content
