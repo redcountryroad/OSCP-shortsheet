@@ -41,3 +41,28 @@ Get-DomainUser -PreauthNotRequired -verbose # identifying AS-REP roastable accou
 
 Get-NetUser -SPN | select serviceprincipalname #Kerberoastable accounts
 ```
+
+### Bloodhound
+
+- Collection methods - database
+
+```bash
+# Sharphound - transfer sharphound.ps1 into the compromised machine
+Import-Module .\Sharphound.ps1 
+Invoke-BloodHound -CollectionMethod All -OutputDirectory <location> -OutputPrefix "name" # collects and saved with the specified details, output will be saved in windows compromised machine
+      e.g. Invoke-BloodHound -CollectionMethod All -Domain MARVEL.local -ZipFileName file.zip
+
+
+# Bloodhound-Python
+bloodhound-python -u 'uname' -p 'pass' -ns <rhost> -d <domain-name> -c all #output will be saved in you kali machine
+```
+
+- Running Bloodhound
+
+```bash
+sudo neo4j console
+# then upload the .json files obtained
+
+sudo bloodhound
+# then upload the .zip files obtained
+```
