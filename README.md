@@ -50,7 +50,7 @@ Get-DomainUser -PreauthNotRequired -verbose # identifying AS-REP roastable accou
 
 Get-NetUser -SPN | select serviceprincipalname #Kerberoastable accounts
 ```
-###Crackmapexec
+### Crackmapexec
 
 ```bash
 # Enumerate users
