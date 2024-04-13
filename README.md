@@ -104,7 +104,6 @@ sudo bloodhound
 
 <aside>
 💡 Make sure you obtain all the relevant credentials from compromised systems, we cannot survive if we don’t have proper creds.
-
 </aside>
 
 ### Tools to dump hashes (tool: secretsdump.py https://github.com/fortra/impacket/blob/master/examples/secretsdump.py)
@@ -156,11 +155,13 @@ crackmapexec smb 192.168.1.105 -u Administrator -H 32196B56FFE6F45E294117B91A83B
 ### Silver Tickets
 
 -Silver Ticket Default Groups:
+<aside>
 Domain Users SID: S-1-5-21<DOMAINID>-513
 Domain Admins SID: S-1-5-21<DOMAINID>-512
 Schema Admins SID: S-1-5-21<DOMAINID>-518
 Enterprise Admins SID: S-1-5-21<DOMAINID>-519
 Group Policy Creator Owners SID: S-1-5-21<DOMAINID>-520
+</aside>
 
 - In Windows, Mimikatz can be used to craft the ticket. Next, the ticket is injected with Rubeus, and finally a remote shell can be obtained thanks to PsExec.
   
@@ -179,9 +180,11 @@ ps> whoami /user
 ```
 
 - Forging silver ticket (TGS) Ft **Mimikatz**
+<aside>
 Forging a TGS (and included PAC)
 Requires the machine account password (key) from the KDC
 Can be used to directly access any service (without touching DC)
+</aside>
 
 ```bash
 mimikatz.exe
@@ -214,9 +217,11 @@ cmd> sqlcmd.exe -S [service_hostname]                 # if service is MSSQL
 ```
 
 ### Golden Ticket Ft **Mimikatz**
+<aside>
 Forging a TGT (and the included PAC)
 Requires tje krbtgt key, the “master” encryption key from the KDC
 Can be used to request any TGS from the Domain Controller
+</aside>
 
 ```bash
 #using krbtgt hash via mimikatz
@@ -239,12 +244,14 @@ mimikatz # misc::cmd whoami
 ```
 
 #Kerberoasting
+<aside>
 Kerberoasting is a technique that allows an attacker to steal the KRB_TGS ticket, that is encrypted with RC4, to brute force application services hash to extract its password. 
 Kerberoasting requires a valid domain account.
 Three step process:
 - Find SPN tied to user accounts through LDAP (service accounts)
 - Request a TGS for each SPN
 - Crack the TGS offline to recover the service account's password
+</aside>
 
 ```bash
 #obtain TGS
