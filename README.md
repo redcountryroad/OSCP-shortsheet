@@ -2,6 +2,7 @@
 - 🚀 Prepared as part of my OSCP journey.
 
 #Resources
+- https://github.com/drak3hft7/Cheat-Sheet---Active-Directory
 - https://hacktricks.boitatech.com.br/windows/active-directory-methodology/silver-ticket
 - https://m0chan.github.io/2019/07/31/How-To-Attack-Kerberos-101.html
 - https://github.com/Sp4c3Tr4v3l3r/OSCP/blob/main/Active%20Directory.md
