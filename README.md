@@ -233,6 +233,9 @@ execl("/bin/sh","sh","-i",NULL,NULL);
 return 0;
 ```
 
+## Web Shell
+
+
 
 # Active Directory Pentesting
 ## Enumeration
