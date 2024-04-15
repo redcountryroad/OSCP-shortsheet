@@ -10,6 +10,7 @@
 - https://blog.certcube.com/kerberoasting-simplified-attack-and-defense/
 - https://www.pentestpartners.com/security-blog/how-to-kerberoast-like-a-boss/
 - https://notes.benheater.com/books/network-pivoting/page/penetrating-networks-via-chisel-proxies
+- https://oscp.cyberdefendersprogram.com/oscp-the-exam    (msfvenom is allowed for unlimited use on the exam to create your reverse shell payloads (shell/reverse_tcp and shell_reverse_tcp))
 
 # Table of Content
 - [Active Directory Pentesting](#active-directory-pentesting)
