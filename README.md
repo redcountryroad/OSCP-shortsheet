@@ -44,17 +44,30 @@ gobuster -u x.x.x.x -w /usr/share/seclists/Discovery/Web_Content/common.txt-t 20
 wfuzz -w /usr/share/seclists/Discovery/Web_Content/common.txt -- hc 400,404,500 http://x.x.x.x/FUZZ
 wfuzz -w /usr/share/seclists/Discovery/Web_Content/quickhits.txt -- hc 400,404,500 http://x.x.x.x/FUZZ
 
-#cmsmap
+#cmsmap - scans for vuls in CMS
 cmsmap.py https://x.x.x.x
 
-#wpscan
+#wpscan - scans for vuls in wordpress
 wpscan -url https://x.x.x.x
+#bruteforce wpscan
+wpscan -url http://x.x.x.x -- wordlist /usr/share/wordlists/SecLists/Passwords/best1050.txt -- username admin -- threads 10
 ```
 
-###SMB Enumeration
+### SMB Enumeration
+```bash
+smbmap -H x.X.X.x
+smbclient -L X.X.X.x
+nmap -- script=smb-check-vulns.nse x.x.x.x
+smbmount //x.x.x.x/share /mnt -o username=xxx,workgroup=xxx
+mount -t cifs //x.x.x.x/share /mnt
+mount -t cifs -o username=xxx,password=xxx //x.x.x.x/share /mnt
+smbclient \\\x.x.x.x\\share
+```
 
-
-
+### SNMP Enumeration
+```bash
+snmpwalk -c public -v1 x.x.x.x
+```
    
 # Active Directory Pentesting
 
