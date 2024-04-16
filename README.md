@@ -1,4 +1,4 @@
-![image](https://github.com/redcountryroad/OSCP-shortsheet/assets/166571565/e0853f27-170c-4c57-83df-e1cbbc04c20e)# OSCP-shortsheet
+# OSCP-shortsheet
 - 🚀 Prepared as part of my OSCP journey.
 
 #Resources
