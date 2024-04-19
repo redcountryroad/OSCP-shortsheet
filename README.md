@@ -494,6 +494,10 @@ Get-NetUser -SPN | select serviceprincipalname #Kerberoastable accounts
 ### Crackmapexec
 
 ```bash
+# First, detect if the SMB signing is enabled, which helps us identify machines that could be targeted for stealing hashes and relay attacks.
+crackmapexec smb 10.129.204.177
+#Or check using NMAP returned results
+
 # Enumerate users
 crackmapexec smb 192.168.215.104 -u 'user' -p 'PASS' --users
 
@@ -1008,12 +1012,15 @@ type "C:\Documents and Settings\Administrator\Desktop\proof.txt"
 systeminfo
 ipconfig
 ```
-
-## ssh operations
+## Permissions
 ```bash
 #modifying permissions
 chmod 600 id_rsa
+chmod a+x ./linpeas.sh
+```
 
+## ssh operations
+```bash
 ##connect to ssh
 ssh -i id_rsa daniela@192.168.50.244
 
