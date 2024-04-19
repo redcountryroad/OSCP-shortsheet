@@ -24,7 +24,8 @@
 ### Port Scan
 ```bash
 #namp
-nmap -sS -Pn -n -Ax.x.x.x
+nmap -sS -Pn -n -A x.x.x.x
+sudo nmap -sC -sV -oN websrv1/nmap 192.168.50.244
 nmap -SU -p- -- max-retries 0 -min-rate 500 x.x.x.x
 
 #powershell's port scan
@@ -48,9 +49,10 @@ wfuzz -w /usr/share/seclists/Discovery/Web_Content/quickhits.txt -- hc 400,404,5
 cmsmap.py https://x.x.x.x
 
 #wpscan - scans for vuls in wordpress
-wpscan -url https://x.x.x.x
+wpscan --url https://x.x.x.x
+ wpscan --url http://192.168.50.244 --enumerate p --pluginsdetection aggressive -o websrv1/wpscan    #scan plugins
 #bruteforce wpscan
-wpscan -url http://x.x.x.x -- wordlist /usr/share/wordlists/SecLists/Passwords/best1050.txt -- username admin -- threads 10
+wpscan --url http://x.x.x.x -- wordlist /usr/share/wordlists/SecLists/Passwords/best1050.txt -- username admin -- threads 10
 ```
 
 ### SMB Enumeration
@@ -67,6 +69,13 @@ smbclient \\\x.x.x.x\\share
 ### SNMP Enumeration
 ```bash
 snmpwalk -c public -v1 x.x.x.x
+```
+
+## Searching exploits
+```bash
+searchsploit *duplicator*
+searchsploit -x *50420*  #Searchsploit command to examine a specific exploit
+ searchsploit -m *50420* #SearchSploit command to copy the exploit script to the current directory
 ```
 
 ### SQL injection
@@ -402,6 +411,7 @@ for X in $(cut -f6 -d':' /etc/passwd |sort |uniq); do
   fi
 done
 ```
+
 ### Find SGID SUID GUID bit
 ```bash
 find / -perm -1000 -type d 2>/dev/null
@@ -997,4 +1007,17 @@ type local.txt
 type "C:\Documents and Settings\Administrator\Desktop\proof.txt"
 systeminfo
 ipconfig
+```
+
+## ssh operations
+```bash
+#modifying permissions
+chmod 600 id_rsa
+
+##connect to ssh
+ssh -i id_rsa daniela@192.168.50.244
+
+##cracking ssh passphrase
+ssh2john id_rsa > ssh.hash
+john --wordlist=/usr/share/wordlists/rockyou.txt ssh.hash
 ```
