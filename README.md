@@ -1037,6 +1037,7 @@ proxychains -q mysql -u dbuser -h 10.0.60.99
 proxychains -q impacket-smbexec domain\user:password -target-ip  10.0.60.99
 proxychains -q evil-winrm -i 10.0.60.99 -u 'domain\user' -p 'password'
 
+#or on attacker's kali, you can connect to the third server using 127.0.0.1 on web browser. If the web browser shows unable to connect, then add thehost name to /etc/hosts
 ```
 
 ## compiling windows exploit on kali
