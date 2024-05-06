@@ -1294,3 +1294,8 @@ sudo ss -antlp | grep sshd
 
 ## port forwarding
 - https://docs.gorigorisensei.com/port-forwarding
+
+## upgrade shell
+- https://fareedfauzi.gitbook.io/oscp-playbook/reverse-shell/interactive-ttys-shell 
+- python3- c 'import pty;pty.spawn("/bin/sh")'
+- stty raw -echo
