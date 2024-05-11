@@ -1301,5 +1301,6 @@ sudo ss -antlp | grep sshd
 
 ## upgrade shell
 - https://fareedfauzi.gitbook.io/oscp-playbook/reverse-shell/interactive-ttys-shell 
-- python3- c 'import pty;pty.spawn("/bin/sh")'
-- stty raw -echo
+- SHELL=/bin/bash script -q /dev/null    #Upgrade from shell to bash.
+- python3- c 'import pty;pty.spawn("/bin/sh")'        #Python PTY Module
+- stty raw -echo      #Fully Interactive TTY
