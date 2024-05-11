@@ -73,7 +73,11 @@ sudo nmap -sU -p- --max-retries 0 --min-rate 500 x.x.x.x
 sudo nmap -sC -sV x.x.x.x -oN scanresult.txt
 
 #rustscan
-rustscan -a IP --ulimit 5000
+```
+#quick
+rustscan -a IP -r 1-65535
+#detailed nmap - Service Scan, Version Scan, OS Detection
+rustscan -a IP -r 1-65535 -- -A
 
 #powershell's port scan
 powershell.exe -exec bypass -C "IEX (New-Object Net.WebClient).DownloadString('https://raw.githubusercontent.com/PowerShellMafia/PowerSploit/master/Recon/Invoke-Portscan.ps1');Invoke-Portscan -Hosts x.x.x.x"
