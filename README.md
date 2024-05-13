@@ -112,15 +112,33 @@ wpscan --url http://x.x.x.x -- wordlist /usr/share/wordlists/SecLists/s/best1050
 - https://docs.gorigorisensei.com/web-apps 
 
 ### SMB Enumeration (445 - SMB)
+- https://exploit-notes.hdks.org/exploit/windows/active-directory/smb-pentesting/
 - SMB can run: directly over TCP (port 445) OR via Netbios API (137/139)
+- always check autorecon scans results on the SMB version to find exploitation
+
 ```bash
+#checking Null session and check share listing
 smbmap -H x.X.X.x
 smbclient -L \\\\X.X.X.x -N
-nmap -- script=smb-check-vulns.nse x.x.x.x
-smbmount //x.x.x.x/share /mnt -o username=xxx,workgroup=xxx
-mount -t cifs //x.x.x.x/share /mnt
-mount -t cifs -o username=xxx,=xxx //x.x.x.x/share /mnt
-smbclient \\\\x.x.x.x\\share
+smbclient \\\\x.x.x.x\\[sharename]
+
+#account login
+smbmap -u username -p password -H <target-ip>
+smbmap -u username -p password -H <target-ip> -x 'ipconfig'
+```
+
+### SMB commands
+```bash
+smb> ls
+#download
+smb> get sample.txt
+smb> get "Example File.txt"
+#upload (If the website is associated with the SMB server, we can upload reverse shell script such as aspx, php and get a shell.)
+smb> put example.txt
+smb> put shell.aspx
+
+#to trigger reverse shell script in smb
+access to https://example.com/path/to/smb/share/shell.aspx
 ```
 
 ### SNMP Enumeration
