@@ -1,6 +1,9 @@
 # OSCP-shortsheet
 - 🚀 Prepared as part of my OSCP journey.
 
+# Best summary
+https://parzival.sh/blog/my-oscp-notes-and-resources
+
 # Guides
 - https://docs.gorigorisensei.com/tech-skills-needed/vim
 - https://dev.to/adamkatora/how-to-use-burp-suite-through-a-socks5-proxy-with-proxychains-and-chisel-507e
@@ -150,6 +153,9 @@ python3 /opt/dirsearch/dirsearch.py -u $url/apps/ -t 16 -e txt,html,php -f -x 40
 #Wfuzz
 wfuzz -w /usr/share/seclists/Discovery/Web_Content/common.txt -- hc 400,404,500 http://x.x.x.x/FUZZ
 wfuzz -w /usr/share/seclists/Discovery/Web_Content/quickhits.txt -- hc 400,404,500 http://x.x.x.x/FUZZ
+
+#Joomla
+joomscan http://$IP
 
 #cmsmap - scans for vuls in CMS
 cmsmap.py https://x.x.x.x
