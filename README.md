@@ -360,6 +360,9 @@ EXECUTE xp_cmdshell 'whoami';
 http://192.168.45.285/tmp/webshell.php?cmd=id #Command execution
 ```
 
+#### SQLi test payload
+- https://github.com/payloadbox/sql-injection-payload-list
+
 #### SQLi resources
 - https://github.com/SofianeHamlaoui/Lockdoor-Framework/blob/master/ToolsResources/WEB/CHEATSHEETS/sqli.md
 - https://github.com/jhaddix/tbhm/blob/master/06_SQLi.md
