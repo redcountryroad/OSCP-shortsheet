@@ -745,7 +745,7 @@ gcc -shared -o /home/user/custom.so -fPIC /home/user/custom.c
 - https://github.com/xairy/linux-kernel-exploitation
 
 ## Linux PE methods
-- Editing /etc/passwd File (https://www.hackingarticles.in/editing-etc-passwd-file-for-privilege-escalation/)
+1. Editing /etc/passwd File (https://www.hackingarticles.in/editing-etc-passwd-file-for-privilege-escalation/)
 ```bash
 #method 1
 openssl passwd raj
