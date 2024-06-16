@@ -909,10 +909,10 @@ id
 whoami
 ```
 
-9. Environment variables <skipped>
+9. Environment variables (skipped)
 - https://macrosec.tech/index.php/2021/06/08/linux-privilege-escalation-techniques-using-suid/
 
-10. Binary Symlinks <skipped>
+10. Binary Symlinks (skipped)
 - https://macrosec.tech/index.php/2021/06/08/linux-privilege-escalation-techniques-using-suid/
 - run linux exploit suggester
 - condition 1: nginxed-root.sh[CVE-2016-1247], affecting nginx < v1.6.2
@@ -923,10 +923,10 @@ whoami
 - Exploitation: got GTFObins -> search under 'capabilities'
 - if we have capabilties to run tar, we can zip /etc/shadow and then unzip, in order to read the unzipped /etc/shadow with permission, where we can break thepassword hash and gain privilege as root.
 
-12. LXD <skipped>
+12. LXD (skipped)
 - https://www.hackingarticles.in/lxd-privilege-escalation/ 
 
-13. Docker <skipped>
+13. Docker (skipped)
 - https://www.hackingarticles.in/docker-privilege-escalation/
 
 # Active Directory Pentesting
