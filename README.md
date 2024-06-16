@@ -767,11 +767,12 @@ su root
 - detection 1: 'find / -perm -u=s -type f 2>/dev/null'
 - detection 2: you execute ls -al with the file name and then you observe the small 's' symbol as in the above image, then its means SUID bit is enabled for that file and can be executed with root privileges.
 
-3. Sudo Rights
+3. Sudo Rights (sudo -l)
 - check root permissions for any user to execute any file or command by executing sudo -l command.
-- can be permissions to use binary programs like find, python, perl, less, awk, nano
-- can be permissions to use other programs like /usr/bin/env, /usr/bin/ftp, /usr/bin/socat
-- can be permissions to run scripts like, .sh, .py or shell
+- can be permissions to use binary programs like find, python, perl, less, awk, nano -> use **GTFObins**
+- can be permissions to use other programs like /usr/bin/env, /usr/bin/ftp, /usr/bin/socat -> use **GTFObins**
+- can be exploiting python libraries -> https://www.hackingarticles.in/linux-privilege-escalation-python-library-hijacking/
+- can be permissions to run scripts like, .sh, .py or shell  
 ![image](https://github.com/redcountryroad/OSCP-shortsheet/assets/166571565/f5b0919f-ae15-4fbf-8377-660115352c68)
 ```bash
 sudo -l
