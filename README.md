@@ -717,6 +717,17 @@ sc start dns
 nc -nvlp 4444
 ```
 
+6. SeImpersonatePrivilege
+- https://juggernaut-sec.com/seimpersonateprivilege/#Impersonating_the_Local_SYSTEM_Account_with_Juicy_Potato
+- Whenever a user is assigned the SeImpersontatePrivilege, the user is permitted to run programs on behalf of that user to impersonate a client. 
+- Detection: whoami /priv
+- Exploitation: We can use Juicy Potato, PrintSpoofer or RoguePotato
+- Exploitation: Transfer PrintSpoofer.exe to victim and execute
+```bash
+PrintSpoofer64.exe -i -c cmd
+whoami
+```
+
 # Linux Priv Esc
 - https://workbook.securityboat.net/resources/network-pentest-1/network-pentest/priv-escalation
 ## Enumeration
