@@ -779,6 +779,13 @@ nc –lvp 8888
 whoami
 ```
 
+10. Unquoted Service Path
+- If the path to the service binary is not enclosed in quotes and contains white spaces, the name of a loophole for an installed service is Service Unquoted Path. As a result, a local user will be able to elevate the privilege to administrator privilege shell by placing an executable in a higher level directory within the path.
+- Detection: './PowerUp.ps1' -> Get-UnquotedService
+- Detection outcome and Precondition: under ModifiablePath -> BUILTIN\Users, and then checks if any binary paths have a space and aren’t quoted.
+- Precondition check: 'icalcs "C:\Program Files\Unquoted Path Service"', to check that BUILTIN\Users has WRITE permission
+- Exploitation: if the path is 'C:\Program Files\Unquoted Path Service\Common Files\unquotedpathservice.exe', then craft reverse shell exploit called common.exe and place in any of the sub directories in C:\Program Files\Unquoted Path Service\Common Files . To trigger the exploit use 'net start *ServiceName*' and then run netcat listener on kali.
+
 
 # Linux Priv Esc
 - https://workbook.securityboat.net/resources/network-pentest-1/network-pentest/priv-escalation
