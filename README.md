@@ -632,7 +632,11 @@ PS C:\> Find-AllVulns
 13. Scheduled Tasks
 
 ## Windows PE methods
-1. Windows Kernel Exploit
+1. Scheduled Task/Job
+- Detection 1: WinPEAS (under scheduled task), ensure that 'scheduled task state = enabled' and 'schedule type = daily' and 'repeat every = 5 min e.g.)
+- Detection 2: 'schtasks /query /fo LIST /v', ensure that 'scheduled task state = enabled' and 'schedule type = daily' and 'repeat every = 5 min e.g.)
+- Exploitation: Replace the file found in "Task to Run" with reverse shell payload using 'echo path_to_shell >> path_to_scheduled_script', while setting up nc listener on kali. 
+- Exploitation on (Windows 2000, XP, or 2003), we can try creating a New Scheduled Task
 
 2. AlwaysInstallElevated (method 1 - via .msi payload)
 - Detection: AlwaysInstalledElevated Policy must be enabled in the Computer Configuration and User Configuration folders of the Local Group Policy editor. run 'cmd.exe /c 'systeminfo | findstr /B /C:"Host Name" /C:"OS Name" /C:"OS Version" /C:"System Type" /C:"Hotfix(s)"'' to know the architecture of OS before crafting 1.msi
@@ -806,12 +810,6 @@ whoami
 - Run and RunOnce registry keys cause programs to run each time a user logs on. The Run registry keys will run the task every time there’s a login. The RunOnce registry keys will run the tasks once and then delete that key. Then there is Run and RunOnce; the only difference is that RunOnce will automatically delete the entry upon successful execution.
 - Detection: WinPEAS (under Autorun Applications)
 - Exploitation: Replace the file in the folder with Full/all access by Authenticated Users, with reverse shell payload of the same name. Reboot and relogin to trigger the autostart.
-
-14. Scheduled Task/Job
-- Detection 1: WinPEAS (under scheduled task), ensure that 'scheduled task state = enabled' and 'schedule type = daily' and 'repeat every = 5 min e.g.)
-- Detection 2: 'schtasks /query /fo LIST /v', ensure that 'scheduled task state = enabled' and 'schedule type = daily' and 'repeat every = 5 min e.g.)
-- Exploitation: Replace the file found in "Task to Run" with reverse shell payload using 'echo path_to_shell >> path_to_scheduled_script', while setting up nc listener on kali. 
-- Exploitation on (Windows 2000, XP, or 2003), we can try creating a New Scheduled Task
 
 # Linux Priv Esc
 - https://workbook.securityboat.net/resources/network-pentest-1/network-pentest/priv-escalation
