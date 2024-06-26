@@ -759,7 +759,9 @@ whoami
 ```
 
 8. Weak Services Permission ( Insecure Service Executable (PTO)
-- overwrite the system binaries with a malicious executable file in order to escalate privileges.
+- If the low-privilege user has at least Pause/continue, Start, and Stop permissions for the service, an attacker may attempt to overwrite the system binaries with a malicious executable file in order to escalate privileges.
+- Detection: 'accesschk64.exe "c:\temp\service.exe", returns RW Everyone
+- Exploitation: rename legit service name to .bak, exploit shell to take the name of legit service. Then run 'net start pentest' to trigger the exploit shell.
 - https://www.hackingarticles.in/windows-privilege-escalation-weak-services-permission/
 
 9. Weak Registry Permission
@@ -802,7 +804,7 @@ whoami
 
 12. Boot Logon Autostart Execution (Startup Folder)
 - Adding an application to a startup folder or referencing it using a Registry run key are two ways to do this.
-- Detection 1: icacls "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\Startup" -> ensure [USER] is Full permission or Read-write permission (due to misconfig by admin)
+- Detection 1: icacls "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\Startup" -> ensure [USER] is Full permission or Read-write permission (due to misconfig by admin) i.e. BUILTIN\Users:OI CI F
 - Detection 2: accesschk.exe /accepteula "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\Startup" -> ensure [USER] is Full permission or Read-write permission (due to misconfig by admin)
 - Exploitation: Craft and send reverse shell payload while starting nc listener on kali. Put the reverse shell payload in StartUp folder and do a reboot and log on with the [USER] login.
 
