@@ -892,10 +892,11 @@ return TRUE;
 
 # Linux Priv Esc
 - https://workbook.securityboat.net/resources/network-pentest-1/network-pentest/priv-escalation
+- https://github.com/RoqueNight/Linux-Privilege-Escalation-Basics?tab=readme-ov-file#linux-privilege-escalation-basics
 ## Enumeration
 ### User and system details
 ```bash
-#7.Escalation Path Sudo - see what commands can be run by current user (as root) that do not require password
+#Escalation Path Sudo - see what commands can be run by current user (as root) that do not require password
 sudo -l
 
 #find out commands that usually require the sudo command can be run without sudo
@@ -1017,11 +1018,11 @@ su root
 
 2. SUID Binaries (https://www.hackingarticles.in/linux-privilege-escalation-using-suid-binaries/)
 - detection 1: `find / -perm -u=s -type f 2>/dev/null`
-- detection 2: you execute ls -al with the file name and then you observe the small 's' symbol as in the above image, then its means SUID bit is enabled for that file and can be executed with root privileges.
+- detection 2: you execute `ls -al` with the file name and then you observe the small 's' symbol as in the above image, then its means SUID bit is enabled for that file and can be executed with root privileges.
 
 3. Sudo Rights (sudo -l)
 - check root permissions for any user to execute any file or command by executing sudo -l command.
-- can be permissions to use binary programs like find, python, perl, less, awk, nano -> use **GTFObins**
+- can be permissions to use binary programs like find, python, perl, less, awk, nano -> use **GTFObins** or [RogueNight](https://github.com/RoqueNight/Linux-Privilege-Escalation-Basics?tab=readme-ov-file#absuing-sudo-binaries-to-gain-root)
 - can be permissions to use other programs like /usr/bin/env, /usr/bin/ftp, /usr/bin/socat -> use **GTFObins**
 - can be exploiting python libraries -> https://www.hackingarticles.in/linux-privilege-escalation-python-library-hijacking/
 - can be permissions to run scripts like, .sh, .py or shell  
@@ -1068,7 +1069,7 @@ raj:x:0:0:,,,:/home/raj:/bin/bash
 
 5. LD_PRELOAD
 - LD_Preload: It is an environment variable that lists shared libraries with functions that override the standard set
-- Detection: `sudo -l`, look out for `env_keep += LD_PRELOAD`
+- Detection: `sudo -l`, look out for `env_reset`, `env_keep += LD_PRELOAD`
 - exploitation: 
 ```bash
 cd tmp
@@ -1163,6 +1164,7 @@ whoami
 
 9. Environment variables (skipped)
 - https://macrosec.tech/index.php/2021/06/08/linux-privilege-escalation-techniques-using-suid/
+- 
 
 10. Binary Symlinks (skipped)
 - https://macrosec.tech/index.php/2021/06/08/linux-privilege-escalation-techniques-using-suid/
@@ -1207,7 +1209,28 @@ gcc -shared -o /home/user/custom.so -fPIC /home/user/custom.c
 15. Linux Kernel Exploits
 - searchsploit ubuntu 16.04 Linux kernel 4.4.0-21 -> should be a .c file that can be Local Privilege escalation
 - Follow exploit instruction to compile
-  
+- https://github.com/SecWiki/linux-kernel-exploits
+
+16. Abuse SSH private keys
+```bash
+find / -name authorized_keys 2> /dev/null              // Any Public Keys?
+find / -name id_rsa 2> /dev/null                       // Any SSH private keys? 
+
+Copy id_rsa contents of keys found with the above command
+Create a local file on your box and paste the content in
+chmod 600 <local_file>
+ssh -i <local_file> user@IP
+
+// Is the key password protected?
+
+ssh2john <local_file> > hash
+john hash --wordlist=/usr/share/wordlists/rockyou.txt
+```
+
+17. Vulnerable Sudo
+- Detection: `sudo -V` // Get sudo version sudo -l
+- CVE-2019-14287 and CVE-2019-16634
+
 # Active Directory Pentesting
 ## Enumeration
 - To check local administrators in domain joined machine
