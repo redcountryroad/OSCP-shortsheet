@@ -1701,6 +1701,10 @@ impacket-secretsdump -just-dc-user *targetuser* corp.com/jeffadmin:"BrouhahaTung
 - admin to give SUID permission to nano: 'chmod u+s /bin/nano'
 - if WinPEAS failed i.e. Error, try using Seatbelt
 - transfer nc from kali to windows: 'locate nc.exe' then host the folder that contains nc.exe
+- For Linux, search for interesting files in /home, /opt, or /
+- For Windows, search for interesting files in \Documents or \Desktop
+- TRY CREDS EVERYWHERE!! try default passwords admin/admin ; root/root
+- IF YOUR SHELLS AREN’T WORKING TRY DIFFERENT PORTS, ARCHITECTURES, AND ENCODINGS!!
 
 ## MSFVenom
 
