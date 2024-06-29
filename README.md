@@ -203,8 +203,11 @@ smbmap -H x.X.X.x
 smbclient -L \\\\X.X.X.x -U '' -N
 smbclient \\\\x.x.x.x\\[sharename e.g.wwwroot]
 
-#Enumerate shares
+#Enumerate shares (focus on those with READ/WRITE access)
 nmap --script smb-enum-shares -p 445 $ip
+
+#Enumerate vulnerabilities
+nmap --script smb-vuln* -p 139,445 x.x.x.x Pn
 
 #account login
 smbmap -u username -p password -H <target-ip>
@@ -254,6 +257,7 @@ snmpwalk -c public -v1 $ip 1.3.6.1.2.1.6.13.1.3
 # Enumerate installed software
 snmpwalk -c public -v1 $ip 1.3.6.1.2.1.25.6.3.1.2
 ```
+
 ### MSSQL (1433)
 ```bash
 # MSSQL shell
@@ -1233,7 +1237,18 @@ john hash --wordlist=/usr/share/wordlists/rockyou.txt
 
 # Active Directory Pentesting
 ## Enumeration
-- To check local administrators in domain joined machine
+- Get domainname from NMAP: `nmap -A 192.168.1.50 -Pn` -> under `NetBIOS_Domain_Name: PENTESTING`
+
+### LdapDomainDump
+- Download: `git clone https://github.com/dirkjanm/ldapdomaindump`
+- got ldap dump: `python3 ldapdomaindump.py --user DOMAIN\\username -p Password12345 ldap://x.x.x.x:389 --no-json --no-grep -o data`
+- find Domain admin `DONT_REQ_PREAUTH` -> crack hash offline
+
+### enum4linux
+- Built-in in kali linux
+- Full target AD info: `enum4linux -u ippsec -p Password12345 -a 192.168.1.50`
+- Provides Domain SID, passwords of some users, share enumerations
+
 
 ### test for a quick No-Preauth win without supplying a username
 ```
@@ -1705,6 +1720,10 @@ impacket-secretsdump -just-dc-user *targetuser* corp.com/jeffadmin:"BrouhahaTung
 - For Windows, search for interesting files in \Documents or \Desktop
 - TRY CREDS EVERYWHERE!! try default passwords admin/admin ; root/root
 - IF YOUR SHELLS AREN’T WORKING TRY DIFFERENT PORTS, ARCHITECTURES, AND ENCODINGS!!
+- Aim old OS versions
+- decode base64 hashes: `echo "xxxxxxxxxxxxx" | base64 -d`
+- Domain Controller usually has port 88/TCP kerberos-sec
+- For AD enumeration run `nmap -A 192.168.1.50 -Pn`, take note of the common name of the host in AD e.g. `ssl-cert: Subject: commonName=student.pentesting.local`
 
 ## MSFVenom
 
