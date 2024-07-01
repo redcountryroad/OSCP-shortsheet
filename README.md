@@ -1496,6 +1496,15 @@ klist
 dir \\web04\admin$
 ```
 
+## EvilWinRM (install before exam, do a snapshot before installing)
+- Gives persistent shell. Crackmapexec doesnt.
+- Installation: `gem install evil-winrm`
+- Get powershell access using: `evil-winrm  -i 192.168.1.100 -u Administrator -p 'MySuperSecr3tPass123!'`
+- Send file from kali to window: `upload <kali directory and filename> <windows destination directory and filename>`
+- Send file from window to kali: `download <windows destination directory and filename> <kali directory and filename>`
+
+
+
 ## PSexec (lateral movement)
 
 ```powershell
