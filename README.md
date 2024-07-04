@@ -1296,6 +1296,12 @@ kerbrute.py -users ./users.txt -dc-ip 10.10.10.175 -domain Egotistical-bank.loca
 kerbrute.py -user 'fsmith' -password 'Thestrokes23' -dc-ip 10.10.10.175 -domain Egotistical-bank.local
 ```
 
+## SKIPPED [Powershell Empire](https://github.com/BC-SECURITY/Empire) 
+- Post exploitation for AD
+- Install: `sudo apt install powershell-empire`
+- Run: `sudo powershell-empire`
+
+
 ### Powerview
 
 ```bash
