@@ -122,6 +122,20 @@ hydra [-L users.txt or -l user_name] [-P pass.txt or -p password] -f [-S port] f
 ### SSH (22)
 ```bash
 nc $IP 22
+
+#private key - id_rsa
+#public key - id_rsa_pub
+#connect using private key - ssh username@IP -i id_rsa
+
+#generate SSH keys (called fileup and renamed it as authorized_keys)
+ssh-keygen
+cat fileup.pub > authorized_keys
+
+#connecting to target (at port 2222)
+rm ~/.ssh/known_hosts
+- ssh -p 2222 -i fileup root@mountaindesserts.com
+- 
+
 ```
 
 ### SMTP
@@ -1763,6 +1777,10 @@ impacket-secretsdump -just-dc-user *targetuser* corp.com/jeffadmin:"BrouhahaTung
 - if SUID is set ofr a binary program and to GTFObins requires LFILE=file_to_read, we can set LFILE=/etc/shadow, and unhash the password and do a 'su' or switch user.
 - If "/bin/bash" has SUID set, user can execute “bash -p” and this should allow you to run the bash as root.
 - If a user can run all command as root user, we can achieve root access by performing 'sudo su' or 'sudo bash'
+- always read the command flags carefully i.e. under --help
+-  ![image](https://github.com/user-attachments/assets/88f6463a-3a77-40ff-a729-05df5c1584da)
+- ![image](https://github.com/user-attachments/assets/6dcd5873-696e-42b9-b725-d8570190febf)
+
 - If program/exploit cannot run, try 'chmod +x exploit' or 'chmod 777 exploit'
 - if '/bin/bash' doesnt work, try '/bin/sh'
 - to run binary program, can specify '/home' instead of current directory '.'
