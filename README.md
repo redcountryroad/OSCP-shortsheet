@@ -1797,6 +1797,9 @@ impacket-secretsdump -just-dc-user *targetuser* corp.com/jeffadmin:"BrouhahaTung
 - Domain Controller usually has port 88/TCP kerberos-sec
 - For AD enumeration run `nmap -A 192.168.1.50 -Pn`, take note of the common name of the host in AD e.g. `ssl-cert: Subject: commonName=student.pentesting.local`
 - For crackmapexec, if a command failed, try another protocol e.g. smb, winrm, etc
+- Root of php web server
+![image](https://github.com/user-attachments/assets/49a4e874-e58c-4c07-aa12-d403a44648e1)
+
 
 ## MSFVenom
 
