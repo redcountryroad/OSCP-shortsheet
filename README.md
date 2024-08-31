@@ -1778,8 +1778,8 @@ impacket-secretsdump -just-dc-user *targetuser* corp.com/jeffadmin:"BrouhahaTung
 - If "/bin/bash" has SUID set, user can execute “bash -p” and this should allow you to run the bash as root.
 - If a user can run all command as root user, we can achieve root access by performing 'sudo su' or 'sudo bash'
 - always read the command flags carefully i.e. under --help
-[image](https://github.com/user-attachments/assets/88f6463a-3a77-40ff-a729-05df5c1584da)
-[image](https://github.com/user-attachments/assets/6dcd5873-696e-42b9-b725-d8570190febf)
+![image](https://github.com/user-attachments/assets/4b28ef51-06ae-4acc-96e3-8bcb6552cee3)
+![image](https://github.com/user-attachments/assets/24447d7f-6aa7-4668-9705-3e14157570c9)
 
 - If program/exploit cannot run, try 'chmod +x exploit' or 'chmod 777 exploit'
 - if '/bin/bash' doesnt work, try '/bin/sh'
