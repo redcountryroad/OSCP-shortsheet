@@ -1799,6 +1799,8 @@ impacket-secretsdump -just-dc-user *targetuser* corp.com/jeffadmin:"BrouhahaTung
 - For crackmapexec, if a command failed, try another protocol e.g. smb, winrm, etc
 - Root of php web server
 ![image](https://github.com/user-attachments/assets/49a4e874-e58c-4c07-aa12-d403a44648e1)
+- if HTTP request method return error e.e. 4xx, check to another method and try. If GET method fails, try POST method
+- to bypass login page `google for default credentials for the web app` or `use XX(MYSQL) bypass login seclist`
 
 
 ## MSFVenom
