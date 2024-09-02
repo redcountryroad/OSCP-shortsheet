@@ -656,6 +656,12 @@ C:\> type 127.0.0.1.pwdump
 
 ### Network
 ```bash
+#check network adapter
+ipconfig /all
+
+#display routing table
+route print
+
 #check ports that are alr opened
 netstat -ano
 netstat -a -p TCP
@@ -681,6 +687,16 @@ net localgroup Administrators kek /add
 net user kek ABCabc123 /add /domain          #username=kek, pw=ABCabc123
 net group "Domain Admins" kek /add /domain    #groupname= Domain Admins, user to add=kek
 ```
+
+### installed app
+x32: `Get-ItemProperty "HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*" | select displayname`
+x64: `Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*" | select displayname`
+
+### Get running processes
+`Get-Process`
+to get the binary file path of the running process: 
+1. `wmic process get name,processid,executablepath`
+2. `powershell "Get-Process | Select-Object Name, Id, Path"`
 
 ### Run command as another user
 ```bash
