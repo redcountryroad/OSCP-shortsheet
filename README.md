@@ -1802,6 +1802,8 @@ impacket-secretsdump -just-dc-user *targetuser* corp.com/jeffadmin:"BrouhahaTung
 - if HTTP request method return error e.e. 4xx, check to another method and try. If GET method fails, try POST method
 - to bypass login page `google for default credentials for the web app` or `use XX(MYSQL) bypass login seclist`
 
+## using RDP
+`xfreerdp /u:nelly /p:nicole1 /v:192.168.190.210`
 
 ## MSFVenom
 
