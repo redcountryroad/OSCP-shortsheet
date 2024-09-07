@@ -720,8 +720,10 @@ runas /user:**domain\user** cmd.exe
 
 ## Windows PE methods
 1. Scheduled Task/Job
-- Detection 1: WinPEAS (under scheduled task), ensure that `scheduled task state = enabled` and `schedule type = daily` and `repeat every = 5 min` e.g.)
-- Detection 2: `schtasks /query /fo LIST /v`, ensure that `scheduled task state = enabled` and `schedule type = daily` and 'repeat every = 5 min` e.g.)
+- Detection 1a: WinPEAS (under scheduled task), ensure that `scheduled task state = enabled` and `schedule type = daily` and `repeat every = 5 min` e.g.), `Author: NT AUTHORITY\SYSTEM or administrative user`
+- Detection 1b: `icacls C:\Users\steve\Pictures\BackendCacheCleanup.exe` ->  to check that non-administrative user can (W) or (F) to modify BackendCacheCleanup.exe at the directory.
+- Detection 2a: `schtasks /query /fo LIST /v`, ensure that `scheduled task state = enabled` and `schedule type = daily` and 'repeat every = 5 min` e.g.), `Author: NT AUTHORITY\SYSTEM or administrative user`
+- Detection 2b: `icacls C:\Users\steve\Pictures\BackendCacheCleanup.exe` ->  to check that non-administrative user can (W) or (F) to modify BackendCacheCleanup.exe at the directory.
 - Exploitation: Replace the file found in "Task to Run" with reverse shell payload using `echo path_to_shell >> path_to_scheduled_script`, while setting up nc listener on kali. 
 - Exploitation on (Windows 2000, XP, or 2003), we can try creating a New Scheduled Task
 
@@ -874,9 +876,9 @@ whoami
 
 10. Unquoted Service Path
 - If the path to the service binary is not enclosed in quotes and contains white spaces, the name of a loophole for an installed service is Service Unquoted Path. As a result, a local user will be able to elevate the privilege to administrator privilege shell by placing an executable in a higher level directory within the path.
-- Detection: `./PowerUp.ps1` -> Get-UnquotedService
+- Detection: `powershell -ep bypass` -> `./PowerUp.ps1` -> `Get-UnquotedService`
 - Detection outcome and Precondition: under ModifiablePath -> BUILTIN\Users, and then checks if any binary paths have a space and aren’t quoted.
-- Precondition check: `icalcs "C:\Program Files\Unquoted Path Service"`, to check that BUILTIN\Users has WRITE or FULL CONTROL permission
+- Precondition check: `icalcs "C:\"`, `icalcs "C:\Program Files"`, `icalcs "C:\Program Files\Unquoted Path Service"`to check that at which level of directory, BUILTIN\Users has WRITE (W) or FULL CONTROL (F) permission. If `"C:\Program Files\Unquoted Path Service"` has (W) or (F) permission, our goal is now to place a malicious file named Current.exe in `"C:\Program Files\Unquoted Path Service"`.
 - Exploitation: if the path is `C:\Program Files\Unquoted Path Service\Common Files\unquotedpathservice.exe`, then craft reverse shell exploit called common.exe and place in any of the sub directories in C:\Program Files\Unquoted Path Service\Common Files . To trigger the exploit use 'net start *ServiceName*' and then run netcat listener on kali.
 
 11. runas
