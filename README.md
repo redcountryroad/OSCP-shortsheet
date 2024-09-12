@@ -1337,46 +1337,43 @@ kerbrute.py -user 'fsmith' -password 'Thestrokes23' -dc-ip 10.10.10.175 -domain 
 ### Powerview
 
 ```bash
+powershell -ep bypass  
 Import-Module .\PowerView.ps1 #loading module to powershell, if it gives error then change execution policy
-Get-NetDomain #basic information about the domain
-Get-NetUser #list of all users in the domain
-# The above command's outputs can be filtered using "select" command. For example, "Get-NetUser | select cn", here cn is sideheading for   the output of above command. we can select any number of them seperated by comma.
-Get-NetGroupMember -GroupName "Domain Admins"       #get SID, Group Doamin name, group name
-Get-NetGroup # enumerate domain groups
-Get-NetGroup "group name" # information from specific group
-Get-NetComputer # enumerate the computer objects in the domain
-Find-LocalAdminAccess # scans the network in an attempt to determine if our current user has administrative permissions on any computers in the domain
-Get-ObjectAcl -Identity <user> # enumerates ACE(access control entities), lists SID(security identifier). ObjectSID
-Convert-SidToName <sid/objsid> # converting SID/ObjSID to name
-
-#Key commands for enumerations
-Import-Module .\PowerView.ps1 #loading module to powershell, if it gives error then change execution policy
-Get-NetSession -ComputerName files04 -Verbose #Checking logged on users with Get-NetSession, adding verbosity gives more info.
 Get-NetUser | select cn,pwdlastset,lastlogon
 Get-NetUser -SPN | select samaccountname,serviceprincipalname # Listing SPN accounts in domain
+Get-UserProperty -Properties badpwdcount
+Find-UserField -SearchField Description -SearchTerm "pass"          #search description field for the word "pass"
+Invoke-UserHunter -CheckAccess   # check for the Local Administrator Access of that particular user 
+Get-NetGroupMember -GroupName "Domain Admins"       #get SID, Group Doamin name, group name
 Get-NetGroup | select cn    #user list for password attacks
-Get-DomainUser -PreauthNotRequired #quick win for AS-REP 
+Get-NetGroup *admin*       # enumerate domain groups
+Get-NetSession -ComputerName files04 -Verbose #Checking logged on users with Get-NetSession, adding verbosity gives more info.
+Get-DomainUser -PreauthNotRequired -verbose # identifying AS-REP roastable accounts
+Get-NetUser -SPN | select serviceprincipalname #Kerberoastable accounts
+Get-NetGroupMember -GroupName "Domain Admins"
 Get-NetComputer | select dnshostname,operatingsystem,operatingsystemversion #attack old OS and see which are web server or file server
-Find-LocalAdminAccess #scans the network in an attempt to determine if our current user has administrative permissions on any computers in the domain
-Get-NetSession -ComputerName *client74* #
+Find-LocalAdminAccess #  determine if our current user has administrative permissions on any computers in the domain
+Get-ObjectAcl -Identity <user> # enumerates ACE(access control entities), lists SID(security identifier). ObjectSID
+Convert-SidToName <sid/objsid> # converting SID/ObjSID to name
+Get-NetDomain #basic information about the domain
+
+Get-NetSession -ComputerName *client74*
 Get-ObjectAcl -Identity *stephanie* #see ObjectSID, ActiveDirectoryRights, SecurityIdentifier (securityidentifier has certain rights on objectSID)
 Get-ObjectAcl -Identity "Management Department" | ? {$_.ActiveDirectoryRights -eq "GenericAll"} | select SecurityIdentifier,ActiveDirectoryRights
-"S-1-5-21-1987370270-658905905-1781884369-512","S-1-5-21-1987370270-658905905-1781884369-1104" | Convert-SidToName
+Invoke-EnumerateLocalAdmin      #searched for the Local Administrators for the domain
 Invoke-UserHunter
 Invoke-Portscan -Hosts sql01
+Invoke-ShareFinder      #find non system shares 
+Invoke-FileFinder       #find possible password file
+Invoke-ACLScanner -ResolveGUIDs        #check ACL
 
 # Checking for "GenericAll" right for a specific group, after obtaining they can be converted using convert-sidtoname
-Get-ObjectAcl -Identity "Management Department" | ? {$_.ActiveDirectoryRights -eq "GenericAll"} | select SecurityIdentifier,ActiveDirectoryRights
 "S-1-5-21-1987370270-658905905-1781884369-512","S-1-5-21-1987370270-658905905-1781884369-1104" | Convert-SidToName #method 1
 Convert-SidToName *S-1-5-21-1987370270-658905905-1781884369-1104*  #method 2
 Find-DomainShare #find the shares in the domain. ##TIPS: ls all the NAME (folder) found in Find-DomainShare
-ls \\*FILES04*\*docshare*   #name=docshare, computername=FILES04.corp.com
-ls \\*dc1.corp.com*\sysvol\*corp.com*\ # %SystemRoot%\SYSVOL\Sysvol\domainname on the domain controller and every domain user has access to it.
+- ls \\*FILES04*\*docshare*   #name=docshare, computername=FILES04.corp.com
+- ls \\*dc1.corp.com*\sysvol\*corp.com*\ # %SystemRoot%\SYSVOL\Sysvol\domainname on the domain controller and every domain user has access to it.
 gpp-decrypt "+bsY0V3d4/KgX3VJdO/vyepPfAN1zMFTiQDApgR92JE" #decrypt cpassword in Group Policy Preferences (GPP) in kali
-
-
-Get-DomainUser -PreauthNotRequired -verbose # identifying AS-REP roastable accounts
-Get-NetUser -SPN | select serviceprincipalname #Kerberoastable accounts
 ```
 
 ### Bloodhound (Install before exam, snapshot VM before installing)
