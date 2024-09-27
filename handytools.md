@@ -1,8 +1,9 @@
 ∂# OSCP-handytools
-- (https://github.com/seal9055/oscp-notes/blob/main/README.md)
+- https://github.com/seal9055/oscp-notes/blob/main/README.md
 - https://github.com/rodolfomarianocy/OSCP-Tricks-2023/tree/main
 - https://github.com/Ak500k/oscp-notes?tab=readme-ov-file
-
+- https://zweilosec.github.io/posts/upgrade-linux-shell/
+  
 # Wordlists
 ```
 /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt
