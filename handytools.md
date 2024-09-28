@@ -107,12 +107,22 @@ Images
 check python version used in box
 `which python python2 python3`
 
-Method 1: using Python
+Method 1: using Python (one liner)
 - `python -c 'import pty;pty.spawn("/bin/bash")'`
 - `python3- c 'import pty;pty.spawn("/bin/sh")'`
 - `stty raw -echo`
 
-Method 2: Using Script
+Method 2: using Python (multi liner)
+```bash
+python -c 'import pty;pty.spawn("/bin/bash")' 
+cltr-z
+stty raw -echo;fg  fg
+export TERM=xterm
+stty -a ; stty rows columns 136 rows 32
+export PATH=$PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+```
+
+Method 3: Using Script
 - `script -qc /bin/bash /dev/nullscript -qc /bin/bash /dev/null`
 
 ## references
