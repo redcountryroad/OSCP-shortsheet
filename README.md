@@ -112,8 +112,12 @@ ftp X.X.X.X
 #FTP connect
 ftp IP -p <<passive mode port no.>>
 
-#recursive download all files
+#recursive (-r) or (-m) download all files
 wget -r ftp://username:passsword@IP
+wget -m ftp://username:passsword@IP
+
+#Ftp Nmap Scan  
+nmap --script ftp-anon,ftp-bounce,ftp-brute,ftp-libopie,ftp-proftpd-backdoor,ftp-vsftpd-backdoor,ftp-vuln-cve2010-4221,tftp-enum,ftp-syst -p21 <RHOST>
 
 #bruteforce credentials
 hydra [-L users.txt or -l user_name] [-P pass.txt or -p password] -f [-S port] ftp://X.X.X.X
@@ -125,25 +129,36 @@ nc $IP 22
 
 #private key - id_rsa
 #public key - id_rsa_pub
-#connect using private key - ssh username@IP -i id_rsa
+#connect using private key: ssh username@IP -i id_rsa
 
 #generate SSH keys (called fileup and renamed it as authorized_keys)
 ssh-keygen
 cat fileup.pub > authorized_keys
 
-#connecting to target (at port 2222)
+#connecting to target using private key (at port 2222)
 rm ~/.ssh/known_hosts
 - ssh -p 2222 -i fileup root@mountaindesserts.com
-- 
 
+#Bruteforce SSH
+hydra -l root -P /usr/share/wordlists/password/10k <RHOST> -t 4 ssh
 ```
 
 ### SMTP
-```bash
-nmap -p25 <[SUBNET]> --open
-nc -nv IP 25
-VRFY <[USERNAME]>
-```
+`nc -nv IP 25`
+-    Nmap Enumeration  
+     `sudo nmap --script "smtp-commands,smtp-open-relay,smtp-vuln*" -p25 <RHOST>`
+-    User Enumeration  
+     `sudo nmap --script smtp-enum-users --script-args smtp-enum-users.methods={VRFY} -p25 <RHOST>`
+-    Version Scan  
+     `auxiliary/scanner/smtp/smtp_enum`
+-    Introduction  
+     `HELO <LHOST> || EHLO <LHOST>`
+-    Enumerate Users  
+     `EXPN <user> || VRFY <user>`
+
+### Kerberos Port 88
+-    Use [Kerbrute](https://github.com/ropnop/kerbrute) to Enumerate Users and Passwords       
+-    [Rubeus](https://github.com/GhostPack/Rubeus)  
 
 ### Web scan (80, 443, 8080, 8081, 8443, and 3000)
 ```bash
@@ -207,18 +222,25 @@ rpcclient -U "" -N $ip
 ```
 
 ### SMB Enumeration (139, 445)
+- <if all fails, try manual inspection> https://0xdf.gitlab.io/2018/12/02/pwk-notes-smb-enumeration-checklist-update1.html#manual-inspection
 - https://exploit-notes.hdks.org/exploit/windows/active-directory/smb-pentesting/
 - SMB can run: directly over TCP (port 445) OR via Netbios API (137/139)
 - always check autorecon scans results on the SMB version to find exploitation
 
 ```bash
+#Version Scan (meterpreter)
+use auxiliary/scanner/smb/smb_version
+
 #checking Null session and check share listing (-N = no password)
 smbmap -H x.X.X.x
-smbclient -L \\\\X.X.X.x -U '' -N
+rpcclient -U "" -N [ip]
+
+# Check Null Sessions: connect to the share. Can try without a password (or sending a blank password) and still potentially connect.
 smbclient \\\\x.x.x.x\\[sharename e.g.wwwroot]
 
 #Enumerate shares (focus on those with READ/WRITE access)
-nmap --script smb-enum-shares -p 445 $ip
+nmap --script smb-enum-shares -p 445,139 $ip
+crackmapexec smb <RHOST> --shares
 
 #Enumerate vulnerabilities
 nmap --script smb-vuln* -p 139,445 x.x.x.x Pn
@@ -226,20 +248,18 @@ nmap --script smb-vuln* -p 139,445 x.x.x.x Pn
 #account login
 smbmap -u username -p password -H <target-ip>
 smbmap -u username -p password -H <target-ip> -x 'ipconfig'
+
+#Log Into Shares  
+smbclient //<RHOST>/<Share> -U <user>
+     
+#Dump Info  
+python3 /usr/share/doc/python3-impacket/examples/samrdump.py <RHOST>
+
+#Dump Info  
+rpcclient -U "" <RHOST>`<br><br>
 ```
 
-```bash
-#steps to inspect samba version without metasploit
-# https://0xdf.gitlab.io/2018/12/02/pwk-notes-smb-enumeration-checklist-update1.html#manual-inspection
-
-#at Terminal A
-ngrep -i -d tap0 's.?a.?m.?b.?a.*[[:digit:]]' port 139 
-
-#at Terminal B
-echo exit | smbclient -L [IP] 
-```
-
-### SMB commands
+#### SMB commands
 - https://0xdf.gitlab.io/2018/12/02/pwk-notes-smb-enumeration-checklist-update1.html#manual-inspection 
 ```bash
 smb> ls
@@ -257,13 +277,12 @@ access to https://example.com/path/to/smb/share/shell.aspx
 ### SNMP (161)
 ```bash
 # Enumerate entire MIB tree
+snmpwalk -c public -v2c <RHOST>
+snmp-check <RHOST>
 snmpwalk -c public -v1 -t 10 $ip
 
 # Enumerate Windows users
 snmpwalk -c public -v1 $ip 1.3.6.1.4.1.77.1.2.25
-
-# Enumerate running Windows processes
-nountsnmpwalk -c public -v1 $ip 1.3.6.1.2.1.25.4.2.1.2
 
 # Enumerate open TCP ports
 snmpwalk -c public -v1 $ip 1.3.6.1.2.1.6.13.1.3
@@ -272,8 +291,38 @@ snmpwalk -c public -v1 $ip 1.3.6.1.2.1.6.13.1.3
 snmpwalk -c public -v1 $ip 1.3.6.1.2.1.25.6.3.1.2
 ```
 
+### LDAP Port 389
+```bash
+ldapsearch  
+ldapsearch -h <rhost> -x
+ldapsearch -h <rhost> -x -s base namingcontexts 
+ldapsearch -h <rhost> -x -b "<information from previous command>"
+ldapsearch -h <rhost> -x -b "<information from previous command>" '(objectClass=Person)' 
+```
+
+### HTTPS 443
+```bash
+# Manually Check Certificate
+
+#Add DNS Names to /etc/hosts  
+#SSL Enum    
+nmap -sV --script ssl-enum-ciphers <RHOST>
+     
+#Nikto  
+nikto -h <RHOST> -p 443 -output nikto_443
+
+#SSLScan  
+sslscan <ip>
+```
+
 ### MSSQL (1433)
 ```bash
+# Nmap Scan  
+nmap -p 1433 --script ms-sql-info,ms-sql-empty-password,ms-sql-xp-cmdshell,ms-sql-config,ms-sql-ntlm-info,ms-sql-tables,ms-sql-hasdbaccess,ms-sql-dac,ms-sql-dump-hashes --script-args mssql.instance-port=1433,mssql.username=sa,mssql.password=,mssql.instance-name=MSSQLSERVER <RHOST>
+
+#Log In  
+ sqsh -S <RHOST> -U <user>
+
 # MSSQL shell
 mssqlclient.py -db msdb hostname/sa:password@$ip
 
@@ -310,8 +359,9 @@ SELECT grantee, table_schema, privilege_type FROM information_schema.schema_priv
 Enumerate file privileges (see here for discussion of file_priv)
 
 SELECT user FROM mysql.user WHERE file_priv='Y';
-
 ```
+
+
 
 ### any other protocol Emuneration
 - https://docs.gorigorisensei.com/ports-enum 
