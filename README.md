@@ -673,6 +673,9 @@ runas /user:**domain\user** cmd.exe
 13. Scheduled Tasks
 
 ## Windows PE methods
+### Manual Enum
+- https://github.com/seal9055/oscp-notes/blob/main/README.md#Post-Exploitation-Windows
+
 0. Quick Wins
 -   Try the obvious - Maybe the user is SYSTEM or is already part of the Administrator group:  
     `whoami` 
@@ -1101,12 +1104,16 @@ echo hodor::0:0:root:/root:/bin/bash >> /etc/passwd
 
 ### Use LinPEAS and LinEnum and Linprivchecker
 - https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS
+- https://github.com/The-Z-Labs/linux-exploit-suggester
 - https://raw.githubusercontent.com/rebootuser/LinEnum/master/LinEnum.sh
 - https://github.com/reider-roque/linpostexp/blob/master/linprivchecker.py
 
 ### Linux Exploits DB
 - https://github.com/SecWiki/linux-kernel-exploits
 - https://github.com/xairy/linux-kernel-exploitation
+
+### Manual Enum
+- https://github.com/seal9055/oscp-notes/blob/main/README.md#Post-Exploitation-Linux
 
 ## Linux PE methods
 1. Editing /etc/passwd File (https://www.hackingarticles.in/editing-etc-passwd-file-for-privilege-escalation/)
