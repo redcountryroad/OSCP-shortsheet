@@ -138,18 +138,15 @@ gpp-decrypt "+bsY0V3d4/KgX3VJdO/vyepPfAN1zMFTiQDApgR92JE" #decrypt cpassword in 
 ```
 
 ### Bloodhound (Install before exam, snapshot VM before installing)
-
-- Collection methods - database
-
+- https://github.com/fox-it/BloodHound.py
 ```bash
 # Sharphound - transfer sharphound.ps1 into the compromised machine
+powershell -ep bypass  
 Import-Module .\Sharphound.ps1 
 Invoke-BloodHound -CollectionMethod All -OutputDirectory <location> -OutputPrefix "name" # collects and saved with the specified details, output will be saved in windows compromised machine
       e.g. Invoke-BloodHound -CollectionMethod All -Domain MARVEL.local -ZipFileName file.zip
-```
 
-- Running Bloodhound
-
+# Download zip onto kali, import into bloodhound  
 ```bash
 sudo neo4j console
 # then upload the .json files obtained
