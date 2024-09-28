@@ -1,7 +1,7 @@
 # Summary
 
 ## Password-based and Hash-based attack
-`Extracting hashes`
+### Extracting hashes
 
          SAM - Security Account Manager (Store as user accounts)  %SystemRoot%/system32/config/sam  
          NTDS.DIT (Windows Server / Active Directory - Store AD data including user accounts) %SystemRoot%/ntds/ntds.dit  
