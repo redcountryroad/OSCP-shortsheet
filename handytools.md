@@ -99,6 +99,22 @@ Images
 - `binwalk <image>`
 - `binwalk -Me <image>`
 
+# Upgrade Linux Shell
+check python version used in box
+`which python python2 python3`
+
+- Method 1: using Python
+`python -c 'import pty;pty.spawn("/bin/bash")'; #spawn a python psuedo-shell`
+
+- Method 2: Using Script
+`script -qc /bin/bash /dev/nullscript -qc /bin/bash /dev/null`
+
+# Upgrade Windows Shell
+`rlwrap nc -lvnp $port`
+
+# improve presentation of shell i.e. browse command history
+`rlwrap nc -lvnp $port`
+
 # Tools to make life easier
 -> revshell generator
 https://www.revshells.com/ 
@@ -117,3 +133,6 @@ http://www.unit-conversion.info/texttools/octal/
 
 -> IP converter
 https://www.silisoftware.com/tools/ipconverter.php
+
+-> How to Zip and Unzip Files Using PowerShell
+https://zweilosec.github.io/posts/zip-unzip-files-powershell/ 
