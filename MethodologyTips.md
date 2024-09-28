@@ -102,12 +102,18 @@ $ gcc i686-w64-mingw32-gcc exploit.c -o exploit.exe
 ```bash
 cat /root/proof.txt
 whoami
-ip a
+ip a```
 
+```bash
 type local.txt
 type "C:\Documents and Settings\Administrator\Desktop\proof.txt"
 systeminfo
 ipconfig
+```
+
+```bash
+cd\ & dir /b /s proof.txt
+type c:\pathto\proof.txt
 ```
 
 ## Permissions
