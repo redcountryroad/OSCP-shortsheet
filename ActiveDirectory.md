@@ -173,7 +173,7 @@ impersonate_token <token>
 
 ## Silver Ticket - Pass the Ticket (Forge own TGS service ticket)
 - Precondition1: Privileged Account Certificate (PAC) validation **not enabled**
-- Precondition2: obtain that account's password hash (via Kerberoasting or other means), it could then forge a TGS for that SPN and access the service that utilizes it
+- Precondition2: obtain that service account's password hash (via Kerberoasting or other means), it could then forge a TGS for that SPN and access the service that utilizes it
 - Principle: the application blindly trusts the integrity of the service ticket since it is encrypted with a password hash that is, in theory, only known to the service account and the domain controller.
 - Get SID of your current box
 ```
