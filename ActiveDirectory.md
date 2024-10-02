@@ -570,6 +570,7 @@ gpp-decrypt "+bsY0V3d4/KgX3VJdO/vyepPfAN1zMFTiQDApgR92JE" #decrypt cpassword in 
 
 ### Bloodhound (Install before exam, snapshot VM before installing)
 - https://github.com/fox-it/BloodHound.py
+- sometimes bloodhound may not see everything (e.g. DACL permissions) that can be seen with PowerView. 
 ```bash
 # Sharphound - transfer sharphound.ps1 into the compromised machine
 powershell -ep bypass  
