@@ -1,15 +1,14 @@
-PAYLOADS
-
-http://lolbas-project.github.io
-http://loldrivers.io
-http://gtfobins.github.io
-http://lots-project.com
-http://filesec.io
-http://malapi.io
-http://hijacklibs.net
-http://wadcoms.github.io
-http://persistence-info.github.io
-http://unprotect.it
+# PAYLOADS
+- http://lolbas-project.github.io
+- http://loldrivers.io
+- http://gtfobins.github.io
+- http://lots-project.com
+- http://filesec.io
+- http://malapi.io
+- http://hijacklibs.net
+- http://wadcoms.github.io
+- http://persistence-info.github.io
+- http://unprotect.it
 
 
 # Backdooring EXE Files
