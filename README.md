@@ -5,6 +5,7 @@
 - https://swisskyrepo.github.io/InternalAllTheThings/active-directory/ad-roasting-asrep/
 - https://www.noobsec.net/oscp-cheatsheet/
 - https://github.com/brianlam38/OSCP-2022/blob/main/cheatsheet-active-directory.md#AD-Lateral-Movement-1 -contains zerologon attack, etc
+- https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse
 
 # METHODOLOGY (MUST READ)
 - https://github.com/adon90/pentest_compilation?tab=readme-ov-file
