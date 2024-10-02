@@ -1,6 +1,11 @@
 # OSCP-shortsheet
 - 🚀 Prepared as part of my OSCP journey.
 
+# In case of emergency: come here to dig
+- https://swisskyrepo.github.io/InternalAllTheThings/active-directory/ad-roasting-asrep/
+- https://www.noobsec.net/oscp-cheatsheet/
+- https://github.com/brianlam38/OSCP-2022/blob/main/cheatsheet-active-directory.md#AD-Lateral-Movement-1 -contains zerologon attack, etc
+
 # METHODOLOGY (MUST READ)
 - https://github.com/adon90/pentest_compilation?tab=readme-ov-file
 - https://gist.github.com/unfo/5ddc85671dcf39f877aaf5dce105fac3
