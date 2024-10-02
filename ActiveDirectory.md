@@ -1,5 +1,8 @@
 # Enumeration
 
+## Tool 0: Powerview
+- guide on how to use Powerview: https://gist.github.com/HarmJ0y/184f9822b195c52dd50c379ed3117993 
+
 ## Tool 1: crackmapexec
 - Built-in in kali linux
 - **IF smb protocol fails, try winrm protocol**
