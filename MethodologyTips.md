@@ -1,4 +1,9 @@
 # General tips
+- If FTP is open try connecting to it with anonymous creds (anonymous / anonymous@anonymous.com)
+- If it looks like it's linked to a webserver of some sort try uploading a reverse shell to the FTP server and execute it in the browser. Or maybe it'll have functionality that auto-executes uploaded files periodically.
+- SMB: Use enum4linux and smbclient. See if you can get usernames, groups, passwords, sensitive files, groups.xml file for password cracking, etc.
+- LDAP: Use ldapsearch to find potentially sensitive info.
+- Try LFIs/RFIs: If the website has upload functionality experiment with uploading webshells or reverse shells.
 - if the webapp presents a page/function that works as intended, try change input to make it throw and error; we can analyse the error to find out the software used and the process behind it
 - If Linpeas cannot found vulnerabilties, use linux-exploit-suggester (https://github.com/mzet-/linux-exploit-suggester)
 - /dev/null is the standard Linux device where you send output that you want ignored.
@@ -31,6 +36,30 @@
 ![image](https://github.com/user-attachments/assets/49a4e874-e58c-4c07-aa12-d403a44648e1)
 - if HTTP request method return error e.e. 4xx, check to another method and try. If GET method fails, try POST method
 - to bypass login page `google for default credentials for the web app` or `use XX(MYSQL) bypass login seclist`
+
+- If you found any potential services, check tasklist / ps -ef to see if they're actively running (and who is running them), and check where the file is running from
+- Can you replace the binary with a reverse shell? i.e. if it's currently running, rename it, upload a reverse shell with the original binary name, start an nc listener, then type shutdown -r to reboot the box and restart the service.
+- If linux, type 'sudo -l' to see if you can take advantage of any sudo commands (use GTFObins if you can sudo a command)
+- Check /opt or Program Files to see if any additional third party software is installed. If so, see if there are any passwords in the configs anywhere.
+- Check web server to see if any additional third party software is installed. If so, see if there are any passwords in the configs anywhere. If it's linux you should see something in /var/www/html.. Check the files in there. linpeas or winpeas should indicate whether or not there's third-party software installed.
+- 
+# AD Methodology
+-  NMAP scan the AD set → Make note of open ports (anything that can give you remote access (SSH/RDP), webservers, FTP, AD specific ports (SMB/LDAP)
+enum4linux/smbclient each box with no creds (to list shares, see what's in each accessible share, and possibly list users/groups/domain name)
+-  Add domain name to "/etc/hosts" file (Medium doesn't let me type the filename without the spaces)
+-  ldapsearch (start general, then dig deep. You might find users/creds/account roles)
+-  Run some remote AD tools for enumeration purposes (kerbrute for username enumeration if you didn't get any through LDAP/SMB, GetNPUsers, GetUserSPNs, secretsdump, etc.)
+-  Have you found users/creds yet? Try them if SSH/RDP is open, or try psexec/evil-winrm, possibly use them to log into a web portal
+-  If you haven't gotten a shell yet, enumerate your initial access vectors (usually a webserver or vulnerable service), get low-priv shell (if you're lucky, maybe an administrator/system shell)
+-  Typically, most AD-specific attacks (or mimikatz.exe) will be useless if you're not an elevated user. Privesc to Administrator or SYSTEM (not touching on that in this section)
+-  Once you're an elevated user, enumerate.
+-  Upload and execute Bloodhound (SharpHound.exe is what gets uploaded to target) for visual domain enumeration (super useful, even shows you the quickest paths to Domain Admin and who can be kerberoasted/as-rep roasted). BloodHound is also sometimes useful as a low-priv user, use it if you're stuck. Just remember to re-run it when you successfully privesc.
+-  Upload mimikatz.exe (this is the money shot). Use the command cheat sheet you made from some of the TryHackMe rooms and dump creds/hashes. If nothing useful gets dumped move onto some of the other attacks like Pass-the-Ticket (PTT) or Over-Pass-the-Hash (OPTH) and try it again or try authenticating to another box's domain resources with your new ticket.
+-  At this point you should have at least a few usernames, passwords, and/or hashes to run with. Use crackmapexec to test if any of these **combinations** work on the other boxes.
+-  If crackmapexec (CME) comes back positive, use psexec/evil-winrm to spawn a remote shell to the box. If that doesn't work and you have valid creds, see if you can use them to SSH/RDP into the box, or maybe use these creds with smbclient and see if you can pull any sensitive data from the share (could contain passwords).
+**-  Any time I get creds that I verified work on another box I'll re-run all of the remote AD tools against it with the creds (GetNPUsers, GetUserSPNs, secretsdump, etc).**
+-  Once you have access to the next box do it all over again. You may get lucky and get domain admin creds from the first box, or you may have to privesc again and re-roll through the process. This is where Bloodhound comes in handy, it'll show you what permissions the accounts have that you found creds for. Some creds may work on multiple boxes, use crackmapexec to verify the creds with EVERY IP in the domain, don't stop at the first box that works. Don't forget to check the permissions/groups your current user is in. You may not find creds to another user, but your current one may have special permissions that allow you to modify access to resources, run certain processes as SYSTEM, or create new users or add them to certain groups.
+
 
 # using RDP
 `xfreerdp /u:nelly /p:nicole1 /v:192.168.190.210`
