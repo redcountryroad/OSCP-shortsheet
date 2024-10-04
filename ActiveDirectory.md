@@ -39,6 +39,15 @@ https://www.reddit.com/r/oscp/comments/1ew7nqt/order_of_attacking_ad_set/
 - Also run responder: you never know, you might catch high value hash or hash of user that will enable you to move in DC domain or he might be part of some high priv. groups that will enable you to escalate to NT sys/ authority.
 
 # Enumeration
+## Tool Summary
+- BloodHound: Displays visual of AD environment
+- Impacket: Great for abusing Windows Network Protocols
+- LinPEAS: Displays Lin Priv Esc Vectors
+- WinPEAS: Displays Windows Priv Esc Vectors
+- PowerView: Allows for enumeration of an AD environment
+- PowerUp: Displays Windows Priv Esc Vectors based on system misconfigs
+- Mimikatz: Credential Stealer
+- Chisel/SSHuttle: Port Forwarding (pivoting)
 
 ## Tool 0: Powerview
 - guide on how to use Powerview: https://gist.github.com/HarmJ0y/184f9822b195c52dd50c379ed3117993 
@@ -73,7 +82,7 @@ https://www.reddit.com/r/oscp/comments/1ew7nqt/order_of_attacking_ad_set/
 - Provides Domain SID, passwords of some users, share enumerations
 
 ## Tool 4: evil-winrm
-- remote access tool: `evil-winrm -i 192.168.194.165 -u enox -p california`         
+- remote access tool: `evil-winrm -i 192.168.194.165 -u enox -p california`      
 
 # Persistence
 
