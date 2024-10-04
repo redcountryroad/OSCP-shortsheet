@@ -257,15 +257,20 @@ rpcclient -U "" -N $ip
 use auxiliary/scanner/smb/smb_version
 
 #checking Null session and check share listing (-N = no password)
-smbmap -H x.X.X.x
+smbmap -H x.X.X.x -N
 rpcclient -U "" -N [ip]
 
 # Check Null Sessions: connect to the share. Can try without a password (or sending a blank password) and still potentially connect.
 smbclient \\\\x.x.x.x\\[sharename e.g.wwwroot]
+smbclient //10.10.10.10/sharename
 
 #Enumerate shares (focus on those with READ/WRITE access)
 nmap --script smb-enum-shares -p 445,139 $ip
 crackmapexec smb <RHOST> --shares
+crackmapexec smb <RHOST>  -u '' -p '' --shares
+crackmapexec smb <RHOST>  -u '' -p '' --share <share_name>
+smbmap -u username -p password -H <target-ip>
+smbmap -H <target-ip> -s share_name
 
 #Enumerate vulnerabilities
 nmap --script smb-vuln* -p 139,445 x.x.x.x Pn
