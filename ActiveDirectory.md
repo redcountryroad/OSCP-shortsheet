@@ -1,12 +1,39 @@
 # IF Stuck, read here
 https://github.com/yovelo98/OSCP-Cheatsheet
+- enumerate the domain controller (Ldap!! services, DNS, Kerberos etc....)
 - MKW → Which is Running Mimikatz + Kerberoasting + Winpeas every time so that I do not miss any juicy vector.
 - Get a foothold in the first host. Escalate privs. mimikatz and dump hashes. Pass the hash.  Or kerberoast.
 - Rinse and repeat with the creds / hashes to move from host to host until you get to the DC.
+
+## AD methodology 1 -- **The goal of AD attacking is to move around AD till you get to DC and own domain .**
 1. Once we get NT Authority or local administrator, we will take a secretsdump (using impacket-secretsdump) + mimikatz and **store all hashes into a file**.
 2. We also need to run “net user /domain” to get all domain users and also check c:/users/ for any local users and add those to a file called **users.txt** in addition to the domain users.
 3. Try to crack those hashes offline in our Kali box using hashcat -m 1000 and see what we get.
-4. If we get any plaintext passwords we store those in **passwords.txt **file.   
+4. If we get any plaintext passwords we store those in **passwords.txt **file.
+5. We will need to set up a pivot in ms01 using chisel or better ligolo (so easy and powerful) and then run a quick nmap scan on ms02 to see what ports we can spray. Once we know that, we start spraying using our passwords or hashes.
+6. Ok now we know what we can spray (smb? Winrm? Mssql? Etc) we do that. The spraying should be done using —continue-on-success only (domain auth) in the first phase. The second time we should use —local-auth —continue-on-success to find out if we have any local users pwned.
+7. Let’s say we have smb and winrm open in ms02. We will run it like this:
+- Spray with continue on success users.txt and passwords.txt.
+- Same as #1 but with local-auth
+- Spray uncracked ntlm hashes to all users in users.txt
+- Same as #3 but with local-auth
+8. If spraying does not give any good results, then we have the list of users and we can attempt to do an ASREP Roasting attack.
+9. If that doesn’t work and we have a username and password we can do a kerberoasting attack.
+10. If roasting does not provide us with anything. Then we go back to ms01 and enumerate every single thing we possibly can no matter how stupid it is. We might have missed a credential somewhere.
+
+## AD methodology 2 - **The goal of AD attacking is to move around AD till you get to DC and own domain .**
+1. If you did not compromise any other Lin. Win. Machine and got any usernames via net/user or car /etc/passwd or via mimikatz, the do AS-RepRoasting and kerbrute to get usernames that have no pre authentication enabled. 
+2. Start spraying username + passwords via crackmapexec (smb, sql,...) using --local-auth.
+3. If you get foothold with password spraying you have multiple attacks that is good for ad :
+         - Enumerate users (who are high priv. users -> your targets)
+         - Enumerate groups
+         - Are you part of any high priv. groups: DNSAdmins, Backup Operator....
+         - Get Domain ACL (you might have genericALL on important group/user,...)
+         - Enumerate Service accounts ( Silver-ticket attack)
+         - Do you have access to any shares
+         - What services are in domain ?
+         - Most of the times if you get foothold on one PC in domain you will have to escalate priv. so you can run mimikatz, this gives you option to: Get LSASS or LSA hash ( overpass the hash, pass the hash, crack hash with hashcat),
+         - Also run responder: you never know, you might catch high value hash or hash of user that will enable you to move in DC domain or he might be part of some high priv. groups that will enable you to escalate to NT sys/ authority.
 
 # Enumeration
 
@@ -110,6 +137,7 @@ cme smb 10.10.0.202 -u username -p password --ntds vss
 - Spray with Crackmapexec using known password on list of found usernames
 ```bash
 # Crackmapexec uses SMB - check if the output shows 'Pwn3d!' Pwn3d!== that account pawned as admin access!
+# For Crackmapexec, try spray with and without --local-auth
 # protocols = smb, winrm, 
 # --continue-on-success to avoid stopping at the first valid credentials.
 crackmapexec smb 192.168.50.75 -u users.txt -p 'Nexus123!' -d corp.com --continue-on-success
