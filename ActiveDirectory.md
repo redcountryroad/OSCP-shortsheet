@@ -1,7 +1,9 @@
 # IF Stuck, read here
 https://github.com/yovelo98/OSCP-Cheatsheet
 - MKW → Which is Running Mimikatz + Kerberoasting + Winpeas every time so that I do not miss any juicy vector.
-
+1. Get a foothold in the first host. Escalate privs. mimikatz and dump hashes. Pass the hash.  Or kerberoast.
+2. Rinse and repeat with the creds / hashes to move from host to host until you get to the DC.
+   
 # Enumeration
 
 ## Tool 0: Powerview
@@ -770,7 +772,16 @@ kerberos::list
 ## Pass the ticket 2
 1. Use Rubeus instead of mimikatz
 
+2. 
+
 ## Use when trapped
 - https://github.com/drak3hft7/Cheat-Sheet---Active-Directory
 - https://www.netwrix.com/attack.html
 - https://github.com/S1ckB0y1337/Active-Directory-Exploitation-Cheat-Sheet
+
+## Pivoting
+- Use chisel for AD to pivot into internal network.
+- For port forwarding local/remote ssh port forward is the key!
+- Double pivoting is not required in the exam.
+
+- OSCP B set tips: Double pivoting is not required in the exam. At least it wasn’t there for my exam set. Still people say OSCP B requires double pivoting while I simply did the set using other tricks; transfer nc to your first pivot and the next target (or a msfvenom backdoor) capture it on the middle machine. See you can spend hell lotta time setting up double pivot and it may or may not work according to the firewall rules and so. So think out of the box. The catch with the oscp B set is you can’t directly transfer the files to ms02 you need to abuse a running webserver on 01.
