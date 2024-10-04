@@ -65,8 +65,38 @@ enum4linux/smbclient each box with no creds (to list shares, see what's in each 
 -  Once you have access to the next box do it all over again. You may get lucky and get domain admin creds from the first box, or you may have to privesc again and re-roll through the process. This is where Bloodhound comes in handy, it'll show you what permissions the accounts have that you found creds for. Some creds may work on multiple boxes, use crackmapexec to verify the creds with EVERY IP in the domain, don't stop at the first box that works. Don't forget to check the permissions/groups your current user is in. You may not find creds to another user, but your current one may have special permissions that allow you to modify access to resources, run certain processes as SYSTEM, or create new users or add them to certain groups.
 
 
-# using RDP
+# Remote Desktop
 `xfreerdp /u:nelly /p:nicole1 /v:192.168.190.210`
+
+## Enable Remote Desktop
+```powershell
+# Turn On
+Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -name "fDenyTSConnections" -value 0
+```
+
+## Login with remote desktop
+```bash
+# Login
+rdesktop 172.16.20.20 -d corporate -u username -p password
+```
+
+## Login with remote desktop with folder sharing 
+```bash
+# Login
+rdesktop 172.16.20.20 -d corporate -u username -p password -r disk:sharename=//home/username/Desktop/Tools
+```
+
+## Login with xfreerdp
+```bash
+# Login
+xfreerdp /u:username /p:password /v:172.16.20.20
+```
+
+## Login with xfreerdp with folder sharing 
+```bash
+# Login
+xfreerdp /u:username /p:password /v:172.16.20.20 /drive:/home/username/Desktop/Tools
+```
 
 # MSFVenom
 ## Check msfvenom payloads
