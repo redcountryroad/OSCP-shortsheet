@@ -1,5 +1,6 @@
 # IF Stuck, read here
 https://github.com/yovelo98/OSCP-Cheatsheet
+- MKW → Which is Running Mimikatz + Kerberoasting + Winpeas every time so that I do not miss any juicy vector.
 
 # Enumeration
 
