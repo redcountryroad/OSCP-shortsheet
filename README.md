@@ -172,6 +172,8 @@ hydra -l root -P /usr/share/wordlists/password/10k <RHOST> -t 4 ssh
 Things to be on look for:
      - Visit all URLs from robots.txt.
      - Default credentials for software
+     - Can I manipulate the URL to give me access to an account/directory I shouldn’t have?
+     - Any valuable information in the source code (Ctrl+U)
      - SQL-injectable GET/POST params
      - LFI/RFI through ?page=foo type params
      - LFI:
@@ -389,6 +391,9 @@ Enumerate file privileges (see here for discussion of file_priv)
 
 SELECT user FROM mysql.user WHERE file_priv='Y';
 ```
+
+### Remote management (5985)
+- Try enumerating some credentials and use a tool like EvilWinRM to gain further access.
 
 ### any other protocol Emuneration
 - https://docs.gorigorisensei.com/ports-enum 
