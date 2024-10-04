@@ -1,9 +1,13 @@
 # IF Stuck, read here
 https://github.com/yovelo98/OSCP-Cheatsheet
 - MKW → Which is Running Mimikatz + Kerberoasting + Winpeas every time so that I do not miss any juicy vector.
-1. Get a foothold in the first host. Escalate privs. mimikatz and dump hashes. Pass the hash.  Or kerberoast.
-2. Rinse and repeat with the creds / hashes to move from host to host until you get to the DC.
-   
+- Get a foothold in the first host. Escalate privs. mimikatz and dump hashes. Pass the hash.  Or kerberoast.
+- Rinse and repeat with the creds / hashes to move from host to host until you get to the DC.
+1. Once we get NT Authority or local administrator, we will take a secretsdump (using impacket-secretsdump) + mimikatz and **store all hashes into a file**.
+2. We also need to run “net user /domain” to get all domain users and also check c:/users/ for any local users and add those to a file called **users.txt** in addition to the domain users.
+3. Try to crack those hashes offline in our Kali box using hashcat -m 1000 and see what we get.
+4. If we get any plaintext passwords we store those in **passwords.txt **file.   
+
 # Enumeration
 
 ## Tool 0: Powerview
