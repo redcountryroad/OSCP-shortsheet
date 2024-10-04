@@ -1,6 +1,7 @@
 # General tips
 - If FTP is open try connecting to it with anonymous creds (anonymous / anonymous@anonymous.com)
 - If it looks like it's linked to a webserver of some sort try uploading a reverse shell to the FTP server and execute it in the browser. Or maybe it'll have functionality that auto-executes uploaded files periodically.
+- Browse to HTTP and HTTPS versions of the site on those other HTTP ports?
 - SMB: Use enum4linux and smbclient. See if you can get usernames, groups, passwords, sensitive files, groups.xml file for password cracking, etc.
 - LDAP: Use ldapsearch to find potentially sensitive info.
 - Try LFIs/RFIs: If the website has upload functionality experiment with uploading webshells or reverse shells.
