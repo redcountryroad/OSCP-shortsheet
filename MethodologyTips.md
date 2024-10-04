@@ -44,6 +44,7 @@
 - Check /opt or Program Files to see if any additional third party software is installed. If so, see if there are any passwords in the configs anywhere.
 - Check web server to see if any additional third party software is installed. If so, see if there are any passwords in the configs anywhere. If it's linux you should see something in /var/www/html.. Check the files in there. linpeas or winpeas should indicate whether or not there's third-party software installed.
 - Always always always, Enumerate once you get the initial. believe me or not 70% of the time, the intended priv esc vector is a file in the D³ folder. I call it the Documents, Downloads, and Desktop folder.
+- Just whack exploits that are meant for both older and newer version of the app that you are whacking.
 
 
 - # AD Methodology
