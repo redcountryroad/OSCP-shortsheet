@@ -42,8 +42,10 @@
 - If linux, type 'sudo -l' to see if you can take advantage of any sudo commands (use GTFObins if you can sudo a command)
 - Check /opt or Program Files to see if any additional third party software is installed. If so, see if there are any passwords in the configs anywhere.
 - Check web server to see if any additional third party software is installed. If so, see if there are any passwords in the configs anywhere. If it's linux you should see something in /var/www/html.. Check the files in there. linpeas or winpeas should indicate whether or not there's third-party software installed.
-- 
-# AD Methodology
+- Always always always, Enumerate once you get the initial. believe me or not 70% of the time, the intended priv esc vector is a file in the D³ folder. I call it the Documents, Downloads, and Desktop folder.
+
+
+- # AD Methodology
 -  NMAP scan the AD set → Make note of open ports (anything that can give you remote access (SSH/RDP), webservers, FTP, AD specific ports (SMB/LDAP)
 enum4linux/smbclient each box with no creds (to list shares, see what's in each accessible share, and possibly list users/groups/domain name)
 -  Add domain name to "/etc/hosts" file (Medium doesn't let me type the filename without the spaces)
