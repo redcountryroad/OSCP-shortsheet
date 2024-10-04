@@ -1,9 +1,11 @@
 # IF Stuck, read here
 https://github.com/yovelo98/OSCP-Cheatsheet
+https://www.reddit.com/r/oscp/comments/1ew7nqt/order_of_attacking_ad_set/
 - enumerate the domain controller (Ldap!! services, DNS, Kerberos etc....)
 - MKW → Which is Running Mimikatz + Kerberoasting + Winpeas every time so that I do not miss any juicy vector.
 - Get a foothold in the first host. Escalate privs. mimikatz and dump hashes. Pass the hash.  Or kerberoast.
 - Rinse and repeat with the creds / hashes to move from host to host until you get to the DC.
+
 
 ## AD methodology 1 -- **The goal of AD attacking is to move around AD till you get to DC and own domain .**
 1. Once we get NT Authority or local administrator, we will take a secretsdump (using impacket-secretsdump) + mimikatz and **store all hashes into a file**.
@@ -25,15 +27,15 @@ https://github.com/yovelo98/OSCP-Cheatsheet
 1. If you did not compromise any other Lin. Win. Machine and got any usernames via net/user or car /etc/passwd or via mimikatz, the do AS-RepRoasting and kerbrute to get usernames that have no pre authentication enabled. 
 2. Start spraying username + passwords via crackmapexec (smb, sql,...) using --local-auth.
 3. If you get foothold with password spraying you have multiple attacks that is good for ad :
-         - Enumerate users (who are high priv. users -> your targets)
-         - Enumerate groups
-         - Are you part of any high priv. groups: DNSAdmins, Backup Operator....
-         - Get Domain ACL (you might have genericALL on important group/user,...)
-         - Enumerate Service accounts ( Silver-ticket attack)
-         - Do you have access to any shares
-         - What services are in domain ?
-         - Most of the times if you get foothold on one PC in domain you will have to escalate priv. so you can run mimikatz, this gives you option to: Get LSASS or LSA hash ( overpass the hash, pass the hash, crack hash with hashcat),
-         - Also run responder: you never know, you might catch high value hash or hash of user that will enable you to move in DC domain or he might be part of some high priv. groups that will enable you to escalate to NT sys/ authority.
+- Enumerate users (who are high priv. users -> your targets)
+- Enumerate groups
+- Are you part of any high priv. groups: DNSAdmins, Backup Operator....
+- Get Domain ACL (you might have genericALL on important group/user,...)
+- Enumerate Service accounts ( Silver-ticket attack)
+- Do you have access to any shares
+- What services are in domain ?
+- Most of the times if you get foothold on one PC in domain you will have to escalate priv. so you can run mimikatz, this gives you option to: Get LSASS or LSA hash ( overpass the hash, pass the hash, crack hash with hashcat),
+- Also run responder: you never know, you might catch high value hash or hash of user that will enable you to move in DC domain or he might be part of some high priv. groups that will enable you to escalate to NT sys/ authority.
 
 # Enumeration
 
