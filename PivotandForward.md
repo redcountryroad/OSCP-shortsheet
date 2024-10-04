@@ -87,3 +87,9 @@ chisel server -p <listen-port>
 # In local machine
 chisel client <listen-ip>:<listen-port> <local-port>:<target-ip>:<target-port>
 ```
+
+## Port forwarding using SSH
+```
+#forward all local port 9906 traffic to port 3306 on the remote database.example.com server, letting me point my desktop GUI to localhost (127.0.0.1:9906) and have it behave exactly as if I had exposed port 3306 on the remote server and connected directly to it.
+$ ssh -f -N -L 9906:127.0.0.1:3306 coolio@database.example.com
+```
