@@ -191,10 +191,10 @@ Things to be on look for:
 nikto -h x.x.x.x
 
 #Directory Brute Force (1)
+gobuster dir -u https://10.129.168.90 -w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt
 gobuster -u x.x.x.x -w /usr/share/seclists/Discovery/Web_Content/common.txt -t 20
 gobuster -u x.x.x.x -w /usr/share/seclists/Discovery/Web_Content/quickhits.txt -t 20
 gobuster -u x.x.x.x -w /usr/share/seclists/Discovery/Web_Content/common.txt-t 20 -x .txt,.php
-gobuster dir -u https://10.129.168.90 -w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt
 
 #Directory Brute Force (2)
 gobuster dir -u $url -w /usr/share/seclists/Discovery/Web-Content/common.txt -x "txt,html,php,asp,aspx,jsp" -s "200,204,301,302,307,403,500" -k -t 16 -o "tcp_port_protocol_gobuster.txt"  
