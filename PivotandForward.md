@@ -41,6 +41,7 @@ rdesktop -u victor -p 'password' 172.16.5.19
 - [Full guide](https://software-sinner.medium.com/how-to-tunnel-and-pivot-networks-using-ligolo-ng-cf828e59e740)
   
 ## Pivoting Using Chisel
+- https://notes.benheater.com/books/network-pivoting/page/port-forwarding-with-chisel
 - https://blog.mkiesel.ch/posts/oscp_pivoting/
 - https://ap3x.github.io/posts/pivoting-with-chisel/ for multi level pivot
 
