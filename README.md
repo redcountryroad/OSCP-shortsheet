@@ -197,7 +197,11 @@ gobuster -u x.x.x.x -w /usr/share/seclists/Discovery/Web_Content/quickhits.txt -
 gobuster -u x.x.x.x -w /usr/share/seclists/Discovery/Web_Content/common.txt-t 20 -x .txt,.php
 
 #Directory Brute Force (2)
-gobuster dir -u $url -w /usr/share/seclists/Discovery/Web-Content/common.txt -x "txt,html,php,asp,aspx,jsp" -s "200,204,301,302,307,403,500" -k -t 16 -o "tcp_port_protocol_gobuster.txt"  
+gobuster dir -u $url -w /usr/share/seclists/Discovery/Web-Content/common.txt -x "txt,html,php,asp,aspx,jsp" -s "200,204,301,302,307,403,500" -k -t 16 -o "tcp_port_protocol_gobuster.txt"
+
+#Directory Brute Force (3) Dirb - Directory brute force finding using a dictionary file  
+dirb http://$ip/ wordlist.dict
+dirb <http://vm/>
 
 python3 /opt/dirsearch/dirsearch.py -u $url -t 16 -e txt,html,php,asp,aspx,jsp -f -x 403 -w /usr/share/seclists/Discovery/Web-Content/common.txt --plain-text-report="tcp_port_protocol_dirsearch.txt"
 
@@ -223,6 +227,9 @@ wpscan --url https://x.x.x.x
  wpscan --url http://192.168.50.244 --enumerate p --pluginsdetection aggressive -o websrv1/wpscan    #scan plugins
 #bruteforce wpscan
 wpscan --url http://x.x.x.x -- wordlist /usr/share/wordlists/SecLists/s/best1050.txt -- username admin -- threads 10
+
+#RSH Enumeration - Unencrypted file transfer system
+auxiliary/scanner/rservices/rsh\_login
 ```
 #### All other web apps
 - https://docs.gorigorisensei.com/web-apps 
