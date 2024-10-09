@@ -313,12 +313,12 @@ sudo ss -antlp | grep sshd
 - https://docs.gorigorisensei.com/port-forwarding
 
 # What to do after you are Windows Admin in Powershell
-Disable realtime monitoring: `Set-MpPreference -DisableRealtimeMonitoring $true`
-Disable AV: `Set-MpPreference -DisableIOAVProtection $true`
-off states: `netsh advfirewall set allprofiles state off`
+- Disable realtime monitoring: `Set-MpPreference -DisableRealtimeMonitoring $true`
+- Disable AV: `Set-MpPreference -DisableIOAVProtection $true`
+- off states: `netsh advfirewall set allprofiles state off`
 
-Linux proof
-`hostname && whoami && cat proof.txt && /sbin/ifconfig`
+## Linux proof
+- `hostname && whoami && cat proof.txt && /sbin/ifconfig`
 
-Windows proof
-`hostname && whoami.exe && type proof.txt && ipconfig /all`
+## Windows proof
+- `hostname && whoami.exe && type proof.txt && ipconfig /all`
