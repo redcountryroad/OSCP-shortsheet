@@ -7,6 +7,9 @@ https://www.reddit.com/r/oscp/comments/1ew7nqt/order_of_attacking_ad_set/
 - Get a foothold in the first host. Escalate privs. mimikatz and dump hashes. Pass the hash.  Or kerberoast.
 - Rinse and repeat with the creds / hashes to move from host to host until you get to the DC.
 
+## 2 methods of accesses AD
+- Upload a Kerberoasting tool to Target (e.g. Rubeus); OR 
+- create a Tunnel (e.g. socat, chisel etc.) and use impacket from Kali
 
 ## AD methodology 1 -- **The goal of AD attacking is to move around AD till you get to DC and own domain .**
 1. Once we get NT Authority or local administrator, we will take a secretsdump (using impacket-secretsdump) + mimikatz and **store all hashes into a file**.
