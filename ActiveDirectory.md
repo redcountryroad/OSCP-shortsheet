@@ -7,9 +7,23 @@ https://www.reddit.com/r/oscp/comments/1ew7nqt/order_of_attacking_ad_set/
 - Get a foothold in the first host. Escalate privs. mimikatz and dump hashes. Pass the hash.  Or kerberoast.
 - Rinse and repeat with the creds / hashes to move from host to host until you get to the DC.
 
-## 2 methods of accesses AD
-- Upload a Kerberoasting tool to Target (e.g. Rubeus); OR 
-- create a Tunnel (e.g. socat, chisel etc.) and use impacket from Kali
+## 2 methods of accessing AD (Machine A -> Machine B -> DC)
+### Method 1: Upload a Kerberoasting tool to Target (e.g. Rubeus)
+1. Kali gains access to Machine A.
+2. Kali transfer Rubeus and mimikatz to Machine A.
+3. On Machine A terminal, sends Rubeus and Mimikatz to Machine B. Run Rubeus and Mimikatz on Machine B.
+4. Kali then gains access to Machine B via Machine A, using RDP and get flag on Machine B desktop.
+5. On Machine B, RDP to DC. Transfer Rubeus and Mimikatz to DC.
+
+### Method 2: Create a Tunnel (e.g. socat, chisel etc.) and use impacket from Kali
+1. Kali gain access to Machine A.
+2. Kali run chisel. Transfer chisel to Machine A and run Chisel on Machine A.
+3. Kali access Machine B via chisel in step 2. Run impacket from Kali on Machine B and get flag on Machine B desktop.
+4. On Kali, transfer chisel to Machine B and run Chisel on Machine B, to gain access to DC
+
+## General flow (Objective is to get password)
+- Get hash -> get passwork
+- Generate TGS/TGT in memory -> get hash -> get password
 
 ## AD methodology 1 -- **The goal of AD attacking is to move around AD till you get to DC and own domain .**
 1. Once we get NT Authority or local administrator, we will take a secretsdump (using impacket-secretsdump) + mimikatz and **store all hashes into a file**.
