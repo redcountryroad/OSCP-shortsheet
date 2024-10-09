@@ -10,6 +10,16 @@
 - http://persistence-info.github.io
 - http://unprotect.it
 
+# Payload Generators
+
+  	Reverse Shell Generator — https://github.com/cwinfosec/revshellgen
+   	Windows Reverse Shell Generator — https://github.com/thosearetheguise/rev
+  	MSFVenom Payload Creator — https://github.com/g0tmi1k/msfpc
+
+# PHP Reverse Shells
+
+   	Windows PHP Reverse Shell — https://github.com/Dhayalanb/windows-php-reverse-shell
+    	PenTestMonkey Unix PHP Reverse Shell — http://pentestmonkey.net/tools/web-shells/php-reverse-shell
 
 # Backdooring EXE Files
 
