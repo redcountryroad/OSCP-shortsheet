@@ -769,6 +769,7 @@ runas /user:**domain\user** cmd.exe
 ### Manual Enum
 - https://github.com/seal9055/oscp-notes/blob/main/README.md#Post-Exploitation-Windows
 
+0. Windows Kernel Exploits - https://github.com/SecWiki/windows-kernel-exploits 
 0. Quick Wins
 -   Try the obvious - Maybe the user is SYSTEM or is already part of the Administrator group:  
     `whoami` 
@@ -1209,6 +1210,7 @@ echo hodor::0:0:root:/root:/bin/bash >> /etc/passwd
 - https://github.com/seal9055/oscp-notes/blob/main/README.md#Post-Exploitation-Linux
 
 ## Linux PE methods
+0. Linux Kernel Exploits - https://github.com/lucyoa/kernel-exploits
 1. Editing /etc/passwd File (https://www.hackingarticles.in/editing-etc-passwd-file-for-privilege-escalation/)
 ```bash
 #method 1
