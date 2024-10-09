@@ -316,3 +316,9 @@ sudo ss -antlp | grep sshd
 Disable realtime monitoring: `Set-MpPreference -DisableRealtimeMonitoring $true`
 Disable AV: `Set-MpPreference -DisableIOAVProtection $true`
 off states: `netsh advfirewall set allprofiles state off`
+
+Linux proof
+`hostname && whoami && cat proof.txt && /sbin/ifconfig`
+
+Windows proof
+`hostname && whoami.exe && type proof.txt && ipconfig /all`
