@@ -1,6 +1,7 @@
 # IF Stuck, read here
 https://github.com/yovelo98/OSCP-Cheatsheet
 https://www.reddit.com/r/oscp/comments/1ew7nqt/order_of_attacking_ad_set/
+- Check for cached TGS/TGT
 - enumerate the domain controller (Ldap!! services, DNS, Kerberos etc....)
 - MKW → Which is Running Mimikatz + Kerberoasting + Winpeas every time so that I do not miss any juicy vector.
 - With every domain creds gained, always enumerate share contents. do --shares with crackmapexec or try smbclient/smbmap
